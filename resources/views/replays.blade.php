@@ -1,6 +1,6 @@
 <x-layout>
   <x-slot:title>
-    Streams
+    Replays
   </x-slot:title>
-  <h1>Streams</h1>
+  <h1>Replays</h1>
 </x-layout>

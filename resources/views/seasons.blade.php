@@ -1,6 +1,6 @@
 <x-layout>
   <x-slot:title>
-    Streams
+    Seasons
   </x-slot:title>
-  <h1>Streams</h1>
+  <h1>Seasons</h1>
 </x-layout>
