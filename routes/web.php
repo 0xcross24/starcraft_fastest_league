@@ -14,8 +14,8 @@ Route::get('/replays', function () {
     return view('replays');
 });
 
-Route::get('/seasons', function () {
-  return view('seasons');
+Route::get('/season', function () {
+  return view('season');
 });
 
 Route::get('/streams', function () {
