@@ -15,9 +15,9 @@
     <header class="absolute inset-x-0 top-0 z-50">
       <nav class="bg-navbar flex items-center justify-between p-6 lg:px-8" aria-label="Global">
         <div class="flex lg:flex-1">
-          <a href="/" class="-m-1.5 p-1.5">
+          <x-nav-link href="/" :active="request()->is('/')" class="-m-1.5 p-1.5">
             <img class="w-auto" src="{{ asset('images/fsl-logo.png')}}" alt="">
-          </a>
+          </x-nav-link>
         </div>
         <div class="flex lg:hidden">
           <button type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
@@ -27,11 +27,11 @@
           </button>
         </div>
         <div class="hidden lg:flex lg:gap-x-12 items-center lg:justify-end">
-          <a href="/rules" class="text-lg font-semibold leading-6 nav-links">Rules</a>
-          <a href="/forum" class="text-lg font-semibold leading-6 nav-links">Forum</a>
-          <a href="/replays" class="text-lg font-semibold leading-6 nav-links">Replays</a>
-          <a href="/seasons" class="text-lg font-semibold leading-6 nav-links">Seasons</a>
-          <a href="/login" class="text-lg font-semibold leading-6 p-2 login-link text-gray-100">Log in <span aria-hidden="true">&rarr;</span></a>
+          <x-nav-link href="/rules" :active="request()->is('rules')" class="text-lg font-semibold leading-6 nav-links">Rules</x-nav-link>
+          <x-nav-link href="/forum" :active="request()->is('forum')" class="text-lg font-semibold leading-6 nav-links">Forum</x-nav-link>
+          <x-nav-link href="/replays" :active="request()->is('replays')" class="text-lg font-semibold leading-6 nav-links">Replays</x-nav-link>
+          <x-nav-link href="/seasons" :active="request()->is('seasons')" class="text-lg font-semibold leading-6 nav-links">Seasons</x-nav-link>
+          <x-nav-link href="/login" :active="request()->is('login')" class="text-lg font-semibold leading-6 p-2 login-link text-gray-100">Log in <span aria-hidden="true">&rarr;</span></x-nav-link>
         </div>
       </nav>
       <!-- Mobile menu, show/hide based on menu open state. -->
@@ -53,13 +53,13 @@
           <div class="mt-6 flow-root">
             <div class="-my-6 divide-y divide-gray-500/10">
               <div class="space-y-2 py-6">
-                <a href="/rules" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Rules</a>
-                <a href="/forum" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Forum</a>
-                <a href="/replays" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Replays</a>
-                <a href="/seasons" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Seasons</a>
+                <x-nav-link href="/rules" :active="request()->is('rules')" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Rules</x-nav-link>
+                <x-nav-link href="/forum" :active="request()->is('forum')" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Forum</x-nav-link>
+                <x-nav-link href="/replays" :active="request()->is('replays')" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Replays</x-nav-link>
+                <x-nav-link href="/seasons" :active="request()->is('seasons')" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 nav-links hover:bg-gray-50">Seasons</x-nav-link>
               </div>
               <div class="py-6">
-                <a href="#" class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 login-link text-gray-100 hover:bg-gray-50">Log in</a>
+                <x-nav-link href="#" class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 login-link text-gray-100 hover:bg-gray-50">Log in</x-nav-link>
               </div>
             </div>
           </div>
