@@ -1,0 +1,15 @@
+.bg-navbar {
+    background-color: #11171C;
+}
+
+.nav-links {
+    color: #1788CC;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.login-link {
+    background-color: #141E28;
+    border: 1px solid #F7F7F7;
+    border-radius: 4px;
+}
