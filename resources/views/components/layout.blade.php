@@ -26,6 +26,9 @@
           <x-nav-link href="/rules" :active="request()->is('rules')">Rules</x-nav-link>
         </li>
         <li>
+          <x-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-nav-link>
+        </li>
+        <li>
           <x-nav-link href="/replays" :active="request()->is('replays')">Replays</x-nav-link>
         </li>
         <li>
