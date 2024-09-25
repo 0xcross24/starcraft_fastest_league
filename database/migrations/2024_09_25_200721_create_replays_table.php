@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('replays', function (Blueprint $table) {
             $table->id('replay_id');
-            $table->foreign('player_1')->references('id')->on('accounts');
+            $table->unsignedBigInteger('player_1');
+            $table->foreign('player_1')->references('account_id')->on('accounts');
             $table->string('player_1_race');
             $table->integer('player_1_team');
             $table->integer('player_1_apm');
@@ -21,7 +22,8 @@ return new class extends Migration
             $table->integer('player_1_cmd_count');
             $table->integer('player_1_ecmd_count');
             $table->integer('player_1_start_pos');
-            $table->foreign('player_2')->references('id')->on('accounts');
+            $table->unsignedBigInteger('player_2');
+            $table->foreign('player_2')->references('account_id')->on('accounts');
             $table->string('player_2_race');
             $table->integer('player_2_team');
             $table->integer('player_2_apm');
@@ -32,7 +34,8 @@ return new class extends Migration
             $table->integer('winning_team');
             $table->dateTime('start_time');
             $table->time('replay_length');
-            $table->integer('map');
+            $table->unsignedBigInteger('map');
+            $table->foreign('map')->references('map_id')->on('maps');
         });
     }
 

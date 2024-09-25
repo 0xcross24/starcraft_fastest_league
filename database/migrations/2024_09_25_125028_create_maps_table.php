@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('maps', function (Blueprint $table) {
             $table->id('map_id');
             $table->string('name');
-            $table->foreign('map_season')->references('seasons')->on('season_id');
+            $table->unsignedBigInteger('map_season');
+            $table->foreign('map_season')->references('season_id')->on('seasons');
         });
     }
 
