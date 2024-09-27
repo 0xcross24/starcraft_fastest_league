@@ -38,7 +38,9 @@ Route::get('/rankings', function() {
 });
 
 Route::get('/rules', function () {
-    return view('rules');
+    return view('rules', [
+      'accounts' => Account::all()
+    ]);
 });
 
 Route::get('/forum', function () {
