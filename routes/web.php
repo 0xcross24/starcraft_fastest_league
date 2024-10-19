@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\ReplayController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -48,10 +50,6 @@ Route::get('/forum', function () {
     return view('forum');
 });
 
-Route::get('/replays', function () {
-    return view('replays');
-});
-
 Route::get('/seasons', function () {
   return view('seasons');
 });
@@ -69,5 +67,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
+Route::get('/replays', [ReplayController::class, 'index'])->name('replays.index');
+Route::post('/replays', [ReplayController::class, 'upload'])->name('replays.upload');
 
 require __DIR__.'/auth.php';
