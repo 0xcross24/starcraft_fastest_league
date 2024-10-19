@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Replay;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ReplayController extends Controller
 {
@@ -24,11 +26,12 @@ class ReplayController extends Controller
             }
 
             // Store the file in the 'uploads' directory on the 'public' disk
-            $filePath = $request->file('file')->store('uploads', 'public');
+            $fileName = $request->file('file')->store('uploads', 'public');
+            $filePath = "/var/www/html/public/storage/$fileName";
             
             // Return success response
             $scriptPath = '/var/www/html/screp'; // Update with the actual path to your script
-            exec("$scriptPath /var/www/html/public/storage/$filePath", $output, $return_var);
+            exec("$scriptPath $filePath", $output, $return_var);
 
             // Debug the file path with dd
             if ($return_var === 0) {
@@ -63,16 +66,13 @@ class ReplayController extends Controller
                             'Name' => $player['Name'],
                             'StartTime' => $startTime,
                             'IsWinner' => ($teamNumber == $winnerTeam),
+                            'Team' => $teamNumber,
                         ];
                     }
                 }
 
-                // Return the specific data to the view or as a response
-                return response()->json([
-                    'success' => true,
-                    'data' => $teams,
-                    'output' => $output,
-                ]);
+                // Store the JSON output into database
+                return $this->store($teams, $filePath);
             } else {
                 // Return an error if JSON decoding fails
                 return response()->json([
@@ -80,11 +80,6 @@ class ReplayController extends Controller
                     'message' => 'Failed to parse JSON output.',
                 ]);
             }
-                dd([
-                    'output' => $output,
-                    'return_var' => $return_var,
-                    'data' => $desiredData,
-                ]);  // Use $filePath to see the stored file path
                 return back()->with('success', 'File uploaded successfully. Script executed.')->with('file', $filePath);
             } else {
                 return back()->with('error', 'File uploaded successfully, but script execution failed.');
@@ -92,5 +87,59 @@ class ReplayController extends Controller
         } else {
             return back()->with('error', 'The uploaded file is not valid.');
         }
+    }
+
+    public function store($data, $filePath) {
+
+        // Hash the filePath to ensure there's no duplicate replay files being uploaded
+        $hashedFile = hash_file('sha256', $filePath);
+        $uuid = Str::uuid()->toString();
+
+        // Check if a replay with this hash already exists
+        if (Replay::where('hash', $hashedFile)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Duplicate replay file detected.',
+                'hash' => $hashedFile,
+                'file_name' => $filePath,
+            ]);
+        }
+
+        foreach ($data as $id) {
+            foreach ($id as $player) {
+                // Validate player information
+                $playerName = $player['Name'] ?? null;
+                $startTime = $player['StartTime'] ?? null;
+                $startTimeFormatted = date('Y-m-d H:i:s', strtotime($startTime));
+                $isWinner = $player['IsWinner'] ?? false; // Assuming IsWinner is boolean
+        
+                // Determine winning team based on player’s IsWinner status
+                $winningTeam = $isWinner ? 1 : 0; // Adjust based on your team's logic
+                if ($playerName) {
+                    // Store replay for each player
+                    Replay::create([
+                        'replay_id' => $uuid,
+                        'player_name' => $playerName,
+                        'winning_team' => $winningTeam,
+                        'start_time' => $startTimeFormatted,
+                        'replay_file' => $filePath,
+                        'team' => $player['Team'], // Assuming team is based on player ID or adjust as needed
+                        'hash' => $hashedFile, // Store the hash
+                    ]);
+
+                } else {
+                    return response()->json([
+                        'success' => false,
+                    ]);
+                }
+            }
+        }
+        return $this->display($uuid);
+    }
+
+    public function display($uuid) {
+        $replays = Replay::where('replay_id', $uuid)->get();
+    
+        return view('replays.results', compact('replays'));
     }
 }

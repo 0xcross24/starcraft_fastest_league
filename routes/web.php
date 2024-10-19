@@ -71,5 +71,6 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/replays', [ReplayController::class, 'index'])->name('replays.index');
 Route::post('/replays', [ReplayController::class, 'upload'])->name('replays.upload');
+Route::get('/replays/{uuid}', [ReplayController::class, 'display'])->name('replays.results');
 
 require __DIR__.'/auth.php';
