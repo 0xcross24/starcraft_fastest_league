@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+use App\Models\Stats;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'player_name',
         'email',
         'password',
     ];
@@ -43,5 +44,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function stats() {
+        return $this->hasOne(Stats::class);
+    }
+
+    public function replay()
+    {
+      return $this->hasMany(Replay::class);
     }
 }

@@ -10,10 +10,20 @@ class Replay extends Model
     use HasFactory;
 
     protected $table = 'replays';
-    protected $primaryKey = 'replay_id';
+    protected $primaryKey = 'id';
+    protected $fillable = [
+      'user_id',
+      'replay_id',
+      'player_name',
+      'winning_team',
+      'start_time',
+      'replay_file',
+      'team',
+      'hash',
+  ];
 
-    function account() {
-      return $this->hasMany(Account::class);
+    function user() {
+      return $this->hasMany(User::class);
     }
 
     function map() {

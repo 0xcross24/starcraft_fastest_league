@@ -16,9 +16,4 @@ class Account extends Model {
   {
     return $this->belongsToOne(User::class);
   }
-
-  public function replay()
-  {
-    return $this->hasMany(Replay::class);
-  }
 }
