@@ -1,12 +1,12 @@
-<x-guest-layout>
+<x-auth-layout>
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
         <!-- Name -->
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <x-input-label for="player_name" :value="__('Player Name')" /> <!-- Changed label to reflect the field name -->
+            <x-text-input id="player_name" class="block mt-1 w-full" type="text" name="player_name" :value="old('player_name')" required autofocus autocomplete="player_name" /> <!-- Updated 'id' and 'name' -->
+            <x-input-error :messages="$errors->get('player_name')" class="mt-2" />
         </div>
 
         <!-- Email Address -->
@@ -49,4 +49,4 @@
             </x-primary-button>
         </div>
     </form>
-</x-guest-layout>
+</x-auth-layout>

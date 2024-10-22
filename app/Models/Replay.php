@@ -12,6 +12,7 @@ class Replay extends Model
     protected $table = 'replays';
     protected $primaryKey = 'id';
     protected $fillable = [
+      'user_id',
       'replay_id',
       'player_name',
       'winning_team',
@@ -21,8 +22,8 @@ class Replay extends Model
       'hash',
   ];
 
-    function account() {
-      return $this->hasMany(Account::class);
+    function user() {
+      return $this->hasMany(User::class);
     }
 
     function map() {

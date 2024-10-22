@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Replay;
+use App\Models\User;
+use App\Models\Stats;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class ReplayController extends Controller
 {
@@ -71,7 +75,6 @@ class ReplayController extends Controller
                     }
                 }
 
-                // Store the JSON output into database
                 return $this->store($teams, $filePath);
             } else {
                 // Return an error if JSON decoding fails
@@ -90,11 +93,10 @@ class ReplayController extends Controller
     }
 
     public function store($data, $filePath) {
-
         // Hash the filePath to ensure there's no duplicate replay files being uploaded
         $hashedFile = hash_file('sha256', $filePath);
         $uuid = Str::uuid()->toString();
-
+    
         // Check if a replay with this hash already exists
         if (Replay::where('hash', $hashedFile)->exists()) {
             return response()->json([
@@ -104,42 +106,98 @@ class ReplayController extends Controller
                 'file_name' => $filePath,
             ]);
         }
-
+    
+        $playerNames = []; // Array to store player names for validation
+        $playersData = []; // Array to store validated player data
+    
         foreach ($data as $id) {
             foreach ($id as $player) {
                 // Validate player information
                 $playerName = $player['Name'] ?? null;
-                $startTime = $player['StartTime'] ?? null;
-                $startTimeFormatted = date('Y-m-d H:i:s', strtotime($startTime));
-                $isWinner = $player['IsWinner'] ?? false; // Assuming IsWinner is boolean
-        
-                // Determine winning team based on player’s IsWinner status
-                $winningTeam = $isWinner ? 1 : 0; // Adjust based on your team's logic
                 if ($playerName) {
-                    // Store replay for each player
-                    Replay::create([
-                        'replay_id' => $uuid,
-                        'player_name' => $playerName,
-                        'winning_team' => $winningTeam,
-                        'start_time' => $startTimeFormatted,
-                        'replay_file' => $filePath,
-                        'team' => $player['Team'], // Assuming team is based on player ID or adjust as needed
-                        'hash' => $hashedFile, // Store the hash
-                    ]);
-
-                } else {
-                    return response()->json([
-                        'success' => false,
-                    ]);
+                    $playerNames[] = $playerName; // Collect player names
+                    $playersData[] = [
+                        'player' => $player,
+                        'name' => $playerName,
+                    ];
                 }
             }
         }
+    
+        // Check if all users are registered
+        $users = User::whereIn('player_name', $playerNames)->get();
+        $registeredNames = $users->pluck('player_name')->toArray();
+    
+        // Check for unregistered players
+        $unregisteredPlayers = array_diff($playerNames, $registeredNames);
+        if (!empty($unregisteredPlayers)) {
+            return response()->json([
+                'success' => false,
+                'message' => "The following players do not exist: " . implode(', ', $unregisteredPlayers),
+            ]);
+        }
+    
+        // Now we can safely create the replay records
+        foreach ($playersData as $playerData) {
+            $playerName = $playerData['name'];
+            $player = $playerData['player'];
+            $startTime = $player['StartTime'] ?? null;
+            $startTimeFormatted = date('Y-m-d H:i:s', strtotime($startTime));
+            $isWinner = $player['IsWinner'] ?? false; // Assuming IsWinner is boolean
+    
+            // Determine winning team based on player’s IsWinner status
+            $winningTeam = $isWinner ? 1 : 0;
+    
+            // Find the user
+            $user = $users->where('player_name', $playerName)->first();
+            
+            // Create the replay entry
+            Replay::create([
+                'replay_id' => $uuid,
+                'player_name' => $playerName,
+                'winning_team' => $winningTeam,
+                'start_time' => $startTimeFormatted,
+                'team' => $player['Team'], // Assuming team is based on player ID or adjust as needed
+                'hash' => $hashedFile, // Store the hash
+                'user_id' => $user->id,
+                'file_name' => $filePath,
+            ]);
+    
+            // Update user statistics
+            $statsController = new StatsController();
+            $statsController->updateStats($user->id);
+        }
         return $this->display($uuid);
     }
+    
 
     public function display($uuid) {
         $replays = Replay::where('replay_id', $uuid)->get();
-    
-        return view('replays.results', compact('replays'));
+        return view('replays.results', compact('replays', 'uuid'));
+        //return Redirect::route('replays.results', ['uuid' => $uuid])->with('replays', $replays);
     }
+
+    public function displayAll() {
+        // Ensure that the user is authenticated
+        if (Auth::check()) {
+            $user = Auth::user(); // Get the authenticated user
+    
+            // Get all replay IDs where the authenticated user is a player
+            $replay_ids = Replay::where('player_name', $user->player_name)->pluck('replay_id');
+    
+            // Get replays for the authenticated user and their opponents using the IN clause
+            $replays = Replay::whereIn('replay_id', $replay_ids)
+                ->orWhere('player_name', $user->player_name)
+                ->get();
+
+            // Get stats from user_id
+            $stats = Stats::where('user_id', $user->id)->first();
+    
+            // Return the dashboard view with the replays data
+            return view('dashboard', compact('user', 'replays', 'stats'));
+        }
+    
+        // Redirect or return an error if the user is not authenticated
+        return redirect()->route('login')->with('error', 'You need to be logged in to view your replays.');
+    }    
 }
