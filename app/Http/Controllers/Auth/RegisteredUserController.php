@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Stats;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,6 +40,13 @@ class RegisteredUserController extends Controller
             'player_name' => $request->player_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ]);
+
+        Stats::create([
+            'user_id' => $user->id,
+            'wins' => 0,
+            'losses' => 0,
+            'elo' => 1000 // Add any default values for the stats columns
         ]);
 
         event(new Registered($user));

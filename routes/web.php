@@ -18,19 +18,13 @@ Route::get('/forum', function () {
     return view('forum');
 });
 
-Route::get('/rankings', function () {
-  return view('rankings');
-});
-
-Route::get('/seasons', function () {
-  return view('seasons');
-});
+Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
 
 Route::get('/streams', function () {
   return view('streams');
 });
 
-Route::get('/dashboard', [ReplayController::class, 'displayAll'])
+Route::get('/dashboard', [ReplayController::class, 'displayAuthUser'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 

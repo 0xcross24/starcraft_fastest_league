@@ -7,26 +7,32 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Replay extends Model
 {
-    use HasFactory;
+  use HasFactory;
 
-    protected $table = 'replays';
-    protected $primaryKey = 'id';
-    protected $fillable = [
-      'user_id',
-      'replay_id',
-      'player_name',
-      'winning_team',
-      'start_time',
-      'replay_file',
-      'team',
-      'hash',
+  protected $table = 'replays';
+  protected $primaryKey = 'id';
+  protected $fillable = [
+    'user_id',
+    'replay_id',
+    'player_name',
+    'winning_team',
+    'start_time',
+    'replay_file',
+    'team',
+    'race',
+    'hash',
+    'apm',
+    'eapm',
+    'points',
   ];
 
-    function user() {
-      return $this->hasMany(User::class);
-    }
+  function user()
+  {
+    return $this->hasMany(User::class);
+  }
 
-    function map() {
-      return $this->hasOne(Map::class);
-    }
+  function map()
+  {
+    return $this->hasOne(Map::class);
+  }
 }
