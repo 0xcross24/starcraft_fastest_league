@@ -18,6 +18,8 @@ services:
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
             SUPERVISOR_PHP_COMMAND: "/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --server=swoole --host=0.0.0.0 --port=80"
+            APP_ENV: local
+            APP_DEBUG: true
         volumes:
             - '.:/var/www/html'
         networks:
@@ -28,6 +30,19 @@ services:
             - meilisearch
             - mailpit
             - selenium
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        ports:
+            - 8081:80
+        environment:
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            PMA_HOST: mysql
+            PMA_USER: '${DB_USERNAME}'
+            PMA_PASSWORD: '${DB_PASSWORD}'
+        networks:
+            - sail
+        depends_on:
+            - mysql
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -38,7 +53,6 @@ services:
             MYSQL_DATABASE: '${DB_DATABASE}'
             MYSQL_USER: '${DB_USERNAME}'
             MYSQL_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ALLOW_EMPTY_PASSWORD: 1
         volumes:
             - 'sail-mysql:/var/lib/mysql'
             - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
