@@ -215,7 +215,7 @@ class ReplayController extends Controller
             ]);
         }
 
-        return $this->displayAuthUser();
+        return $this->displayPlayer($user);
     }
 
     public function display($uuid)
@@ -224,36 +224,33 @@ class ReplayController extends Controller
         return view('replays.results', compact('replays', 'uuid'));
     }
 
-    public function displayAuthUser()
+    public function displayPlayer($username)
     {
+        $user = User::where('player_name', $username)->first();
 
-        // Ensure that the user is authenticated
-        if (Auth::check()) {
-            $user = Auth::user(); // Get the authenticated user
+        //if (!$user) {
+        //return redirect()->route('home')->with('error', 'User not found');
+        //}
 
-            // Get all replay IDs where the authenticated user is a player
-            $replay_ids = Replay::where('player_name', $user->player_name)->pluck('replay_id');
+        // Get all replay IDs where the authenticated user is a player
+        $replay_ids = Replay::where('player_name', $user->player_name)->pluck('replay_id');
 
-            // Get replays for the authenticated user and their opponents using the IN clause
-            $replays = Replay::whereIn('replay_id', $replay_ids)
-                ->orWhere('player_name', $user->player_name)
-                ->get();
+        // Get replays for the authenticated user and their opponents using the IN clause
+        $replays = Replay::whereIn('replay_id', $replay_ids)
+            ->orWhere('player_name', $user->player_name)
+            ->get();
 
-            $user_ids = $replays->pluck('user_id')->unique();
-            $statsCollection = Stats::whereIn('user_id', $user_ids)->get();
+        $user_ids = $replays->pluck('user_id')->unique();
+        $statsCollection = Stats::whereIn('user_id', $user_ids)->get();
 
-            // Map user stats to their corresponding user IDs for easier access
-            $userStats = $statsCollection->keyBy('user_id');
+        // Map user stats to their corresponding user IDs for easier access
+        $userStats = $statsCollection->keyBy('user_id');
 
-            // Get stats from logged in user
-            $stats = Stats::where('user_id', $user->id)->first();
-            $rank = $this->eloService->getEloGrade($user->stats->elo);
+        // Get stats from logged in user
+        $stats = Stats::where('user_id', $user->id)->first();
+        $rank = $this->eloService->getEloGrade($user->stats->elo);
 
-            // Return the dashboard view with the replays data
-            return view('dashboard', compact('user', 'replays', 'userStats', 'stats', 'rank'));
-        }
-
-        // Redirect or return an error if the user is not authenticated
-        return redirect()->route('login')->with('error', 'You need to be logged in to view your replays.');
+        // Return the dashboard view with the replays data
+        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank'));
     }
 }

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ Auth::user()->player_name }}
+            {{ $user->player_name }}
         </h2>
         <p class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ $rank }} {{ ($stats->elo ?? 1000) }} {{ ($stats->wins ?? 0) }} - {{ ($stats->losses ?? 0) }}
@@ -41,7 +41,7 @@
                             <tbody>
                                 @foreach($groupedReplays as $replay)
                                 <tr>
-                                    <td class="border border-gray-300 px-4 py-2">{{ $replay->player_name }}</td>
+                                    <td class="border border-gray-300 px-4 py-2"><a href="{{ route('player', ['user' => $replay->player_name]) }}">{{ $replay->player_name }}</a></td>
                                     <td class="border border-gray-300 px-4 py-2">
                                         @if($replay->winning_team == 1)
                                         <span class="text-emerald-500 font-bold">Win</span>

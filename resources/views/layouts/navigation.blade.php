@@ -7,12 +7,10 @@
                 <div class="hidden space-x-8 sm:-my-px sm:flex">
                     <!-- Common Navigation Links -->
                     @auth
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
                     <x-nav-link href="/replays" :active="request()->is('replays')">Replays</x-nav-link>
                     @endauth
                     <x-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-nav-link>
                     <x-nav-link href="/rules" :active="request()->is('rules')">Rules</x-nav-link>
-                    <x-nav-link href="/forum" :active="request()->is('forum')">Forum</x-nav-link>
                 </div>
             </div>
 
@@ -42,7 +40,7 @@
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
@@ -65,11 +63,6 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
@@ -88,7 +81,7 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

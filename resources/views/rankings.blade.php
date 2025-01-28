@@ -22,7 +22,7 @@
                 <tbody>
                   @foreach($usersWithStats as $user)
                   <tr>
-                    <td>{{ $user->player_name }}</td>
+                    <td><a href="{{ route('player', ['user' => $user->player_name]) }}">{{ $user->player_name }}</a></td>
                     <td>{{ $user->stats->wins ?? 'N/A' }}</td> <!-- Use 'N/A' if stats not found -->
                     <td>{{ $user->stats->losses ?? 'N/A' }}</td> <!-- Use 'N/A' if stats not found -->
                     <td>{{ $user->stats->elo ?? 'N/A' }}</td>
