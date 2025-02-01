@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Stats;
+use App\Models\Season;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,11 +43,18 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $currentSeason = Season::where('is_active', 1)->first();
+
+        if (!$currentSeason) {
+            return redirect()->back()->with('error', 'No active season found. Please activate a season.');
+        }
+
         Stats::create([
             'user_id' => $user->id,
             'wins' => 0,
             'losses' => 0,
-            'elo' => 1000 // Add any default values for the stats columns
+            'elo' => 1000, // Add any default values for the stats columns
+            'season_id' => $currentSeason->id,
         ]);
 
         event(new Registered($user));

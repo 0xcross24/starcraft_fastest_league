@@ -5,6 +5,7 @@
             <div class="flex">
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:flex">
+                    <x-nav-link href="/"><img src="{{ asset('images/fsl-logo.png') }}" alt="Rules"></x-nav-link>
                     <!-- Common Navigation Links -->
                     @auth
                     <x-nav-link href="/replays" :active="request()->is('replays')">Replays</x-nav-link>

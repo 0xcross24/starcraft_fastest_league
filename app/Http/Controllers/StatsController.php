@@ -4,36 +4,35 @@ namespace App\Http\Controllers;
 
 
 use App\Models\User;
+use App\Models\Season;
 use App\Models\Stats;
+use App\Services\EloService;
 
 class StatsController extends Controller
 {
+    protected $eloService;
 
-    public function getEloGrade($elo)
+    public function __construct(EloService $eloService)
     {
-        $eloRanges = [
-            'D' => [1000, 1999],
-            'C' => [2000, 2999],
-            'B' => [3000, 3999],
-            'A' => [4000, 4999],
-            'S' => [5000, 5999],
-        ];
-
-        foreach ($eloRanges as $grade => $range) {
-            if ($elo >= $range[0] && $elo <= $range[1]) {
-                return $grade;
-            }
-        }
-        return 'Unranked'; // Optional: Return a default grade if not in any range
-
+        $this->eloService = $eloService;
     }
 
     public function displayAllRanking()
     {
-        // Retrieve all users with their associated stats
-        $usersWithStats = User::with('stats')->get();
+        // Retrieve all users with their associated stats, ordered by Elo in descending order
+        $usersWithStats = User::with('stats')
+            ->join('stats', 'users.id', '=', 'stats.user_id') // Join with stats table
+            ->orderBy('stats.elo', 'desc') // Order by Elo in descending order
+            ->get();
 
-        return view('rankings', compact('usersWithStats'));
+        foreach ($usersWithStats as $user) {
+            $elo = $user->stats->elo;
+            $user->elo_grade = $this->eloService->getEloGrade($elo);
+        }
+
+        $seasons = Season::all();
+
+        return view('rankings', compact('usersWithStats', 'seasons'));
     }
 
     public function calculateElo(array $winners, array $losers)

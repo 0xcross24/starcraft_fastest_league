@@ -12,8 +12,8 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <div class="container">
-                        <div class="card py-6">
+                    <div class="container w-full">
+                        <div class="card">
                             <div class="card-header">
                                 <h2>Past Match History</h2>
                             </div>
@@ -24,7 +24,7 @@
                         <p>No replays found for this user.</p>
                         @else
                         @foreach($replays->groupBy('replay_id') as $replayId => $groupedReplays)
-                        <table class="min-w-full table-fixed border-collapse border border-gray-200 mb-4">
+                        <table class="w-full table-fixed border-collapse border border-gray-200 mb-4">
                             <thead class="bg-gray-200">
                                 <tr>
                                     <th class="px-4 py-2 text-left text-gray-700 w-1/4">Player Name</th>
@@ -41,20 +41,20 @@
                             <tbody>
                                 @foreach($groupedReplays as $replay)
                                 <tr>
-                                    <td class="border border-gray-300 px-4 py-2"><a href="{{ route('player', ['user' => $replay->player_name]) }}">{{ $replay->player_name }}</a></td>
-                                    <td class="border border-gray-300 px-4 py-2">
+                                    <td class="border border-gray-300 text-center px-4 py-2"><a href="{{ route('player', ['user' => $replay->player_name]) }}">{{ $replay->player_name }}</a></td>
+                                    <td class="border border-gray-300 text-center px-4 py-2">
                                         @if($replay->winning_team == 1)
                                         <span class="text-emerald-500 font-bold">Win</span>
                                         @else
                                         <span class="text-red-500 font-bold">Loss</span>
                                         @endif
                                     </td>
-                                    <td class="border border-gray-300 px-4 py-2">{{ $replay->team }}</td>
-                                    <td class="border border-gray-300 px-4 py-2">{{ $replay->race }}</td>
-                                    <td class="border border-gray-300 px-4 py-2">{{ $replay->apm ?? 'N/A' }}</td>
-                                    <td class="border border-gray-300 px-4 py-2">{{ $replay->eapm ?? 'N/A' }}</td>
-                                    <td class="border border-gray-300 px-4 py-2">{{ $replay->points ?? 'N/A' }}</td>
-                                    <td class="border border-gray-300 px-4 py-2">
+                                    <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->team }}</td>
+                                    <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->race }}</td>
+                                    <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->apm ?? 'N/A' }}</td>
+                                    <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->eapm ?? 'N/A' }}</td>
+                                    <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->points ?? 'N/A' }}</td>
+                                    <td class="border border-gray-300 text-center px-4 py-2">
                                         {{ $userStats[$replay->user_id]->elo ?? 'N/A' }} <!-- Accessing user stats -->
                                     </td>
                                     <td class="border border-gray-300 px-4 py-2 w-1/3">

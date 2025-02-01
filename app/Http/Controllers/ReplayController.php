@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Replay;
 use App\Models\User;
 use App\Models\Stats;
+use App\Models\Season;
 use App\Services\EloService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ReplayController extends Controller
@@ -102,10 +102,7 @@ class ReplayController extends Controller
                     return $this->store($teams, $filePath);
                 } else {
                     // Return an error if JSON decoding fails
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Failed to parse JSON output.',
-                    ]);
+                    return back()->with('error', 'File failed to decode.');
                 }
                 return back()->with('success', 'File uploaded successfully. Script executed.')->with('file', $filePath);
             } else {
@@ -122,14 +119,16 @@ class ReplayController extends Controller
         $hashedFile = hash_file('sha256', $filePath);
         $uuid = Str::uuid()->toString();
 
+        // Check which season is currently active
+        $currentSeason = Season::where('is_active', 1)->first();
+
+        if (!$currentSeason) {
+            return redirect()->back()->with('error', 'No active season found. Please activate a season.');
+        }
+
         // Check if a replay with this hash already exists
         if (Replay::where('hash', $hashedFile)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Duplicate replay file detected.',
-                'hash' => $hashedFile,
-                'file_name' => $filePath,
-            ]);
+            return back()->with('error', 'Replay already exists');
         }
 
         $playerNames = []; // Array to store player names for validation
@@ -157,10 +156,7 @@ class ReplayController extends Controller
         // Check for unregistered players
         $unregisteredPlayers = array_diff($lowercasePlayerNames, $registeredNames);
         if (!empty($unregisteredPlayers)) {
-            return response()->json([
-                'success' => false,
-                'message' => "The following players do not exist: " . implode(', ', $unregisteredPlayers),
-            ]);
+            return redirect()->back()->with('error', 'Failed to upload. Missing player(s): ' . implode(', ', $unregisteredPlayers));
         }
 
         $winners = [];
@@ -212,10 +208,11 @@ class ReplayController extends Controller
                 'user_id' => $user->id,
                 'file_name' => $filePath,
                 'points' => $points,
+                'season_id' => $currentSeason->id,
             ]);
         }
 
-        return $this->displayPlayer($user);
+        return redirect()->route('replays.results', ['uuid' => $uuid]);
     }
 
     public function display($uuid)
@@ -224,9 +221,9 @@ class ReplayController extends Controller
         return view('replays.results', compact('replays', 'uuid'));
     }
 
-    public function displayPlayer($username)
+    public function displayPlayer($user)
     {
-        $user = User::where('player_name', $username)->first();
+        $user = User::where('player_name', $user)->first();
 
         //if (!$user) {
         //return redirect()->route('home')->with('error', 'User not found');
@@ -236,9 +233,7 @@ class ReplayController extends Controller
         $replay_ids = Replay::where('player_name', $user->player_name)->pluck('replay_id');
 
         // Get replays for the authenticated user and their opponents using the IN clause
-        $replays = Replay::whereIn('replay_id', $replay_ids)
-            ->orWhere('player_name', $user->player_name)
-            ->get();
+        $replays = Replay::whereIn('replay_id', $replay_ids)->get();
 
         $user_ids = $replays->pluck('user_id')->unique();
         $statsCollection = Stats::whereIn('user_id', $user_ids)->get();

@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\ReplayController;
 use App\Http\Controllers\StatsController;
+use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +15,8 @@ Route::get('/rules', function () {
 });
 
 Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
+Route::get('/rankings/{seasonId}', [SeasonController::class, 'showRankings'])->name('rankings.show');
+
 
 Route::get('/streams', function () {
   return view('streams');
