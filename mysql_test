@@ -1,0 +1,7 @@
+INSERT INTO users (player_name, email, password, created_at, updated_at)
+VALUES
+('Wk`Cross-', 'cross@example.com', 'password1', NOW(), NOW()),
+('Wk`Vanguard', 'vanguard@example.com', 'password2', NOW(), NOW()),
+('Wk`Viper', 'viper@example.com', 'password3', NOW(), NOW()),
+('Wk`Oldman', 'oldman@example.com', 'password4', NOW(), NOW()),
+('Wk`QlolQ', 'qlolq@example.com', 'password5', NOW(), NOW());
