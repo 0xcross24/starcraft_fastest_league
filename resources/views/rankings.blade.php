@@ -20,7 +20,7 @@
                 <ul class="flex border-b border-gray-200">
                   @foreach($seasons as $season)
                   <li class="mr-8">
-                    <a href="#season-{{ $season->id }}" class="inline-block py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-500">
+                    <a href="#season-{{ $season->id }}" class="season-tab inline-block py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-500 {{ $loop->first ? 'active' : '' }}">
                       Season {{ $season->id }}
                     </a>
                   </li>
@@ -43,25 +43,28 @@
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach($usersWithStats as $user)
-                       <!-- Ensure stats belong to the current season -->
+                      @foreach($usersWithStats[$season->id] ?? collect() as $stat)
                       <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="border border-gray-300 text-center px-4 py-2">
-                          <a href="{{ route('player', ['user' => $user->player_name]) }}" class="text-blue-500 hover:underline">
-                            {{ $user->player_name }}
+                          @if(isset($stat->user->player_name))
+                          <a href="{{ route('player', ['user' => $stat->user->player_name]) }}" class="text-blue-500 hover:underline">
+                            {{ $stat->user->player_name }}
                           </a>
+                          @else
+                          <span class="text-gray-500">Unknown Player</span>
+                          @endif
                         </td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->elo_grade }}</td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->stats->elo ?? 'N/A' }}</td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->stats->wins ?? 'N/A' }} - {{ $user->stats->losses ?? 'N/A' }}</td>
+                        <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->elo_grade ?? 'N/A' }}</td>
+                        <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->elo ?? 'N/A' }}</td>
+                        <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->wins ?? 'N/A' }} - {{ $stat->losses ?? 'N/A' }}</td>
                       </tr>
-                      
                       @endforeach
                     </tbody>
                   </table>
                 </div>
               </div>
               @endforeach
+
             </div>
           </div>
         </div>
@@ -69,11 +72,15 @@
     </div>
   </div>
 
-  <!-- Add a simple JavaScript to toggle between season tabs -->
+  <!-- JavaScript for Tab Switching -->
   <script>
-    document.querySelectorAll('a[href^="#season-"]').forEach(tab => {
+    document.querySelectorAll('.season-tab').forEach(tab => {
       tab.addEventListener('click', function(e) {
         e.preventDefault();
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
 
         // Hide all season rankings
         document.querySelectorAll('.season-ranking').forEach(section => {
