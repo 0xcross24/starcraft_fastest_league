@@ -2,55 +2,50 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Season;
+use App\Models\User;
 use App\Models\Stats;
-use App\Models\HistoricalStat;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class ResetSeason extends Command
 {
-    protected $signature = 'season:reset';
-    protected $description = 'End the current season, archive stats, and reset for the new season';
+    protected $signature = 'season:start';
+    protected $description = 'Start a new season and reset player stats';
 
     public function handle()
     {
-        // Get the current season (assuming the latest season is the current one)
-        $currentSeason = Season::latest()->first();
-        if (!$currentSeason) {
-            $this->error("No active season found.");
-            return;
+        // Get the last active season to get the latest 'id' (used as season number)
+        $lastSeason = Season::where('is_active', true)->first();
+        $seasonId = $lastSeason ? $lastSeason->id + 1 : 1;  // Use 'id' as the season number
+
+        // Create a new season record with the new season_id and set it as active
+        $season = Season::create([
+            'id' => $seasonId,   // Use the incremented 'id' as the season number
+            'is_active' => true,  // Set this season as active
+            'created_at' => Carbon::now(), // Set the current timestamp for created_at
+            'updated_at' => Carbon::now(), // Set the current timestamp for updated_at
+        ]);
+
+        // If there's an active season, deactivate it
+        if ($lastSeason) {
+            $lastSeason->update(['is_active' => false]);
         }
 
-        // Archive current season stats
-        Stats::where('season_id', $currentSeason->season_id)->each(function ($stat) {
-            HistoricalStat::create([
-                'user_id' => $stat->user_id,
-                'season_id' => $stat->season_id,
-                'wins' => $stat->wins,
-                'losses' => $stat->losses,
-                'elo' => $stat->elo,
-                'archived_at' => now(),
+        // Loop through all users and reset their stats for the new season
+        $users = User::all();
+
+        foreach ($users as $user) {
+            // Create a new record for the player in the new season with reset stats
+            Stats::create([
+                'user_id' => $user->id,
+                'season_id' => $season->id,
+                'elo' => 1000,  // Set the starting Elo (can be changed to a default value)
+                'wins' => 0,     // Reset wins
+                'losses' => 0,   // Reset losses
             ]);
-        });
+        }
 
-        // Reset stats for the new season
-        Stats::where('season_id', $currentSeason->season_id)->update([
-            'wins' => 0,
-            'losses' => 0,
-            'elo' => 1000, // Default Elo rating
-        ]);
-
-        // Create a new season
-        $newSeason = Season::create([
-            'name' => 'Season ' . ($currentSeason->season_id + 1),
-            'start_date' => now(),
-        ]);
-
-        // Update all user stats to associate with the new season
-        Stats::where('season_id', $currentSeason->season_id)->update([
-            'season_id' => $newSeason->season_id,
-        ]);
-
-        $this->info("Season reset successful. New season started: {$newSeason->name}");
+        $this->info('New season started!');
     }
 }

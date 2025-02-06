@@ -229,6 +229,9 @@ class ReplayController extends Controller
         //return redirect()->route('home')->with('error', 'User not found');
         //}
 
+        // Get all seasons
+        $seasons = Season::all();
+
         // Get all replay IDs where the authenticated user is a player
         $replay_ids = Replay::where('player_name', $user->player_name)->pluck('replay_id');
 
@@ -246,6 +249,6 @@ class ReplayController extends Controller
         $rank = $this->eloService->getEloGrade($user->stats->elo);
 
         // Return the dashboard view with the replays data
-        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank'));
+        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank', 'seasons'));
     }
 }

@@ -28,41 +28,6 @@
                 </ul>
               </div>
 
-              <!-- Global Rankings -->
-              <div id="all-rankings">
-                <h3 class="text-lg font-semibold mb-4">Overall Ranking</h3>
-                @if($usersWithStats->isEmpty())
-                <p class="text-center text-gray-500">No registered users found.</p>
-                @else
-                <div class="overflow-x-auto">
-                  <table class="w-full border-collapse border border-gray-200 mb-4">
-                    <thead class="bg-gray-200">
-                      <tr>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Player</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Rank</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Elo</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Record</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @foreach($usersWithStats as $user)
-                      <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td class="border border-gray-300 text-center px-4 py-2">
-                          <a href="{{ route('player', ['user' => $user->player_name]) }}" class="text-blue-500 hover:underline">
-                            {{ $user->player_name }}
-                          </a>
-                        </td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->elo_grade }}</td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->stats->elo ?? 'N/A' }}</td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->stats->wins ?? 'N/A' }} - {{ $user->stats->losses ?? 'N/A' }}</td>
-                      </tr>
-                      @endforeach
-                    </tbody>
-                  </table>
-                </div>
-                @endif
-              </div>
-
               <!-- Rankings by Season -->
               @foreach($seasons as $season)
               <div id="season-{{ $season->id }}" class="season-ranking {{ $loop->first ? 'block' : 'hidden' }}">
@@ -77,6 +42,22 @@
                         <th class="px-4 py-2 text-left text-center text-gray-700">Record</th>
                       </tr>
                     </thead>
+                    <tbody>
+                      @foreach($usersWithStats as $user)
+                       <!-- Ensure stats belong to the current season -->
+                      <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <td class="border border-gray-300 text-center px-4 py-2">
+                          <a href="{{ route('player', ['user' => $user->player_name]) }}" class="text-blue-500 hover:underline">
+                            {{ $user->player_name }}
+                          </a>
+                        </td>
+                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->elo_grade }}</td>
+                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->stats->elo ?? 'N/A' }}</td>
+                        <td class="border border-gray-300 text-center px-4 py-2">{{ $user->stats->wins ?? 'N/A' }} - {{ $user->stats->losses ?? 'N/A' }}</td>
+                      </tr>
+                      
+                      @endforeach
+                    </tbody>
                   </table>
                 </div>
               </div>
@@ -105,6 +86,5 @@
       });
     });
   </script>
-
 
 </x-app-layout>
