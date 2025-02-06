@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('hash'); // Assuming hash should be unique
             $table->integer('apm');
             $table->integer('eapm');
+            $table->integer('points')->default(0);
+            $table->foreignId('season_id')->constrained('seasons')->onDelete('cascade');
             $table->timestamps(); // This will create 'created_at' and 'updated_at' columns
         });
     }

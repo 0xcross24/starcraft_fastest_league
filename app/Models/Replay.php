@@ -24,6 +24,7 @@ class Replay extends Model
     'apm',
     'eapm',
     'points',
+    'season_id',
   ];
 
   function user()
@@ -31,8 +32,8 @@ class Replay extends Model
     return $this->hasMany(User::class);
   }
 
-  function map()
+  public function season()
   {
-    return $this->hasOne(Map::class);
+    return $this->belongsTo(Season::class);
   }
 }

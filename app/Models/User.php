@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models;
+
 use App\Models\Stats;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -46,12 +47,13 @@ class User extends Authenticatable
         ];
     }
 
-    public function stats() {
+    public function stats()
+    {
         return $this->hasOne(Stats::class);
     }
 
     public function replay()
     {
-      return $this->hasMany(Replay::class);
+        return $this->hasMany(Replay::class);
     }
 }
