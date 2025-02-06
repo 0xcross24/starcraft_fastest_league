@@ -20,7 +20,7 @@
                 <ul class="flex border-b border-gray-200">
                   @foreach($seasons as $season)
                   <li class="mr-8">
-                    <a href="#season-{{ $season->id }}" class="season-tab inline-block py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-500 {{ $loop->first ? 'active' : '' }}">
+                    <a href="#season-{{ $season->id }}" class="season-tab inline-block py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-500 {{ $loop->first ? 'font-bold' : '' }}">
                       Season {{ $season->id }}
                     </a>
                   </li>
@@ -78,9 +78,13 @@
       tab.addEventListener('click', function(e) {
         e.preventDefault();
 
-        // Remove active class from all tabs
-        document.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
+        // Remove font-bold class from all tabs
+        document.querySelectorAll('.season-tab').forEach(t => {
+          t.classList.remove('font-bold');
+        });
+
+        // Add font-bold class to the clicked tab
+        this.classList.add('font-bold');
 
         // Hide all season rankings
         document.querySelectorAll('.season-ranking').forEach(section => {
