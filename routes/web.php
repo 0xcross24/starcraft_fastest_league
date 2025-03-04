@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
 use App\Http\Controllers\StatsController;
-use App\Http\Controllers\SeasonController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,7 +15,6 @@ Route::get('/rules', function () {
 });
 
 Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
-Route::get('/rankings/{seasonId}', [SeasonController::class, 'showRankings'])->name('rankings.show');
 
 
 Route::get('/streams', function () {
@@ -35,7 +34,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
   Route::get('/replays', [ReplayController::class, 'index'])->name('replays.index');
   Route::post('/replays', [ReplayController::class, 'upload'])->name('replays.upload');
-  Route::get('/replays/{uuid}', [ReplayController::class, 'display'])->name('replays.results');
+  Route::get('replays/download/{uuid}', [ReplayController::class, 'download'])->name('replays.download');
 });
 
 require __DIR__ . '/auth.php';

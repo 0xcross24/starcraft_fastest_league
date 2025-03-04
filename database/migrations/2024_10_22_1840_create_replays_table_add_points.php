@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('player_name');
             $table->tinyInteger('winning_team'); // Assuming winning_team can be 0 or 1
             $table->timestamp('start_time')->nullable(); // Can be nullable if not always provided
+            $table->string('replay_file');
             $table->string('team'); // Assuming team is a string representation
             $table->string('race'); // Race
             $table->string('hash'); // Assuming hash should be unique

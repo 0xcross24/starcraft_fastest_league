@@ -61,7 +61,7 @@
                     <li>All games will be mirror matchups (ex. PPP vs PPP, PPZ vs PPZ, PTZ vs PTZ).</li>
                     <li>Attempts at balancing teams should be kept honest amongst all included players unless teams are specified beforehand.</li>
                     <li>Minimum turn-rate 12 games.</li>
-                    <li>If a player is disconnected due to lag or internet connection issues before 2 minutes, the game is void.</li>
+                    <li>If a player is disconnected due to lag or internet connection issues before 2 minutes, the game is voided.</li>
                     <li>Pausing mid-game is allowed within reason & players are recommended to countdown prior to resuming gameplay.</li>
                     <li>All players must be registered with their in-game username prior to playing games & submitting replays. The involved players assume responsibility if the game is voided due to a player within the game not being registered.</li>
                   </ul>
