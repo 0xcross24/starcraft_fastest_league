@@ -86,15 +86,15 @@
                             <table class="w-full table-fixed border-collapse border border-gray-200 mb-4">
                                 <thead class="bg-gray-200">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/4">Player Name</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/6">Result</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/6">Team</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/4">Race</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/6">APM</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/6">EAPM</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/6">Points</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/6">New ELO</th>
-                                        <th class="px-4 py-2 text-left text-gray-700 w-1/4">Replay ID</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Player Name</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">Result</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">Team</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Race</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">APM</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">EAPM</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">Points</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">New ELO</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Replay ID</th>
                                     </tr>
                                 </thead>
                                 <tbody>
