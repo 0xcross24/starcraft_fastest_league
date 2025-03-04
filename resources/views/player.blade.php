@@ -4,7 +4,37 @@
             {{ $user->player_name }}
         </h2>
         <p class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ $rank }} {{ ($stats->elo ?? 1000) }} {{ ($stats->wins ?? 0) }} - {{ ($stats->losses ?? 0) }}
+            @switch($rank)
+            @case($rank == 'A')
+            @case($rank == 'A+')
+            @case($rank == 'A-')
+            <span class="text-neonGreen font-bold">{{ $rank ?? 'N/A' }}</span>
+            @break
+            @case($rank == 'B')
+            @case($rank == 'B+')
+            @case($rank == 'B-')
+            <span class="text-neonBlue font-bold">{{ $rank ?? 'N/A' }}</span>
+            @break
+            @case($rank == 'C')
+            @case($rank == 'C+')
+            @case($rank == 'C-')
+            <span class="text-neonYellow font-bold">{{ $rank ?? 'N/A' }}</span>
+            @break
+            @case($rank == 'D')
+            @case($rank == 'D+')
+            @case($rank == 'D-')
+            <span class="text-neonRed font-bold">{{ $rank ?? 'N/A' }}</span>
+            @break
+            @case('E')
+            <span class="text-neonPink font-bold">{{ $rank ?? 'N/A' }}</span>
+            @break
+            @case('S')
+            <span class="text-neonGold font-bold">{{ $rank ?? 'N/A' }}</span>
+            @break
+            @default
+            <span class="text-gray-500 font-bold">{{ $rank ?? 'N/A' }}</span>
+            @endswitch
+            {{ ($stats->elo ?? 1000) }} {{ ($stats->wins ?? 0) }} - {{ ($stats->losses ?? 0) }}
         </p>
     </x-slot>
 
