@@ -9,7 +9,11 @@ use App\Models\Season;
 use App\Services\EloService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
+use DateTime;
+use DateTimeZone;
 
 class ReplayController extends Controller
 {
@@ -37,15 +41,17 @@ class ReplayController extends Controller
         // Check if the file is valid
         if ($request->file('file')->isValid()) {
             if ($request->file('file')->getClientOriginalExtension() !== 'rep') {
-                return back()->with('error', 'Only .rep files are allowed.');
+                return back()->with('error', 'An unexpected error has occurred.');
             }
 
             // Store the file in the 'uploads' directory on the 'public' disk
-            $fileName = $request->file('file')->store('uploads', 'public');
-            $filePath = "/var/www/html/public/storage/$fileName";
+            $fileName = time() . '.rep';  // Ensure the file is saved with a .rep extension
+            $fileRep = $request->file('file')->storeAs('uploads', $fileName, 'public');
+            $filePath = "/var/www/html/storage/app/public/$fileRep";
 
             // Return success response
             $scriptPath = '/var/www/html/screp'; // Update with the actual path to your script
+
             exec("$scriptPath $filePath", $output, $return_var);
 
             // Debug the file path with dd
@@ -67,6 +73,20 @@ class ReplayController extends Controller
                     $startTime = $data['Header']['StartTime'];
                     $winnerTeam = $data['Computed']['WinnerTeam'];
                     $playerDescs = $data['Computed']['PlayerDescs'];
+
+                    // Check if the startTime is older than 48 hours
+                    $currentTime = new DateTime('now', new DateTimeZone('UTC')); // Get current UTC time
+                    $startTimeObj = new DateTime($startTime, new DateTimeZone('UTC')); // Convert startTime to DateTime object in UTC
+
+                    $interval = $currentTime->diff($startTimeObj); // Calculate the difference
+                    $hoursDifference = ($interval->d * 24) + $interval->h; // Convert difference to hours
+
+                    /*if ($hoursDifference > 48) {
+                        // Delete the
+                        unlink($filePath);
+                        // Reject upload if the replay file's startTime is more than 48 hours old
+                        return back()->with('error', 'Replay file is too old. Please upload within 48 hours');
+                    }*/
 
                     $playerAPMs = [];
                     $playerEAPMs = [];
@@ -115,6 +135,7 @@ class ReplayController extends Controller
 
     public function store($data, $filePath)
     {
+
         // Hash the filePath to ensure there's no duplicate replay files being uploaded
         $hashedFile = hash_file('sha256', $filePath);
         $uuid = Str::uuid()->toString();
@@ -206,19 +227,13 @@ class ReplayController extends Controller
                 'eapm' => $player['EAPM'],
                 'hash' => $hashedFile, // Store the hash
                 'user_id' => $user->id,
-                'file_name' => $filePath,
+                'replay_file' => $filePath,
                 'points' => $points,
                 'season_id' => $currentSeason->id,
             ]);
         }
 
-        return redirect()->route('replays.results', ['uuid' => $uuid]);
-    }
-
-    public function display($uuid)
-    {
-        $replays = Replay::where('replay_id', $uuid)->get();
-        return view('replays.results', compact('replays', 'uuid'));
+        return redirect()->route('player', ['user' => Auth::user()->player_name]);
     }
 
     public function displayPlayer($user)
@@ -231,6 +246,10 @@ class ReplayController extends Controller
 
         // Get all seasons
         $seasons = Season::all();
+
+        // Get the active season (the one with isActive() == true)
+        $activeSeason = $seasons->firstWhere('is_active', true);
+        $activeSeasonId = $activeSeason ? $activeSeason->id : $seasons->first()->id;
 
         // Get all replay IDs where the authenticated user is a player
         $replay_ids = Replay::where('player_name', $user->player_name)->pluck('replay_id');
@@ -249,6 +268,21 @@ class ReplayController extends Controller
         $rank = $this->eloService->getEloGrade($user->stats->elo);
 
         // Return the dashboard view with the replays data
-        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank', 'seasons'));
+        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank', 'seasons', 'activeSeasonId'));
+    }
+
+    public function download($uuid)
+    {
+        // Find the replay by its UUID
+        $replay = Replay::where('replay_id', $uuid)->firstOrFail();
+
+        // Ensure the file exists before trying to download
+        $filePath = storage_path('app/public/uploads/' . basename($replay->replay_file));
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'File not found.');
+        }
+
+        return response()->download($filePath);
     }
 }

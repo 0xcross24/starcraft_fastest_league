@@ -20,6 +20,8 @@ class StatsController extends Controller
     public function displayAllRanking()
     {
         $seasons = Season::all();
+        $activeSeason = $seasons->firstWhere('is_active', true);
+        $activeSeasonId = $activeSeason ? $activeSeason->id : $seasons->first()->id;
 
         // Retrieve users with their associated stats, grouped by season
         $usersWithStats = Stats::with('user') // Eager load user relationship
@@ -36,7 +38,7 @@ class StatsController extends Controller
             }
         }
 
-        return view('rankings', compact('usersWithStats', 'seasons'));
+        return view('rankings', compact('usersWithStats', 'seasons', 'activeSeasonId'));
     }
 
     public function calculateElo(array $winners, array $losers)

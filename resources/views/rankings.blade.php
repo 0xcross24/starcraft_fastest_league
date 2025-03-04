@@ -11,10 +11,6 @@
         <div class="p-6 text-gray-900 dark:text-gray-100">
           <div class="w-full">
             <div class="card">
-              <div class="card-header pb-4">
-                <h2 class="text-xl font-bold">Current Standing</h2>
-              </div>
-
               <!-- Season Tabs -->
               <div class="mb-6">
                 <ul class="flex border-b border-gray-200">
@@ -30,7 +26,7 @@
 
               <!-- Rankings by Season -->
               @foreach($seasons as $season)
-              <div id="season-{{ $season->id }}" class="season-ranking {{ $loop->first ? 'block' : 'hidden' }}">
+              <div id="season-{{ $season->id }}" class="season-ranking {{ $season->id == $activeSeasonId ? 'block' : 'hidden' }}">
                 <h3 class="text-lg font-semibold mb-4">Season {{ $season->id }} Ranking</h3>
                 <div class="overflow-x-auto">
                   <table class="w-full border-collapse border border-gray-200 mb-4">
@@ -54,7 +50,38 @@
                           <span class="text-gray-500">Unknown Player</span>
                           @endif
                         </td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->elo_grade ?? 'N/A' }}</td>
+                        <td class="border border-gray-300 text-center px-4 py-2">
+                          @switch($stat->elo_grade)
+                          @case($stat->elo_grade == 'A')
+                          @case($stat->elo_grade == 'A+')
+                          @case($stat->elo_grade == 'A-')
+                          <span class="text-neonGreen font-bold">{{ $stat->elo_grade ?? 'N/A' }}</span>
+                          @break
+                          @case($stat->elo_grade == 'B')
+                          @case($stat->elo_grade == 'B+')
+                          @case($stat->elo_grade == 'B-')
+                          <span class="text-neonBlue font-bold">{{ $stat->elo_grade ?? 'N/A' }}</span>
+                          @break
+                          @case($stat->elo_grade == 'C')
+                          @case($stat->elo_grade == 'C+')
+                          @case($stat->elo_grade == 'C-')
+                          <span class="text-neonYellow font-bold">{{ $stat->elo_grade ?? 'N/A' }}</span>
+                          @break
+                          @case($stat->elo_grade == 'D')
+                          @case($stat->elo_grade == 'D+')
+                          @case($stat->elo_grade == 'D-')
+                          <span class="text-neonRed font-bold">{{ $stat->elo_grade ?? 'N/A' }}</span>
+                          @break
+                          @case('E')
+                          <span class="text-neonPink font-bold">{{ $stat->elo_grade ?? 'N/A' }}</span>
+                          @break
+                          @case('S')
+                          <span class="text-neonGold font-bold">{{ $stat->elo_grade ?? 'N/A' }}</span>
+                          @break
+                          @default
+                          <span class="text-gray-500 font-bold">{{ $stat->elo_grade ?? 'N/A' }}</span>
+                          @endswitch
+                        </td>
                         <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->elo ?? 'N/A' }}</td>
                         <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->wins ?? 'N/A' }} - {{ $stat->losses ?? 'N/A' }}</td>
                       </tr>
@@ -64,7 +91,6 @@
                 </div>
               </div>
               @endforeach
-
             </div>
           </div>
         </div>
