@@ -73,7 +73,6 @@
                         @foreach($seasons as $season)
                         <!-- Create a div for each season, set its id to match the tab -->
                         <div id="season-{{ $season->id }}" class="season-ranking {{ $season->id == $activeSeasonId ? 'block' : 'hidden' }}">
-                            <h3 class="font-medium text-lg mb-4">Season {{ $season->id }}</h3>
                             @php
                             // Filter replays for this specific season
                             $seasonReplays = $replays->where('season_id', $season->id);
@@ -94,7 +93,7 @@
                                         <th class="px-4 py-2 text-center text-gray-700 w-1/6">EAPM</th>
                                         <th class="px-4 py-2 text-center text-gray-700 w-1/6">Points</th>
                                         <th class="px-4 py-2 text-center text-gray-700 w-1/6">New ELO</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Replay ID</th>
+                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Replays</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -116,9 +115,9 @@
                                         <td class="border border-gray-300 text-center px-4 py-2">
                                             {{ $userStats[$replay->user_id]->elo ?? 'N/A' }} <!-- Accessing user stats -->
                                         </td>
-                                        <td class="border border-gray-300 px-4 py-2 w-1/3">
+                                        <td class="border border-gray-300 text-center px-4 py-2 w-1/3">
                                             <a href="{{ route('replays.download', ['uuid' => $replay->replay_id]) }}" class="text-blue-600 hover:underline">
-                                                {{ $replay->replay_id }}
+                                                Download
                                             </a>
                                         </td>
                                     </tr>
