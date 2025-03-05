@@ -53,7 +53,7 @@
                                     @foreach($seasons as $season)
                                     <li class="mr-8">
                                         <a href="#season-{{ $season->id }}"
-                                            class="inline-block py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-500 
+                                            class="inline-block py-2 px-4 text-sm text-gray-700 dark:text-gray-300 hover:text-blue-500 
                                            @if($season->id == $activeSeasonId) 
                                                text-blue-600 font-bold 
                                            @endif">
@@ -99,7 +99,7 @@
                                 <tbody>
                                     @foreach($groupedReplays as $replay)
                                     <tr>
-                                        <td class="border border-gray-300 text-center px-4 py-2"><a href="{{ route('player', ['user' => $replay->player_name]) }}">{{ $replay->player_name }}</a></td>
+                                        <td class="border text-blue-600 border-gray-300 text-center px-4 py-2"><a href="{{ route('player', ['user' => $replay->player_name]) }}">{{ $replay->player_name }}</a></td>
                                         <td class="border border-gray-300 text-center px-4 py-2">
                                             @if($replay->winning_team == 1)
                                             <span class="text-emerald-500 font-bold">Win</span>
