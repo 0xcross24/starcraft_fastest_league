@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('replay_file');
             $table->string('team'); // Assuming team is a string representation
             $table->string('race'); // Race
+            $table->string('format')->nullable(); // 2v2, 3v3, etc.
             $table->string('hash'); // Assuming hash should be unique
             $table->integer('apm');
             $table->integer('eapm');

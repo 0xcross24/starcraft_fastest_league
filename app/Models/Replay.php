@@ -25,6 +25,7 @@ class Replay extends Model
     'eapm',
     'points',
     'season_id',
+    'format',
   ];
 
   function user()

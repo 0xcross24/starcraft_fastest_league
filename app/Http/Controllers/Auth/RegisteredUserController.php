@@ -49,18 +49,22 @@ class RegisteredUserController extends Controller
             return redirect()->back()->with('error', 'No active season found. Please activate a season.');
         }
 
-        Stats::create([
-            'user_id' => $user->id,
-            'wins' => 0,
-            'losses' => 0,
-            'elo' => 1000, // Add any default values for the stats columns
-            'season_id' => $currentSeason->id,
-        ]);
+
+        // Create stats for both 2v2 and 3v3
+        foreach (['2v2', '3v3'] as $format) {
+            Stats::create([
+                'user_id' => $user->id,
+                'wins' => 0,
+                'losses' => 0,
+                'elo' => 1000,
+                'season_id' => $currentSeason->id,
+                'format' => $format,
+            ]);
+        }
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('homepage', absolute: false));
+        // Do not log in the user after registration. Redirect to login page instead.
+        return redirect(route('login'));
     }
 }

@@ -19,9 +19,28 @@ class StatsController extends Controller
 
     public function displayAllRanking()
     {
+
         $seasons = Season::all();
         $activeSeason = $seasons->firstWhere('is_active', true);
-        $activeSeasonId = $activeSeason ? $activeSeason->id : $seasons->first()->id;
+
+        if ($seasons->isEmpty()) {
+            return view('rankings', [
+                'usersWithStats' => collect(),
+                'seasons' => collect(),
+                'activeSeasonId' => null,
+                'noSeasonMessage' => 'No season has started',
+            ]);
+        }
+
+        $activeSeasonId = $activeSeason ? $activeSeason->id : null;
+        if (!$activeSeasonId) {
+            return view('rankings', [
+                'usersWithStats' => collect(),
+                'seasons' => $seasons,
+                'activeSeasonId' => null,
+                'noSeasonMessage' => 'No season has started',
+            ]);
+        }
 
         // Retrieve users with their associated stats, grouped by season
         $usersWithStats = Stats::with('user') // Eager load user relationship
@@ -41,7 +60,7 @@ class StatsController extends Controller
         return view('rankings', compact('usersWithStats', 'seasons', 'activeSeasonId'));
     }
 
-    public function calculateElo(array $winners, array $losers)
+    public function calculateElo(array $winners, array $losers, string $format)
     {
         // Retrieve the active season
         $activeSeason = Season::where('is_active', true)->first();
@@ -63,7 +82,8 @@ class StatsController extends Controller
         // Calculate the total Elo for winners
         foreach ($winners as $winnerId) {
             $stats = Stats::where('user_id', $winnerId)
-                ->where('season_id', $activeSeason->id) // Filter by active season
+                ->where('season_id', $activeSeason->id)
+                ->where('format', $format)
                 ->first();
             if ($stats) {
                 $totalWinnerElo += $stats->elo;
@@ -74,7 +94,8 @@ class StatsController extends Controller
         // Calculate the total Elo for losers
         foreach ($losers as $loserId) {
             $stats = Stats::where('user_id', $loserId)
-                ->where('season_id', $activeSeason->id) // Filter by active season
+                ->where('season_id', $activeSeason->id)
+                ->where('format', $format)
                 ->first();
             if ($stats) {
                 $totalLoserElo += $stats->elo;
@@ -85,7 +106,8 @@ class StatsController extends Controller
         // Update Elo ratings for winners and track changes
         foreach ($winners as $winnerId) {
             $stats = Stats::where('user_id', $winnerId)
-                ->where('season_id', $activeSeason->id) // Filter by active season
+                ->where('season_id', $activeSeason->id)
+                ->where('format', $format)
                 ->first();
             if ($stats) {
                 // Calculate expected score
@@ -108,7 +130,8 @@ class StatsController extends Controller
         // Update Elo ratings for losers and track changes
         foreach ($losers as $loserId) {
             $stats = Stats::where('user_id', $loserId)
-                ->where('season_id', $activeSeason->id) // Filter by active season
+                ->where('season_id', $activeSeason->id)
+                ->where('format', $format)
                 ->first();
             if ($stats) {
                 // Calculate expected score

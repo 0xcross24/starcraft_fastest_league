@@ -22,6 +22,7 @@
     <div class="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {{ $slot }}
     </div>
+    <x-footer />
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
 </body>
 

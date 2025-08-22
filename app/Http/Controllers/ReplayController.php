@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 use DateTime;
 use DateTimeZone;
+use Illuminate\Support\Facades\Log;
 
 class ReplayController extends Controller
 {
@@ -135,6 +136,12 @@ class ReplayController extends Controller
 
     public function store($data, $filePath)
     {
+        // ...existing code...
+        $playerNames = []; // Array to store player names for validation
+        $playersData = []; // Array to store validated player data
+
+        // Debug: log player names from replay and registered user names (after they are set)
+        // We'll move this after $playerNames and $registeredNames are set below
 
         // Hash the filePath to ensure there's no duplicate replay files being uploaded
         $hashedFile = hash_file('sha256', $filePath);
@@ -152,8 +159,11 @@ class ReplayController extends Controller
             return back()->with('error', 'Replay already exists');
         }
 
+        // ...existing code...
         $playerNames = []; // Array to store player names for validation
         $playersData = []; // Array to store validated player data
+
+        // ...existing code...
 
         foreach ($data as $id) {
             foreach ($id as $player) {
@@ -168,6 +178,11 @@ class ReplayController extends Controller
                 }
             }
         }
+
+        // After $playerNames and $registeredNames are set
+        $lowercasePlayerNames = array_map('strtolower', $playerNames);
+        $users = User::whereIn(DB::raw('LOWER(player_name)'), $lowercasePlayerNames)->get();
+        $registeredNames = $users->pluck('player_name')->map('strtolower')->toArray();
 
         $lowercasePlayerNames = array_map('strtolower', $playerNames);
         // Check if all users are registered
@@ -189,8 +204,14 @@ class ReplayController extends Controller
 
             $winningTeam = $isWinner ? 1 : 0;
 
-            $user = $users->where('player_name', $playerName)->first();
-
+            // Case-insensitive user lookup
+            $user = $users->first(function ($u) use ($playerName) {
+                return strtolower($u->player_name) === strtolower($playerName);
+            });
+            if (!$user) {
+                // Optionally log or handle the missing user
+                continue;
+            }
             if ($isWinner) {
                 $winners[] = $user->id;
             } else {
@@ -198,7 +219,17 @@ class ReplayController extends Controller
             }
         }
 
-        $eloResults = $this->statsController->calculateElo($winners, $losers);
+        // Determine format (2s or 3s) based on number of players per team
+        $team1Count = isset($data['Team1']) ? count($data['Team1']) : 0;
+        $team2Count = isset($data['Team2']) ? count($data['Team2']) : 0;
+        $format = null;
+        if ($team1Count === 2 && $team2Count === 2) {
+            $format = '2v2';
+        } elseif ($team1Count === 3 && $team2Count === 3) {
+            $format = '3v3';
+        }
+
+        $eloResults = $this->statsController->calculateElo($winners, $losers, $format);
 
         // Now we can safely create the replay records
         foreach ($playersData as $playerData) {
@@ -208,13 +239,17 @@ class ReplayController extends Controller
             $startTimeFormatted = date('Y-m-d H:i:s', strtotime($startTime));
             $isWinner = $player['IsWinner'] ?? false; // Assuming IsWinner is boolean
 
-            $user = $users->where('player_name', $playerName)->first();
-
+            // Case-insensitive user lookup
+            $user = $users->first(function ($u) use ($playerName) {
+                return strtolower($u->player_name) === strtolower($playerName);
+            });
+            if (!$user) {
+                // Optionally log or handle the missing user
+                continue;
+            }
             // Determine winning team based on player’s IsWinner status
             $winningTeam = $isWinner ? 1 : 0;
-
             $points = isset($eloResults['eloChanges'][$user->id]) ? $eloResults['eloChanges'][$user->id] : 0;
-
             // Create the replay entry
             Replay::create([
                 'replay_id' => $uuid,
@@ -230,45 +265,66 @@ class ReplayController extends Controller
                 'replay_file' => $filePath,
                 'points' => $points,
                 'season_id' => $currentSeason->id,
+                'format' => $format,
             ]);
         }
 
-        return redirect()->route('player', ['user' => Auth::user()->player_name]);
+        // Preserve format in redirect if available
+        $format = request('format', '2v2');
+        return redirect()->route('player', ['user' => Auth::user()->player_name, 'format' => $format]);
     }
 
     public function displayPlayer($user)
     {
         $user = User::where('player_name', $user)->first();
 
-        //if (!$user) {
-        //return redirect()->route('home')->with('error', 'User not found');
-        //}
-
         // Get all seasons
         $seasons = Season::all();
+        // Use selected season from query or fallback to latest season
+        $seasonId = request('season');
+        if (!$seasonId && $seasons->count()) {
+            $seasonId = $seasons->max('id');
+        }
+        $format = request('format', '2v2');
 
-        // Get the active season (the one with isActive() == true)
-        $activeSeason = $seasons->firstWhere('is_active', true);
-        $activeSeasonId = $activeSeason ? $activeSeason->id : $seasons->first()->id;
+        // Get all replay_ids for this user, season, and format
+        $replayIds = Replay::where('player_name', $user->player_name)
+            ->where('season_id', $seasonId)
+            ->where('format', $format)
+            ->pluck('replay_id');
 
-        // Get all replay IDs where the authenticated user is a player
-        $replay_ids = Replay::where('player_name', $user->player_name)->pluck('replay_id');
+        // Get all replay rows for those replay_ids, season, and format
+        $replays = Replay::whereIn('replay_id', $replayIds)
+            ->where('season_id', $seasonId)
+            ->where('format', $format)
+            ->get();
 
-        // Get replays for the authenticated user and their opponents using the IN clause
-        $replays = Replay::whereIn('replay_id', $replay_ids)->get();
-
+        // For stats and rank, still use selected format
         $user_ids = $replays->pluck('user_id')->unique();
-        $statsCollection = Stats::whereIn('user_id', $user_ids)->get();
-
-        // Map user stats to their corresponding user IDs for easier access
+        $statsCollection = Stats::whereIn('user_id', $user_ids)->where('format', $format)->where('season_id', $seasonId)->get();
         $userStats = $statsCollection->keyBy('user_id');
 
-        // Get stats from logged in user
-        $stats = Stats::where('user_id', $user->id)->first();
-        $rank = $this->eloService->getEloGrade($user->stats->elo);
+        // Get stats for the selected format and season
+        $stats = Stats::where('user_id', $user->id)
+            ->where('season_id', $seasonId)
+            ->where('format', $format)
+            ->first();
+        $rank = $stats ? $this->eloService->getEloGrade($stats->elo) : null;
 
-        // Return the dashboard view with the replays data
-        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank', 'seasons', 'activeSeasonId'));
+        // Calculate numeric rank for the user in this season/format
+        $allStats = Stats::where('season_id', $seasonId)
+            ->where('format', $format)
+            ->orderByDesc('elo')
+            ->get();
+        $numericRank = null;
+        foreach ($allStats as $i => $s) {
+            if ($s->user_id == $user->id) {
+                $numericRank = $i + 1;
+                break;
+            }
+        }
+
+        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
     }
 
     public function download($uuid)

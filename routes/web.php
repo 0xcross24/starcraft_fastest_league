@@ -6,9 +6,9 @@ use App\Http\Controllers\ReplayController;
 use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-  return view('homepage');
-})->name('homepage');
+use App\Http\Controllers\HomeController;
+
+Route::get('/', [HomeController::class, 'index'])->name('homepage');
 
 Route::get('/rules', function () {
   return view('rules');
@@ -32,9 +32,9 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware('auth')->group(function () {
-  Route::get('/replays', [ReplayController::class, 'index'])->name('replays.index');
-  Route::post('/replays', [ReplayController::class, 'upload'])->name('replays.upload');
-  Route::get('replays/download/{uuid}', [ReplayController::class, 'download'])->name('replays.download');
+  Route::get('/upload', [ReplayController::class, 'index'])->name('upload.index');
+  Route::post('/upload', [ReplayController::class, 'upload'])->name('upload.upload');
+  Route::get('upload/download/{uuid}', [ReplayController::class, 'download'])->name('upload.download');
 });
 
 require __DIR__ . '/auth.php';

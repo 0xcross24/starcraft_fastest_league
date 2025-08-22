@@ -10,7 +10,7 @@ class Stats extends Model
 {
 
     public $timestamps = false; // Disable timestamps
-    protected $fillable = ['user_id', 'season_id', 'wins', 'losses', 'elo'];
+    protected $fillable = ['user_id', 'season_id', 'wins', 'losses', 'elo', 'format'];
 
     public function user()
     {

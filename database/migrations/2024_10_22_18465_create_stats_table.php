@@ -18,11 +18,13 @@ return new class extends Migration
             $table->integer('losses')->default(0); // Losses counter
             $table->bigInteger('elo')->default(1000); // elo ranking default starts with 1000
 
+            $table->string('format')->nullable(); // 2v2, 3v3, etc.
+
             // Foreign key constraint
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade'); // Link to user
             $table->foreignId('season_id')->constrained('seasons')->onDelete('cascade'); // Link to season
 
-            $table->unique(['user_id', 'season_id']);  // Ensures one stat record per user per season
+            $table->unique(['user_id', 'season_id', 'format']);  // Ensures one stat record per user per season per format
         });
     }
 

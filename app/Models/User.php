@@ -49,7 +49,7 @@ class User extends Authenticatable
 
     public function stats()
     {
-        return $this->hasOne(Stats::class);
+        return $this->hasMany(Stats::class);
     }
 
     public function replay()

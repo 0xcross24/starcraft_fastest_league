@@ -29,5 +29,33 @@ class EloService
                 return $grade;
             }
         }
+        return 'E'; // fallback
+    }
+
+    /**
+     * Get the color class for a given ELO grade.
+     */
+    public function getGradeColorClass($grade)
+    {
+        if ($grade === 'E') {
+            return 'text-neonPink';
+        }
+        if (in_array($grade, ['D-', 'D', 'D+'])) {
+            return 'text-neonRed';
+        }
+        if (in_array($grade, ['C-', 'C', 'C+'])) {
+            return 'text-neonYellow';
+        }
+        if (in_array($grade, ['B-', 'B', 'B+'])) {
+            return 'text-neonBlue';
+        }
+        if (in_array($grade, ['A-', 'A', 'A+'])) {
+            return 'text-neonGreen';
+        }
+        if ($grade === 'S') {
+            return 'text-gold';
+        }
+        // Default/fallback
+        return 'text-yellow-600 dark:text-yellow-400';
     }
 }

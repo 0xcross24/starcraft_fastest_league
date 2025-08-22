@@ -1,7 +1,10 @@
 <x-app-layout>
-    <x-slot:title>
-        Replays
-    </x-slot:title>
+
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Upload') }}
+        </h2>
+    </x-slot>
 
     <div class="flex items-center justify-center w-full">
         <div class="dark:bg-gray-900 sm:max-w-lg mt-6 px-6 py-2 shadow-md sm:rounded-lg">
@@ -22,7 +25,7 @@
 
     <div class="flex items-center justify-center w-full">
         <div class="dark:bg-gray-900 w-full sm:max-w-lg mt-2 px-6 py-2 shadow-md overflow-hidden sm:rounded-lg">
-            <form class="max-w-lg mx-auto space-y-4" action="{{ route('replays.upload') }}" method="POST" enctype="multipart/form-data">
+            <form class="max-w-lg mx-auto space-y-4" action="{{ route('upload.upload') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-56 px-8 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">

@@ -1,155 +1,252 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ $user->player_name }}
-        </h2>
-        <p class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            @switch($rank)
-            @case($rank == 'A')
-            @case($rank == 'A+')
-            @case($rank == 'A-')
-            <span class="text-neonGreen font-bold">{{ $rank ?? 'N/A' }}</span>
-            @break
-            @case($rank == 'B')
-            @case($rank == 'B+')
-            @case($rank == 'B-')
-            <span class="text-neonBlue font-bold">{{ $rank ?? 'N/A' }}</span>
-            @break
-            @case($rank == 'C')
-            @case($rank == 'C+')
-            @case($rank == 'C-')
-            <span class="text-neonYellow font-bold">{{ $rank ?? 'N/A' }}</span>
-            @break
-            @case($rank == 'D')
-            @case($rank == 'D+')
-            @case($rank == 'D-')
-            <span class="text-neonRed font-bold">{{ $rank ?? 'N/A' }}</span>
-            @break
-            @case('E')
-            <span class="text-neonPink font-bold">{{ $rank ?? 'N/A' }}</span>
-            @break
-            @case('S')
-            <span class="text-neonGold font-bold">{{ $rank ?? 'N/A' }}</span>
-            @break
-            @default
-            <span class="text-gray-500 font-bold">{{ $rank ?? 'N/A' }}</span>
-            @endswitch
-            {{ ($stats->elo ?? 1000) }} {{ ($stats->wins ?? 0) }} - {{ ($stats->losses ?? 0) }}
-        </p>
-    </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <h1 class="font-semibold text-3xl text-gray-800 dark:text-gray-200 leading-tight mb-6">
+                        {{ __('Profile') }}: {{ $user->player_name }}
+                    </h1>
                     <div class="container w-full">
-                        <div class="card">
-                            <div class="card-header">
-                                <h2>Past Match History</h2>
+                        <ul class="flex border-b border-gray-200 mb-6">
+                            @foreach($seasons as $season)
+                            <li class="mr-8 relative season-dropdown">
+                                <button class="season-tab inline-block py-2 px-4 text-sm font-medium border-b-4 focus:outline-none {{ $season->id == $seasonId ? 'border-blue-500 text-white font-bold dark:bg-gray-900 font-bold' : 'border-transparent text-gray-700 dark:text-gray-300' }}">
+                                    Season {{ $season->id }}
+                                </button>
+                                <div class="dropdown-menu absolute px-4 left-0 mt-2 min-w-full bg-white dark:bg-gray-800 border border-gray-200 rounded shadow-lg z-50 hidden" style="pointer-events: auto;">
+                                    <a href="?season={{ $season->id }}&format=2v2" class="block px-4 w-full text-center py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 {{ $season->id == $seasonId && request('format', '2v2') == '2v2' ? 'font-bold text-blue-600' : '' }}">2v2</a>
+                                    <a href="?season={{ $season->id }}&format=3v3" class="block px-4 w-full text-center py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 {{ $season->id == $seasonId && request('format') == '3v3' ? 'font-bold text-blue-600' : '' }}">3v3</a>
+                                </div>
+                            </li>
+                            @endforeach
+                        </ul>
+                        <!-- Player Stats/Ranking for Selected Season/Format -->
+                        @php
+                        $format = request('format', '2v2');
+                        $selectedSeason = $seasons->firstWhere('id', $seasonId);
+                        @endphp
+                        @if($selectedSeason && $stats)
+                        <div class="pb-3">
+                            <div class=" text-lg font-semibold text-gray-700 dark:text-gray-200">Season {{ $selectedSeason->id }} ({{ strtoupper($format) }})</div>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-start gap-8 bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-10">
+                            <div>
+                                <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Rank</div>
+                                <div class="text-lg font-semibold text-emerald-600 dark:text-emerald-400 mt-1">#{{ $numericRank ?? 'N/A' }}</div>
                             </div>
-                            <!-- Season Tabs -->
-                            <div class="mb-6">
-                                <ul class="flex border-b border-gray-200">
-                                    @foreach($seasons as $season)
-                                    <li class="mr-8">
-                                        <a href="#season-{{ $season->id }}"
-                                            class="inline-block py-2 px-4 text-sm text-gray-700 dark:text-gray-300 hover:text-blue-500 
-                                           @if($season->id == $activeSeasonId) 
-                                               text-blue-600 font-bold 
-                                           @endif">
-                                            Season {{ $season->id }}
-                                        </a>
-                                    </li>
-                                    @endforeach
-                                </ul>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Grade</div>
+                                @php
+                                $eloService = app('App\\Services\\EloService');
+                                $grade = $eloService->getEloGrade($stats->elo ?? 0);
+                                $color = $eloService->getGradeColorClass($grade);
+                                @endphp
+                                <div class="text-lg font-semibold mt-1 {{ $grade === 'S' ? 'text-neonGold' : $color }}">
+                                    {{ $grade }}
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Wins</div>
+                                <div class="text-lg font-semibold text-green-400 dark:text-green-400 mt-1">{{ $stats->wins ?? 0 }}</div>
+                            </div>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Losses</div>
+                                <div class="text-lg font-semibold text-red-500 dark:text-red-500 mt-1">{{ $stats->losses ?? 0 }}</div>
+                            </div>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">ELO</div>
+                                <div class="text-lg font-semibold text-emerald-600 dark:text-emerald-400 mt-1">{{ $stats->elo ?? 'N/A' }}</div>
                             </div>
                         </div>
-
-                        <!-- Check if there are any replays -->
-                        @if($replays->isEmpty())
-                        <p>No replays found for this user.</p>
-                        @else
-                        <!-- Loop through seasons -->
-                        @foreach($seasons as $season)
-                        <!-- Create a div for each season, set its id to match the tab -->
-                        <div id="season-{{ $season->id }}" class="season-ranking {{ $season->id == $activeSeasonId ? 'block' : 'hidden' }}">
+                        @endif
+                        @if($selectedSeason)
+                        <div id="season-{{ $selectedSeason->id }}" class="season-ranking block mt-10">
+                            @if($format === '2v2')
                             @php
-                            // Filter replays for this specific season
-                            $seasonReplays = $replays->where('season_id', $season->id);
+                            $seasonReplays2v2 = $replays->where('season_id', $selectedSeason->id)->where('format', '2v2');
                             @endphp
-
-                            @if($seasonReplays->isEmpty())
-                            <p>No replays found for this season.</p>
+                            @if($seasonReplays2v2->isEmpty())
+                            <p>No 2v2 replays found for this season.</p>
                             @else
-                            @foreach($seasonReplays->groupBy('replay_id') as $replayId => $groupedReplays)
-                            <table class="w-full table-fixed border-collapse border border-gray-200 mb-4">
-                                <thead class="bg-gray-200">
-                                    <tr>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Player Name</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">Result</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">Team</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Race</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">APM</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">EAPM</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">Points</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/6">New ELO</th>
-                                        <th class="px-4 py-2 text-center text-gray-700 w-1/4">Replays</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($groupedReplays as $replay)
-                                    <tr>
-                                        <td class="border text-blue-600 border-gray-300 text-center px-4 py-2"><a href="{{ route('player', ['user' => $replay->player_name]) }}">{{ $replay->player_name }}</a></td>
-                                        <td class="border border-gray-300 text-center px-4 py-2">
-                                            @if($replay->winning_team == 1)
-                                            <span class="text-emerald-500 font-bold">Win</span>
-                                            @else
-                                            <span class="text-red-500 font-bold">Loss</span>
-                                            @endif
-                                        </td>
-                                        <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->team }}</td>
-                                        <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->race }}</td>
-                                        <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->apm ?? 'N/A' }}</td>
-                                        <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->eapm ?? 'N/A' }}</td>
-                                        <td class="border border-gray-300 text-center px-4 py-2">{{ $replay->points ?? 'N/A' }}</td>
-                                        <td class="border border-gray-300 text-center px-4 py-2">
-                                            {{ $userStats[$replay->user_id]->elo ?? 'N/A' }} <!-- Accessing user stats -->
-                                        </td>
-                                        <td class="border border-gray-300 text-center px-4 py-2 w-1/3">
-                                            <a href="{{ route('replays.download', ['uuid' => $replay->replay_id]) }}" class="text-blue-600 hover:underline">
-                                                Download
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                            @foreach($seasonReplays2v2->groupBy('replay_id') as $replayId => $groupedReplays)
+                            @php
+                            $team1 = $groupedReplays->where('team', '1');
+                            $team2 = $groupedReplays->where('team', '2');
+                            $team1Win = $team1->first() && $team1->first()->winning_team == 1;
+                            $team2Win = $team2->first() && $team2->first()->winning_team == 1;
+                            @endphp
+                            <div class="flex flex-row border border-gray-200 mb-6 rounded-lg overflow-hidden">
+                                <!-- Team 1 -->
+                                <div class="w-1/2 border-r border-gray-200">
+                                    <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
+                                        Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
+                                    </div>
+                                    <table class="w-full table-fixed border-collapse">
+                                        <thead class="bg-gray-200">
+                                            <tr>
+                                                <th class="px-2 py-1 text-center text-gray-700">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($team1 as $player)
+                                            <tr>
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1">
+                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}">{{ $player->player_name }}</a>
+                                                </td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->points ?? 'N/A' }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Team 2 -->
+                                <div class="w-1/2">
+                                    <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
+                                        Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
+                                    </div>
+                                    <table class="w-full table-fixed border-collapse">
+                                        <thead class="bg-gray-200">
+                                            <tr>
+                                                <th class="px-2 py-1 text-center text-gray-700">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($team2 as $player)
+                                            <tr>
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1">
+                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}">{{ $player->player_name }}</a>
+                                                </td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->points ?? 'N/A' }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Download link below the tables -->
+                            <div class="w-full text-center py-2 mb-6">
+                                <a href="{{ route('upload.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
+                            </div>
                             @endforeach
                             @endif
+                            @elseif($format === '3v3')
+                            @php
+                            $seasonReplays3v3 = $replays->where('season_id', $selectedSeason->id)->where('format', '3v3');
+                            @endphp
+                            @if($seasonReplays3v3->isEmpty())
+                            <p>No 3v3 replays found for this season.</p>
+                            @else
+                            @foreach($seasonReplays3v3->groupBy('replay_id') as $replayId => $groupedReplays)
+                            @php
+                            $team1 = $groupedReplays->where('team', '1');
+                            $team2 = $groupedReplays->where('team', '2');
+                            $team1Win = $team1->first() && $team1->first()->winning_team == 1;
+                            $team2Win = $team2->first() && $team2->first()->winning_team == 1;
+                            @endphp
+                            <div class="flex flex-row border border-gray-200 mb-6 rounded-lg overflow-hidden">
+                                <!-- Team 1 -->
+                                <div class="w-1/2 border-r border-gray-200">
+                                    <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
+                                        Team 1 {{ $team1Win ? 'Win' : 'Loss' }}
+                                    </div>
+                                    <table class="w-full table-fixed border-collapse">
+                                        <thead class="bg-gray-200">
+                                            <tr>
+                                                <th class="px-2 py-1 text-center text-gray-700">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($team1 as $player)
+                                            <tr>
+                                                <td class="border text-neonBlue border-gray-200 text-center px-2 py-1">
+                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}">{{ $player->player_name }}</a>
+                                                </td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->points ?? 'N/A' }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Team 2 -->
+                                <div class="w-1/2">
+                                    <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
+                                        Team 2 {{ $team2Win ? 'Win' : 'Loss' }}
+                                    </div>
+                                    <table class="w-full table-fixed border-collapse">
+                                        <thead class="bg-gray-200">
+                                            <tr>
+                                                <th class="px-2 py-1 text-center text-gray-700">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700">Points</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($team2 as $player)
+                                            <tr>
+                                                <td class="border text-neonBlue border-gray-200 text-center px-2 py-1">
+                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}">{{ $player->player_name }}</a>
+                                                </td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->points ?? 'N/A' }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Download link below the tables -->
+                            <div class="w-full text-center py-2 mb-6">
+                                <a href="{{ route('upload.download', ['uuid' => $replayId]) }}" class="text-blue-600 hover:underline font-semibold">Download Replay</a>
+                            </div>
+                            @endforeach
+                            @endif
+                            @endif
                         </div>
-                        @endforeach
                         @endif
+
+                        </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
+    </div>
 
-    <!-- Add JavaScript to toggle between season tabs -->
-    <script>
-        document.querySelectorAll('a[href^="#season-"]').forEach(tab => {
-            tab.addEventListener('click', function(e) {
-                e.preventDefault();
+    <script src="/js/season-dropdown.js"></script>
+    <!-- Neon Gold CSS for S grade -->
+    <style>
+        .text-neonGold {
+            color: #FFD700;
+            text-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700;
+        }
+    </style>
 
-                // Hide all season rankings
-                document.querySelectorAll('.season-ranking').forEach(section => {
-                    section.classList.add('hidden');
-                });
-
-                // Show the clicked season's ranking
-                const seasonId = this.getAttribute('href').replace('#', '');
-                document.getElementById(seasonId).classList.remove('hidden');
-            });
-        });
-    </script>
 </x-app-layout>

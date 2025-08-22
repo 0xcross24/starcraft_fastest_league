@@ -16,8 +16,40 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $seasons = \App\Models\Season::all();
+        $seasonId = $request->input('season') ?? ($seasons->count() ? $seasons->max('id') : null);
+        $format = $request->input('format', '2v2');
+
+        // Get all stats for the user, grouped by season and format
+        $userStats = $user->stats()->get()->groupBy(function ($item) {
+            return $item->season_id . '-' . $item->format;
+        });
+
+        // Get stats for the selected season/format
+        $stats = $userStats[$seasonId . '-' . $format][0] ?? null;
+
+        // Calculate rank for this user in this season/format
+        $rank = null;
+        if ($seasonId) {
+            $allStats = \App\Models\Stats::where('season_id', $seasonId)
+                ->where('format', $format)
+                ->orderByDesc('elo')
+                ->get();
+            $rank = $allStats->search(function ($s) use ($user) {
+                return $s->user_id == $user->id;
+            });
+            $rank = $rank !== false ? $rank + 1 : null;
+        }
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'seasons' => $seasons,
+            'seasonId' => $seasonId,
+            'format' => $format,
+            'stats' => $stats,
+            'rank' => $rank,
+            'userStats' => $userStats,
         ]);
     }
 
