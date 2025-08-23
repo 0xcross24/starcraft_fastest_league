@@ -109,6 +109,4 @@
         </div>
     </div>
     <script src="/js/season-dropdown.js"></script>
-
-
 </x-app-layout>
