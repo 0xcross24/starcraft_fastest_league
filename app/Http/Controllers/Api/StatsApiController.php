@@ -47,7 +47,7 @@ class StatsApiController extends Controller
                 ->first();
 
             if (!$stats) {
-                $output .= "{$fmt} -> Stats not found\n";
+                $output .= "{$fmt}: Stats not found\n";
                 continue;
             }
 
@@ -61,8 +61,8 @@ class StatsApiController extends Controller
             $rank = $rank !== false ? $rank + 1 : "N/A";
             $grade = $eloService->getEloGrade($stats->elo);
 
-            // Safe arrow and plain ASCII
-            $output .= "{$fmt} -> Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}\n";
+            // ASCII-only output
+            $output .= "{$fmt}: Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}\n";
         }
 
         // Trim trailing newline
