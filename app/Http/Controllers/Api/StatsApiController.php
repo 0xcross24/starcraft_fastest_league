@@ -12,14 +12,6 @@ class StatsApiController extends Controller
 {
     public function userStats(Request $request)
     {
-        // --- Check API token ---
-        $apiKey = $request->query('api_key'); // or $request->header('X-API-KEY')
-        if ($apiKey !== env('STEALTHBOT_API_KEY')) {
-            return response("Unauthorized", 401)
-                ->header('Content-Type', 'text/plain');
-        }
-
-        // --- Fetch username ---
         $username = $request->query('username');
         if (!$username) {
             return response("Error: Missing username", 400)
@@ -28,7 +20,7 @@ class StatsApiController extends Controller
 
         $user = User::where('player_name', $username)->first();
         if (!$user) {
-            return response("Error: User not found", 404)
+            return response("User not found", 404)
                 ->header('Content-Type', 'text/plain');
         }
 
@@ -36,7 +28,8 @@ class StatsApiController extends Controller
         $formatQuery = $request->query('format');
         $eloService = new EloService();
 
-        $output = "Season: {$seasonId} | Username: {$user->player_name}";
+        // Start single-line output
+        $output = "Season {$seasonId} | Username: {$user->player_name}";
 
         if ($formatQuery) {
             $formats = [$formatQuery];
@@ -68,6 +61,7 @@ class StatsApiController extends Controller
             $rank = $rank !== false ? $rank + 1 : "N/A";
             $grade = $eloService->getEloGrade($stats->elo);
 
+            // Append format info in single line
             $output .= " | {$fmt}: Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}";
         }
 
