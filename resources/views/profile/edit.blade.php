@@ -41,16 +41,15 @@
                 <div class="mt-6">
                     <div class="flex flex-wrap items-center gap-8 bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-6">
                         <div>
-                            <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Season</div>
-                            <div class="text-lg font-semibold mt-1 text-white">{{ $seasonId }}</div>
-                        </div>
-                        <div>
-                            <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Format</div>
-                            <div class="text-lg font-semibold mt-1 text-white">{{ strtoupper($format) }}</div>
-                        </div>
-                        <div>
-                            <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">ELO</div>
-                            <div class="text-lg font-semibold text-white mt-1">{{ $selectedStats->elo ?? 'N/A' }}</div>
+                            <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Grade</div>
+                            @php
+                            $eloService = app('App\\Services\\EloService');
+                            $grade = $eloService->getEloGrade($selectedStats->elo ?? 0);
+                            $color = $eloService->getGradeColorClass($grade);
+                            @endphp
+                            <div class="text-lg font-semibold mt-1 {{ $grade === 'S' ? 'text-neonGold' : $color }}">
+                                {{ $grade }}
+                            </div>
                         </div>
                         <div>
                             <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Wins</div>
@@ -61,8 +60,8 @@
                             <div class="text-lg font-semibold text-red-500 dark:text-red-500 mt-1">{{ $selectedStats->losses ?? 0 }}</div>
                         </div>
                         <div>
-                            <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Rank</div>
-                            <div class="text-lg font-semibold text-blue-600 dark:text-blue-400 mt-1">{{ $rank ?? 'N/A' }}</div>
+                            <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">ELO</div>
+                            <div class="text-lg font-semibold text-gray-700 dark:text-gray-200 mt-1">{{ $selectedStats->elo ?? 'N/A' }}</div>
                         </div>
                     </div>
                 </div>
