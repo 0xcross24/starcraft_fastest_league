@@ -17,9 +17,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
+
+<body class="font-sans antialiased min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
     @include('layouts.navigation')
-    <div class="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+    <div class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 w-full flex flex-col">
         {{ $slot }}
     </div>
     <x-footer />
