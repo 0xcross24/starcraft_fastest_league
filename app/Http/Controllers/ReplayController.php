@@ -184,26 +184,10 @@ class ReplayController extends Controller
     protected function generateReplayFingerprint(array $data): string
     {
         $header = $data['Header'];
-        $computed = $data['Computed'];
 
         $stableData = [
-            'Engine' => $header['Engine'],
-            'Version' => $header['Version'],
-            'Speed' => $header['Speed'],
-            'Type' => $header['Type'],
-            'SubType' => $header['SubType'],
-            'MapWidth' => $header['MapWidth'],
-            'MapHeight' => $header['MapHeight'],
-            'Map' => $header['Map'],
-            'Host' => $header['Host'],
-            'Title' => $header['Title'],
-            'Players' => array_map(fn($p) => [
-                'SlotID' => $p['SlotID'],
-                'Name' => $p['Name'],
-                'Team' => $p['Team'],
-                'Race' => $p['Race']['Name'],
-            ], $header['Players']),
-            'WinnerTeam' => $computed['WinnerTeam'],
+            'Host'      => $header['Host'],
+            'StartTime' => $header['StartTime'],
         ];
 
         return hash(
