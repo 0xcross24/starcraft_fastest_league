@@ -3,23 +3,42 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <h1 class="font-semibold text-3xl text-gray-800 dark:text-gray-200 leading-tight mb-6">
-                        All Replays
-                    </h1>
                     <div class="container w-full">
-                        <ul class="flex border-b border-gray-200 mb-6">
+                        <ul class="flex border-b border-gray-200 mb-2">
                             @foreach($seasons as $season)
-                            <li class="mr-8 relative season-dropdown">
-                                <button class="season-tab inline-block py-2 px-4 text-sm font-medium border-b-4 focus:outline-none {{ $season->id == $seasonId ? 'border-blue-500 text-white font-bold dark:bg-gray-900 font-bold' : 'border-transparent text-gray-700 dark:text-gray-300' }}">
+                            <li class="mr-8">
+                                <a href="?season={{ $season->id }}&format={{ request('format', '2v2') }}"
+                                    class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $seasonId ? 'border-b-4 border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300' }}">
                                     Season {{ $season->id }}
-                                </button>
-                                <div class="dropdown-menu absolute px-4 left-0 mt-2 min-w-full bg-white dark:bg-gray-800 border border-gray-200 rounded shadow-lg z-50 hidden" style="pointer-events: auto;">
-                                    <a href="?season={{ $season->id }}&format=2v2" class="block px-4 w-full text-center py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 {{ $season->id == $seasonId && request('format', '2v2') == '2v2' ? 'font-bold text-blue-600' : '' }}">2v2</a>
-                                    <a href="?season={{ $season->id }}&format=3v3" class="block px-4 w-full text-center py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 {{ $season->id == $seasonId && request('format') == '3v3' ? 'font-bold text-blue-600' : '' }}">3v3</a>
-                                </div>
+                                </a>
                             </li>
                             @endforeach
                         </ul>
+                        <ul class="flex mb-6">
+                            <li class="mr-4">
+                                <a href="?season={{ $seasonId }}&format=2v2"
+                                    class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format', '2v2') == '2v2' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
+                                    2v2
+                                </a>
+                            </li>
+                            <li>
+                                <a href="?season={{ $seasonId }}&format=3v3"
+                                    class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format') == '3v3' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
+                                    3v3
+                                </a>
+                            </li>
+                        </ul>
+                        @php
+                        $format = request('format', '2v2');
+                        $selectedSeason = $seasons->firstWhere('id', $seasonId);
+                        @endphp
+                        <h1 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight mb-6">
+                            @if($selectedSeason)
+                            Season {{ $selectedSeason->id }} Replays ({{ strtoupper($format) }})
+                            @else
+                            All Replays
+                            @endif
+                        </h1>
                         <div class="mt-8">
                             @if($replays->isEmpty())
                             <p>No replays found for this season and format.</p>
