@@ -100,13 +100,18 @@ class ReplayController extends Controller
             ];
         }
 
-        return $this->store($teams, $filePath, $fingerprint);
+        // Instead of redirect, return store result and show success on upload page
+        return $this->store($teams, $filePath, $fingerprint, $fileName);
     }
 
     public function store($data, $filePath, $fingerprint)
     {
         $playerNames = [];
         $playersData = [];
+
+        // Accept $fileName as 4th argument (optional)
+        $args = func_get_args();
+        $fileName = $args[3] ?? null;
 
         $uuid = Str::uuid()->toString();
         $currentSeason = Season::where('is_active', 1)->first();
@@ -172,8 +177,8 @@ class ReplayController extends Controller
             ]);
         }
 
-        $format = request('format', $format ?? '2v2');
-        return redirect()->route('player', ['user' => Auth::user()->player_name, 'format' => $format]);
+        // Instead of redirect, return to upload page with success message and file name
+        return redirect()->route('upload.index')->with(['success' => 'Upload successful!', 'file' => $fileName]);
     }
 
     protected function generateReplayFingerprint(array $data): string
@@ -199,11 +204,19 @@ class ReplayController extends Controller
                 'Race' => $p['Race']['Name'],
             ], $header['Players']),
             'WinnerTeam' => $computed['WinnerTeam'],
-            'LeaveGameCmds' => array_map(fn($cmd) => ['PlayerID' => $cmd['PlayerID']], $computed['LeaveGameCmds']),
+            // fallback to empty array if LeaveGameCmds is null
+            'LeaveGameCmds' => array_map(
+                fn($cmd) => ['PlayerID' => $cmd['PlayerID']],
+                $computed['LeaveGameCmds'] ?? []
+            ),
         ];
 
-        return hash('sha256', json_encode($stableData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        return hash(
+            'sha256',
+            json_encode($stableData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        );
     }
+
 
     public function displayPlayer($user)
     {
