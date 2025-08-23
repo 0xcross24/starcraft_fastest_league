@@ -11,8 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use DateTime;
-use DateTimeZone;
 
 class ReplayController extends Controller
 {
@@ -46,7 +44,7 @@ class ReplayController extends Controller
 
         $fileName = time() . '.rep';
         $fileRep = $request->file('file')->storeAs('uploads', $fileName, 'public');
-        $filePath = "/var/www/html/storage/app/public/$fileRep";
+        $filePath = storage_path("app/public/$fileRep");
 
         $scriptPath = '/var/www/html/screp';
         exec("$scriptPath $filePath", $output, $return_var);
@@ -62,6 +60,21 @@ class ReplayController extends Controller
             return back()->with('error', 'Failed to decode replay JSON.');
         }
 
+        // Enforce replay is not older than 48 hours
+        $startTime = $data['Header']['StartTime'] ?? null;
+        if ($startTime) {
+            $replayTime = strtotime($startTime);
+            if ($replayTime < (time() - 48 * 3600)) {
+                return back()->with('error', 'Replay is too old (over 48 hours).');
+            }
+        }
+
+        // Enforce map name starts with 'OP SFL-' or 'SFLClan'
+        $mapName = $data['Header']['Map'] ?? '';
+        if (!(str_starts_with($mapName, 'OP SFL-') || str_starts_with($mapName, 'SFLClan'))) {
+            return back()->with('error', 'Replay must be played on a map starting with OP SFL- or SFLClan.');
+        }
+
         // Generate stable fingerprint
         $fingerprint = $this->generateReplayFingerprint($data);
 
@@ -74,7 +87,7 @@ class ReplayController extends Controller
         $teams = ['Team1' => [], 'Team2' => []];
         $players = $data['Header']['Players'];
         $playerDescs = $data['Computed']['PlayerDescs'];
-        $winnerTeam = $data['Computed']['WinnerTeam'];
+        $winnerTeam = $data['Computed']['WinnerTeam'] ?? null;
         $startTime = $data['Header']['StartTime'];
 
         $apms = $eapms = [];
@@ -100,19 +113,13 @@ class ReplayController extends Controller
             ];
         }
 
-        // Instead of redirect, return store result and show success on upload page
-        return $this->store($teams, $filePath, $fingerprint, $fileName);
+        return $this->store($teams, $filePath, $fingerprint, $fileName, $data);
     }
 
-    public function store($data, $filePath, $fingerprint)
+    public function store($data, $filePath, $fingerprint, $fileName = null, $rawData = null)
     {
         $playerNames = [];
         $playersData = [];
-
-        // Accept $fileName as 4th argument (optional)
-        $args = func_get_args();
-        $fileName = $args[3] ?? null;
-
         $uuid = Str::uuid()->toString();
         $currentSeason = Season::where('is_active', 1)->first();
 
@@ -152,6 +159,33 @@ class ReplayController extends Controller
         $team2Count = count($data['Team2'] ?? []);
         $format = ($team1Count === 2 && $team2Count === 2) ? '2v2' : (($team1Count === 3 && $team2Count === 3) ? '3v3' : null);
 
+        // Reject invalid team sizes
+        if (!$format) {
+            return back()->with('error', 'Invalid replay: must be 2v2 or 3v3.');
+        }
+
+        // Reject games with no winner (draw)
+        $winnerTeam = null;
+        foreach ($data as $teamKey => $teamPlayers) {
+            foreach ($teamPlayers as $p) {
+                if ($p['IsWinner']) {
+                    $winnerTeam = $p['Team'];
+                    break 2;
+                }
+            }
+        }
+        if ($winnerTeam === null) {
+            return back()->with('error', 'Replay is a draw. Ignored.');
+        }
+
+        // Reject short games (< 2:05)
+        $frames = $rawData['Header']['Frames'] ?? 0;
+        $frameRate = 24; // Brood War standard
+        $gameSeconds = $frames / $frameRate;
+        if ($gameSeconds < 125) { // 2 minutes 5 seconds
+            return back()->with('error', 'Game too short (<2:05). Ignored.');
+        }
+
         $eloResults = $this->statsController->calculateElo($winners, $losers, $format);
 
         foreach ($playersData as $playerData) {
@@ -177,7 +211,6 @@ class ReplayController extends Controller
             ]);
         }
 
-        // Instead of redirect, return to upload page with success message and file name
         return redirect()->route('upload.index')->with(['success' => 'Upload successful!', 'file' => $fileName]);
     }
 
@@ -195,7 +228,6 @@ class ReplayController extends Controller
             json_encode($stableData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
     }
-
 
     public function displayPlayer($user)
     {

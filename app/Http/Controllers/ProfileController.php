@@ -54,6 +54,22 @@ class ProfileController extends Controller
     }
 
     /**
+     * Download official SFL map files.
+     */
+    public function downloadMap($filename)
+    {
+        $allowed = ['OP SFL-.scm', 'SFLClan.scm'];
+        if (!in_array($filename, $allowed)) {
+            abort(404);
+        }
+        $filePath = storage_path('app/public/maps/' . $filename);
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+        return response()->download($filePath);
+    }
+
+    /**
      * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse

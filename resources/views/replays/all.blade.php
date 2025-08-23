@@ -32,14 +32,14 @@
                         $format = request('format', '2v2');
                         $selectedSeason = $seasons->firstWhere('id', $seasonId);
                         @endphp
-                        <h1 class="font-semibold text-lg text-gray-800 dark:text-gray-200 leading-tight mb-6">
+                        <h1 class="text-lg font-semibold mb-4">
                             @if($selectedSeason)
                             Season {{ $selectedSeason->id }} Replays ({{ strtoupper($format) }})
                             @else
                             All Replays
                             @endif
                         </h1>
-                        <div class="mt-8">
+                        <div class="mt-4">
                             @if($replays->isEmpty())
                             <p>No replays found for this season and format.</p>
                             @else
@@ -117,7 +117,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('upload.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
+                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
                             </div>
                             @endforeach
                             @endif

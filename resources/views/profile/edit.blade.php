@@ -74,6 +74,27 @@
                 @endif
             </div>
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Download Official SFL Maps</h3>
+                <div class="space-y-3">
+                    <a href="{{ route('maps.download', ['filename' => 'OP SFL-.scm']) }}"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14m7-7H5" />
+                        </svg>
+                        Download OP SFL-.scm
+                    </a>
+                    <a href="{{ route('maps.download', ['filename' => 'SFLClan.scm']) }}"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14m7-7H5" />
+                        </svg>
+                        Download SFLClan.scm
+                    </a>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">Place these maps in your <span class="font-mono">StarCraft/Maps/Download</span> folder before uploading replays.</div>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.update-profile-information-form')
                 </div>

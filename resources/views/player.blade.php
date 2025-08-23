@@ -5,16 +5,9 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     @php
-                        $format = request('format', '2v2');
-                        $selectedSeason = $seasons->firstWhere('id', $seasonId);
+                    $format = request('format', '2v2');
+                    $selectedSeason = $seasons->firstWhere('id', $seasonId);
                     @endphp
-                    <h1 class="font-semibold text-3xl text-gray-800 dark:text-gray-200 leading-tight mb-6">
-                        @if($selectedSeason)
-                            Season {{ $selectedSeason->id }} Profile ({{ strtoupper($format) }}) : {{ $user->player_name }}
-                        @else
-                            {{ __('Profile') }}: {{ $user->player_name }}
-                        @endif
-                    </h1>
                     <div class="container w-full">
                         <ul class="flex border-b border-gray-200 mb-2">
                             @foreach($seasons as $season)
@@ -40,6 +33,11 @@
                                 </a>
                             </li>
                         </ul>
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">
+                                Profile: {{ $user->player_name }}
+                            </h2>
+                        </div>
                         <!-- Player Stats/Ranking for Selected Season/Format -->
                         @php
                         $format = request('format', '2v2');
@@ -162,7 +160,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('upload.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
+                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
                             </div>
                             @endforeach
                             @endif
@@ -247,7 +245,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('upload.download', ['uuid' => $replayId]) }}" class="text-blue-600 hover:underline font-semibold">Download Replay</a>
+                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="text-blue-600 hover:underline font-semibold">Download Replay</a>
                             </div>
                             @endforeach
                             @endif

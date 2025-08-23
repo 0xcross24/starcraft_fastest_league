@@ -1,9 +1,4 @@
 <x-app-layout>
-  <x-slot name="header">
-    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-      {{ __('Rules') }}
-    </h2>
-  </x-slot>
   <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
@@ -11,12 +6,34 @@
           <!-- Tabs -->
           <div class="mb-4">
             <div class="flex border-b">
-              <button id="gameplay-tab" class="tab-button w-1/2 py-4 px-4 text-center font-medium text-gray-700 hover:text-gray-900 focus:outline-none dark:text-gray-300 dark:hover:text-white">
+              <button id="gameplay-tab" class="tab-button w-1/3 py-4 px-4 text-center font-medium text-gray-700 hover:text-gray-900 focus:outline-none dark:text-gray-300 dark:hover:text-white">
                 Gameplay Rules
               </button>
-              <button id="league-tab" class="tab-button w-1/2 py-4 px-4 text-center font-medium text-gray-700 hover:text-gray-900 focus:outline-none dark:text-gray-300 dark:hover:text-white">
+              <button id="league-tab" class="tab-button w-1/3 py-4 px-4 text-center font-medium text-gray-700 hover:text-gray-900 focus:outline-none dark:text-gray-300 dark:hover:text-white">
                 League Rules
               </button>
+              <button id="replay-tab" class="tab-button w-1/3 py-4 px-4 text-center font-medium text-gray-700 hover:text-gray-900 focus:outline-none dark:text-gray-300 dark:hover:text-white">
+                Replay Upload Rules
+              </button>
+            </div>
+            <div id="replay-content" class="tab-content hidden">
+              <!-- Replay Upload Rules Section -->
+              <div class="w-full mt-6">
+                <div class="card">
+                  <div class="card-body">
+                    <ul class="list-disc pl-5">
+                      <li>File must be a valid <code>.rep</code> replay file and not exceed 2MB.</li>
+                      <li>Only 2v2 or 3v3 games are accepted (must be exactly 2 or 3 players per team).</li>
+                      <li>All players in the replay must be registered with their in-game username before uploading.</li>
+                      <li>Duplicate replays are not allowed.</li>
+                      <li>Games must have a winner (draws are not accepted).</li>
+                      <li>Games shorter than 2 minutes and 5 seconds are not accepted.</li>
+                      <li>Replays older than 48 hours from the game time are not accepted.</li>
+                      <li>Only replays played on maps starting with <code>OP SFL-</code> or <code>SFLClan</code> are accepted. You can find these two maps in your profile page</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -84,22 +101,37 @@
     // Get references to the tab buttons and content sections
     const gameplayTab = document.getElementById("gameplay-tab");
     const leagueTab = document.getElementById("league-tab");
+    const replayTab = document.getElementById("replay-tab");
     const gameplayContent = document.getElementById("gameplay-content");
     const leagueContent = document.getElementById("league-content");
+    const replayContent = document.getElementById("replay-content");
 
     // Add event listeners to handle tab switching
     gameplayTab.addEventListener("click", () => {
       gameplayTab.classList.add("border-b-2", "border-indigo-500");
       leagueTab.classList.remove("border-b-2", "border-indigo-500");
+      replayTab.classList.remove("border-b-2", "border-indigo-500");
       gameplayContent.classList.remove("hidden");
       leagueContent.classList.add("hidden");
+      replayContent.classList.add("hidden");
     });
 
     leagueTab.addEventListener("click", () => {
       leagueTab.classList.add("border-b-2", "border-indigo-500");
       gameplayTab.classList.remove("border-b-2", "border-indigo-500");
+      replayTab.classList.remove("border-b-2", "border-indigo-500");
       leagueContent.classList.remove("hidden");
       gameplayContent.classList.add("hidden");
+      replayContent.classList.add("hidden");
+    });
+
+    replayTab.addEventListener("click", () => {
+      replayTab.classList.add("border-b-2", "border-indigo-500");
+      gameplayTab.classList.remove("border-b-2", "border-indigo-500");
+      leagueTab.classList.remove("border-b-2", "border-indigo-500");
+      replayContent.classList.remove("hidden");
+      gameplayContent.classList.add("hidden");
+      leagueContent.classList.add("hidden");
     });
   </script>
 

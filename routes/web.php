@@ -26,13 +26,14 @@ Route::middleware('auth')->group(function () {
   Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
   Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
   Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+  Route::get('/profile/maps/download/{filename}', [ProfileController::class, 'downloadMap'])->where('filename', 'OP SFL-\\.scm|SFLClan\\.scm')->name('maps.download');
 });
 
 
 Route::middleware('auth')->group(function () {
   Route::get('/upload', [ReplayController::class, 'index'])->name('upload.index');
   Route::post('/upload', [ReplayController::class, 'upload'])->name('upload.upload');
-  Route::get('upload/download/{uuid}', [ReplayController::class, 'download'])->name('upload.download');
+  Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
 });
 
 require __DIR__ . '/auth.php';
