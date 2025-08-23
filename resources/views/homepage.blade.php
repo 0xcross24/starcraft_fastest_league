@@ -86,8 +86,8 @@
   </div>
 
   <!-- Last 5 Replays Full Details -->
-  <h2 class="text-lg font-bold my-2 text-center text-gray-700 dark:text-gray-200">Recently Played Matches</h2>
-  <div class="grid grid-cols-3 gap-1 mt-8">
+  <h2 class="text-lg font-bold mt-7 text-center text-gray-700 dark:text-gray-200">Recently Played Matches</h2>
+  <div class="grid grid-cols-3 gap-1 mt-5">
     @forelse($recentReplayGroups as $group)
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
       <div class="w-full text-center text-xs text-gray-500 mb-6">

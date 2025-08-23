@@ -17,6 +17,7 @@ class HomeController extends Controller
                 'season' => null,
                 'top2v2' => collect(),
                 'top3v3' => collect(),
+                'recentReplayGroups' => collect(),
             ]);
         }
 
