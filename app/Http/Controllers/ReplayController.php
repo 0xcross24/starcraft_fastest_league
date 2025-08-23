@@ -204,11 +204,6 @@ class ReplayController extends Controller
                 'Race' => $p['Race']['Name'],
             ], $header['Players']),
             'WinnerTeam' => $computed['WinnerTeam'],
-            // fallback to empty array if LeaveGameCmds is null
-            'LeaveGameCmds' => array_map(
-                fn($cmd) => ['PlayerID' => $cmd['PlayerID']],
-                $computed['LeaveGameCmds'] ?? []
-            ),
         ];
 
         return hash(

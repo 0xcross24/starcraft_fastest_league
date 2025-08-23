@@ -26,6 +26,7 @@ class Replay extends Model
     'points',
     'season_id',
     'format',
+    'is_invalid',
   ];
 
   function user()

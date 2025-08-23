@@ -76,6 +76,9 @@
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
+                            <div class="w-full text-xs text-gray-500 px-3 py-1 border-b border-gray-200 dark:border-gray-700">
+                                Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
+                            </div>
                             <div class="flex flex-row border border-gray-200 mb-6 rounded-lg overflow-hidden">
                                 <!-- Team 1 -->
                                 <div class="w-1/2 border-r border-gray-200">
@@ -158,6 +161,9 @@
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
+                            <div class="w-full text-xs text-gray-500 px-3 py-1 border-b border-gray-200 dark:border-gray-700">
+                                Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
+                            </div>
                             <div class="flex flex-row border border-gray-200 mb-6 rounded-lg overflow-hidden">
                                 <!-- Team 1 -->
                                 <div class="w-1/2 border-r border-gray-200">

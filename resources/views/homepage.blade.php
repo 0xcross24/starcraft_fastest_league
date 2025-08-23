@@ -91,7 +91,12 @@
     @forelse($recentReplayGroups as $group)
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
       <div class="w-full text-center text-xs text-gray-500 mb-6">
-        Uploaded {{ $group->first()->created_at ? $group->first()->created_at->diffForHumans() : '' }}
+        <div class="w-full text-xs text-gray-500 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+          Replay ID: <span class="font-mono">{{ substr($group->first()->replay_id, 0, 8) }}</span>
+        </div>
+        <div class="w-full text-xs text-gray-500 px-3 pt-2">
+          Uploaded {{ $group->first()->created_at ? $group->first()->created_at->diffForHumans() : '' }}
+        </div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full border-collapse border border-gray-200 text-sm mb-2">

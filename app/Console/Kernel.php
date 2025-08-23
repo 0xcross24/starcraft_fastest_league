@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\StartNextSeason::class,
         \App\Console\Commands\InitStatsForNewSeason::class,
+        \App\Console\Commands\InvalidateReplayAndRestoreElo::class,
     ];
 
     /**
