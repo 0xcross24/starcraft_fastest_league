@@ -25,27 +25,34 @@ class StatsApiController extends Controller
         }
 
         $seasonId = $request->query('season_id') ?: \App\Models\Season::max('id');
-        $format = $request->query('format');
-
+        $formatQuery = $request->query('format');
         $eloService = new EloService();
 
         $output = "Season ID: {$seasonId}\n";
         $output .= "Username: {$user->player_name}\n";
 
-        if ($format) {
-            // Single format requested
+        if ($formatQuery) {
+            $formats = [$formatQuery];
+        } else {
+            $formats = Stats::where('user_id', $user->id)
+                ->where('season_id', $seasonId)
+                ->pluck('format')
+                ->toArray();
+        }
+
+        foreach ($formats as $fmt) {
             $stats = Stats::where('user_id', $user->id)
                 ->where('season_id', $seasonId)
-                ->where('format', $format)
+                ->where('format', $fmt)
                 ->first();
 
             if (!$stats) {
-                return response("Error: Stats not found", 404)
-                    ->header('Content-Type', 'text/plain');
+                $output .= "{$fmt} -> Stats not found\n";
+                continue;
             }
 
             $allStats = Stats::where('season_id', $seasonId)
-                ->where('format', $format)
+                ->where('format', $fmt)
                 ->orderByDesc('elo')
                 ->orderBy('id')
                 ->get();
@@ -54,35 +61,12 @@ class StatsApiController extends Controller
             $rank = $rank !== false ? $rank + 1 : "N/A";
             $grade = $eloService->getEloGrade($stats->elo);
 
-            $output .= "{$format} → Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}";
-        } else {
-            // All formats for this user/season
-            $formats = Stats::where('user_id', $user->id)
-                ->where('season_id', $seasonId)
-                ->pluck('format');
-
-            foreach ($formats as $fmt) {
-                $stats = Stats::where('user_id', $user->id)
-                    ->where('season_id', $seasonId)
-                    ->where('format', $fmt)
-                    ->first();
-
-                $allStats = Stats::where('season_id', $seasonId)
-                    ->where('format', $fmt)
-                    ->orderByDesc('elo')
-                    ->orderBy('id')
-                    ->get();
-
-                $rank = $allStats->search(fn($s) => $s->user_id == $user->id);
-                $rank = $rank !== false ? $rank + 1 : "N/A";
-                $grade = $eloService->getEloGrade($stats->elo);
-
-                $output .= "{$fmt} → Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}\n";
-            }
-
-            // Trim trailing newline
-            $output = rtrim($output);
+            // Safe arrow and plain ASCII
+            $output .= "{$fmt} -> Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}\n";
         }
+
+        // Trim trailing newline
+        $output = rtrim($output);
 
         return response($output, 200)
             ->header('Content-Type', 'text/plain');
