@@ -228,6 +228,7 @@ class ReplayController extends Controller
         $replays = Replay::whereIn('replay_id', $replayIds)
             ->where('season_id', $seasonId)
             ->where('format', $format)
+            ->orderByDesc('created_at')
             ->get();
 
         $user_ids = $replays->pluck('user_id')->unique();
