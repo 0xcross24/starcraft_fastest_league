@@ -20,7 +20,7 @@ class StatsApiController extends Controller
 
         $user = User::where('player_name', $username)->first();
         if (!$user) {
-            return response("Error: User not found", 404)
+            return response("User not found", 404)
                 ->header('Content-Type', 'text/plain');
         }
 
