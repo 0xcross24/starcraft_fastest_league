@@ -10,6 +10,7 @@
                     @auth
                     <x-nav-link href="/upload" :active="request()->is('upload')">Upload</x-nav-link>
                     @endauth
+                    <x-nav-link href="/replays" :active="request()->is('replays')">Replays</x-nav-link>
                     <x-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-nav-link>
                     <x-nav-link href="/rules" :active="request()->is('rules')">Rules</x-nav-link>
                 </div>

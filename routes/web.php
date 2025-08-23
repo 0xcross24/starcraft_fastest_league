@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AllReplaysController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
@@ -16,10 +17,7 @@ Route::get('/rules', function () {
 
 Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
 
-
-Route::get('/streams', function () {
-  return view('streams');
-});
+Route::get('/replays', [AllReplaysController::class, 'index'])->name('replays.all');
 
 Route::get('/player/{user}', [ReplayController::class, 'displayPlayer'])
   ->name('player');
