@@ -10,20 +10,30 @@
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Your Stats</h3>
                 @if(isset($seasons) && $seasons->count())
-                <ul class="flex border-b border-gray-200 mb-6">
+                <ul class="flex border-b border-gray-200 mb-2">
                     @foreach($seasons as $season)
-                    <li class="mr-8 relative season-dropdown">
-                        <button class="season-tab inline-block py-2 px-4 text-sm font-medium border-b-4 focus:outline-none {{ $season->id == $seasonId ? 'border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-transparent text-gray-700 dark:text-gray-300' }}">
+                    <li class="mr-8">
+                        <a href="?season={{ $season->id }}&format={{ $format ?? '2v2' }}"
+                            class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $seasonId ? 'border-b-4 border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
                             Season {{ $season->id }}
-                        </button>
-                        <div class="dropdown-menu absolute px-4 left-0 mt-2 min-w-full bg-white dark:bg-gray-800 border border-gray-200 rounded shadow-lg z-50 hidden" style="pointer-events: auto;">
-                            <a href="?season={{ $season->id }}&format=2v2" class="block px-4 w-full text-center py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 {{ $season->id == $seasonId && $format == '2v2' ? 'font-bold text-blue-600' : '' }}">2v2</a>
-                            <a href="?season={{ $season->id }}&format=3v3" class="block px-4 w-full text-center py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 {{ $season->id == $seasonId && $format == '3v3' ? 'font-bold text-blue-600' : '' }}">3v3</a>
-                        </div>
+                        </a>
                     </li>
                     @endforeach
                 </ul>
-                <script src="/js/season-dropdown.js"></script>
+                <ul class="flex mb-6">
+                    <li class="mr-4">
+                        <a href="?season={{ $seasonId }}&format=2v2"
+                            class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ ($format ?? request('format', '2v2')) == '2v2' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
+                            2v2
+                        </a>
+                    </li>
+                    <li>
+                        <a href="?season={{ $seasonId }}&format=3v3"
+                            class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ ($format ?? request('format')) == '3v3' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
+                            3v3
+                        </a>
+                    </li>
+                </ul>
                 @php
                 $selectedStats = $stats;
                 @endphp
