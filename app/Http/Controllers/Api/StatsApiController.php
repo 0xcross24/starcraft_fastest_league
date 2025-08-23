@@ -29,7 +29,7 @@ class StatsApiController extends Controller
         $eloService = new EloService();
 
         // Start single-line output
-        $output = "Season ID: {$seasonId} | Username: {$user->player_name}";
+        $output = "Season {$seasonId} | Username: {$user->player_name}";
 
         if ($formatQuery) {
             $formats = [$formatQuery];
