@@ -28,8 +28,8 @@ class StatsApiController extends Controller
         $formatQuery = $request->query('format');
         $eloService = new EloService();
 
-        $output = "Season ID: {$seasonId}\n";
-        $output .= "Username: {$user->player_name}\n";
+        // Start single-line output
+        $output = "Season ID: {$seasonId} | Username: {$user->player_name}";
 
         if ($formatQuery) {
             $formats = [$formatQuery];
@@ -47,7 +47,7 @@ class StatsApiController extends Controller
                 ->first();
 
             if (!$stats) {
-                $output .= "{$fmt}: Stats not found\n";
+                $output .= " | {$fmt}: Stats not found";
                 continue;
             }
 
@@ -61,12 +61,9 @@ class StatsApiController extends Controller
             $rank = $rank !== false ? $rank + 1 : "N/A";
             $grade = $eloService->getEloGrade($stats->elo);
 
-            // ASCII-only output
-            $output .= "{$fmt}: Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}\n";
+            // Append format info in single line
+            $output .= " | {$fmt}: Elo: {$stats->elo}, Grade: {$grade}, Wins: {$stats->wins}, Losses: {$stats->losses}, Rank: {$rank}";
         }
-
-        // Trim trailing newline
-        $output = rtrim($output);
 
         return response($output, 200)
             ->header('Content-Type', 'text/plain');
