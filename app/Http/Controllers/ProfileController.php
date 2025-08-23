@@ -29,12 +29,13 @@ class ProfileController extends Controller
         // Get stats for the selected season/format
         $stats = $userStats[$seasonId . '-' . $format][0] ?? null;
 
-        // Calculate rank for this user in this season/format
+        // Calculate rank for this user in this season/format (match rankings page order for ties)
         $rank = null;
         if ($seasonId) {
             $allStats = \App\Models\Stats::where('season_id', $seasonId)
                 ->where('format', $format)
                 ->orderByDesc('elo')
+                ->orderBy('id') // secondary sort for tie-breaker, matches rankings page
                 ->get();
             $rank = $allStats->search(function ($s) use ($user) {
                 return $s->user_id == $user->id;

@@ -46,6 +46,7 @@ class StatsController extends Controller
         $usersWithStats = Stats::with('user') // Eager load user relationship
             ->orderBy('season_id', 'asc')  // Group by season
             ->orderBy('elo', 'desc')       // Order by Elo in descending order
+            ->orderBy('id')                // Tie-breaker for same Elo, matches profile/homepage
             ->get()
             ->groupBy('season_id'); // Group stats by season
 
