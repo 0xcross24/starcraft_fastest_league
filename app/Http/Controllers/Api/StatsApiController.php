@@ -17,6 +17,7 @@ class StatsApiController extends Controller
         // Log API call with IP and parameters
         Log::info('API /users called', [
             'ip' => $request->ip(),
+            'x_forwarded_for' => $request->header('X-Forwarded-For'),
             'username' => $username,
             'season_id' => $request->query('season_id'),
             'format' => $request->query('format'),
