@@ -7,12 +7,21 @@ use App\Models\Stats;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\EloService;
+use Illuminate\Support\Facades\Log;
 
 class StatsApiController extends Controller
 {
     public function userStats(Request $request)
     {
         $username = $request->query('username');
+        // Log API call with IP and parameters
+        Log::info('API /users called', [
+            'ip' => $request->ip(),
+            'username' => $username,
+            'season_id' => $request->query('season_id'),
+            'format' => $request->query('format'),
+            'user_agent' => $request->header('User-Agent'),
+        ]);
         if (!$username) {
             return response("Error: Missing username", 400)
                 ->header('Content-Type', 'text/plain');
