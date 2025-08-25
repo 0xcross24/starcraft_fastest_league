@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Stats;
+use App\Models\Replay;
+use Illuminate\Support\Facades\Storage;
 
 class ResetStatsForSeason extends Command
 {
@@ -29,6 +31,8 @@ class ResetStatsForSeason extends Command
     public function handle()
     {
         $seasonId = $this->argument('season_id');
+
+        // Reset stats
         $stats = Stats::where('season_id', $seasonId)->get();
         $count = 0;
         foreach ($stats as $stat) {
@@ -39,5 +43,18 @@ class ResetStatsForSeason extends Command
             $count++;
         }
         $this->info("Reset stats for {$count} users for season {$seasonId}.");
+
+        // Delete all replays for this season from DB
+        $replayCount = Replay::where('season_id', $seasonId)->count();
+        Replay::where('season_id', $seasonId)->delete();
+        $this->info("Deleted {$replayCount} replays for season {$seasonId}.");
+
+        // Delete all files in the season directory, but not the directory itself
+        $seasonDir = 'uploads/season_' . $seasonId;
+        if (Storage::disk('public')->exists($seasonDir)) {
+            $files = Storage::disk('public')->allFiles($seasonDir);
+            Storage::disk('public')->delete($files);
+            $this->info("Deleted all files in directory: {$seasonDir}");
+        }
     }
 }

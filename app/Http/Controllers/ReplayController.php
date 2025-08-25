@@ -42,8 +42,15 @@ class ReplayController extends Controller
             return back()->with('error', 'Unexpected file type.');
         }
 
+
+        // Get current season for directory
+        $currentSeason = \App\Models\Season::where('is_active', 1)->first();
+        if (!$currentSeason) {
+            return back()->with('error', 'No active season found.');
+        }
+        $seasonDir = 'uploads/season_' . $currentSeason->id;
         $fileName = time() . '.rep';
-        $fileRep = $request->file('file')->storeAs('uploads', $fileName, 'public');
+        $fileRep = $request->file('file')->storeAs($seasonDir, $fileName, 'public');
         $filePath = storage_path("app/public/$fileRep");
 
         $scriptPath = '/var/www/html/screp';
@@ -61,6 +68,7 @@ class ReplayController extends Controller
         }
 
         // Enforce replay is not older than 48 hours
+        /*
         $startTime = $data['Header']['StartTime'] ?? null;
         if ($startTime) {
             $replayTime = strtotime($startTime);
@@ -68,12 +76,15 @@ class ReplayController extends Controller
                 return back()->with('error', 'Replay is too old (over 48 hours).');
             }
         }
+        */
 
         // Enforce map name starts with 'OP SFL-' or 'SFLClan'
+        /*
         $mapName = $data['Header']['Map'] ?? '';
         if (!(str_starts_with($mapName, 'OP SFL-') || str_starts_with($mapName, 'SFLClan'))) {
             return back()->with('error', 'Replay must be played on a map starting with OP SFL- or SFLClan.');
         }
+        */
 
         // Generate stable fingerprint
         $fingerprint = $this->generateReplayFingerprint($data);
@@ -122,7 +133,6 @@ class ReplayController extends Controller
         $playersData = [];
         $uuid = Str::uuid()->toString();
         $currentSeason = Season::where('is_active', 1)->first();
-
         if (!$currentSeason) {
             return back()->with('error', 'No active season found.');
         }
@@ -278,7 +288,10 @@ class ReplayController extends Controller
     public function download($uuid)
     {
         $replay = Replay::where('replay_id', $uuid)->firstOrFail();
-        $filePath = storage_path('app/public/uploads/' . basename($replay->replay_file));
+        // Always use the season directory for the file
+        $seasonDir = 'uploads/season_' . $replay->season_id;
+        $fileName = basename($replay->replay_file);
+        $filePath = storage_path('app/public/' . $seasonDir . '/' . $fileName);
 
         if (!file_exists($filePath)) {
             return back()->with('error', 'File not found.');

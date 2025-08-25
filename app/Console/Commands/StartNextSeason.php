@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Season;
 use App\Models\User;
 use App\Models\Stats;
+use Illuminate\Support\Facades\Storage;
 
 class StartNextSeason extends Command
 {
@@ -28,6 +29,13 @@ class StartNextSeason extends Command
         $season->id = $nextSeasonId;
         $season->is_active = 1;
         $season->save();
+
+
+        // Create uploads directory for the new season
+        $seasonDir = 'uploads/season_' . $nextSeasonId;
+        if (!Storage::disk('public')->exists($seasonDir)) {
+            Storage::disk('public')->makeDirectory($seasonDir);
+        }
 
         // For each user, create stats for 2v2 and 3v3 for the new season
         $users = User::all();
