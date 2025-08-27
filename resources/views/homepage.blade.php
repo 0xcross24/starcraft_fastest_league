@@ -41,8 +41,8 @@
       </table>
       {{-- Button to view full 2v2 standings --}}
       <div class="mt-2 text-center" style="width: 100%;">
-        <a href="{{ route('rankings', ['format' => '2v2', 'season_id' => $season->id]) }}" class="text-gray-500 btn btn-primary w-full">
-          View 2v2 standings
+        <a href="{{ route('rankings', ['format' => '2v2', 'season_id' => $season->id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-center text-xs rounded hover:bg-blue-700 transition font-semibold">
+          View 2v2 Standings
         </a>
       </div>
       @else
@@ -87,8 +87,8 @@
       </table>
       {{-- Button to view full 3v3 standings --}}
       <div class="mt-2 text-center" style="width: 100%;">
-        <a href="{{ route('rankings', ['format' => '3v3', 'season_id' => $season->id]) }}" class="text-gray-500 btn btn-primary w-full">
-          View 3v3 standings
+        <a href="{{ route('rankings', ['format' => '3v3', 'season_id' => $season->id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">
+          View 3v3 Standings
         </a>
       </div>
       @else
@@ -102,11 +102,11 @@
   <div class="grid grid-cols-3 gap-1 mt-5">
     @forelse($recentReplayGroups as $group)
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
-      <div class="w-full text-center text-xs text-gray-500 mb-6">
-        <div class="w-full text-xs text-gray-500 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+      <div class="w-full text-center text-xs text-gray-300 mb-6">
+        <div class="w-full text-xs text-gray-300 px-3 py-2 border-b border-gray-200 dark:border-gray-700">
           Replay ID: <span class="font-mono">{{ substr($group->first()->replay_id, 0, 8) }}</span>
         </div>
-        <div class="w-full text-xs text-gray-500 px-3 pt-2">
+        <div class="w-full text-xs text-gray-300 px-3 pt-2">
           Uploaded {{ $group->first()->created_at ? $group->first()->created_at->diffForHumans() : '' }}
         </div>
       </div>

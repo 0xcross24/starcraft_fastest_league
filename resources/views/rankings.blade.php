@@ -52,13 +52,13 @@
                 <h3 class="text-lg font-semibold mb-4">Season {{ $season->id }} Ranking ({{ strtoupper($format) }})</h3>
                 <div class="overflow-x-auto">
                   <table class="w-full border-collapse border border-gray-200 mb-4">
-                    <thead class="bg-gray-200">
+                    <thead class="bg-gray-200 dark:bg-gray-700">
                       <tr>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">#</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Player</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Rank</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Elo</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-700">Record</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200">#</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200">Player</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200">Rank</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200">Elo</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200">Record</th>
                       </tr>
                     </thead>
                     <tbody>

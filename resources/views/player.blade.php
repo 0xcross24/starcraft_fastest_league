@@ -113,29 +113,29 @@
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
-                            <div class="w-full text-xs text-gray-500 px-3 py-1 border-b border-gray-200 dark:border-gray-700">
+                            <div class="w-full text-xs text-gray-300 px-3 py-1 border-b border-gray-200 dark:border-gray-700">
                                 @php
                                 $firstReplay = $groupedReplays->first();
                                 $uploadTime = $firstReplay?->created_at;
                                 @endphp
                                 Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
-                                <span class="ml-2 text-gray-500">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
+                                <span class="ml-2 text-gray-300">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
-                            <div class="flex flex-row border border-gray-200 mb-6 rounded-lg overflow-hidden">
+                            <div class="flex flex-row mb-6 overflow-hidden">
                                 <!-- Team 1 -->
-                                <div class="w-1/2 border-r border-gray-200">
+                                <div class="w-1/2">
                                     <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full table-fixed border-collapse">
-                                        <thead class="bg-gray-200">
+                                    <table class="w-full table-fixed border-collapse border border-gray-200">
+                                        <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -144,18 +144,18 @@
                                             @endphp
                                             @foreach($team1 as $player)
                                             <tr>
-                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-md">
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
                                                     <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
                                                 </td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->race }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
                                                 $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -166,15 +166,15 @@
                                     <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full table-fixed border-collapse">
-                                        <thead class="bg-gray-200">
+                                    <table class="w-full table-fixed border-collapse border border-gray-200">
+                                        <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -182,18 +182,18 @@
                                             @endphp
                                             @foreach($team2 as $player)
                                             <tr>
-                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-md">
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
                                                     <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
                                                 </td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->race }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
                                                 $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -202,7 +202,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-md rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
+                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
                             </div>
                             @endforeach
                             @endif
@@ -248,21 +248,21 @@
                                 Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
                                 <span class="ml-2 text-gray-400">{{ $timestamp ? (\Carbon\Carbon::parse($timestamp)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
-                            <div class="flex flex-row border border-gray-200 mb-6 rounded-lg overflow-hidden">
+                            <div class="flex flex-row border border-gray-200 mb-6 overflow-hidden">
                                 <!-- Team 1 -->
-                                <div class="w-1/2 border-r border-gray-200">
+                                <div class="w-1/2">
                                     <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 1 {{ $team1Win ? 'Win' : 'Loss' }}
                                     </div>
                                     <table class="w-full table-fixed border-collapse">
                                         <thead class="bg-gray-200">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -270,18 +270,18 @@
                                             @endphp
                                             @foreach($team1 as $player)
                                             <tr>
-                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-md">
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
                                                     <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
                                                 </td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->race }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
                                                 $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -295,12 +295,12 @@
                                     <table class="w-full table-fixed border-collapse">
                                         <thead class="bg-gray-200">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-sm w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -308,18 +308,18 @@
                                             @endphp
                                             @foreach($team2 as $player)
                                             <tr>
-                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-md">
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
                                                     <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
                                                 </td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->race }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
                                                 $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -328,7 +328,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-md rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
+                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
                             </div>
                             @endforeach
                             @endif
