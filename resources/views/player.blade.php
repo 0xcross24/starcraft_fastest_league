@@ -202,7 +202,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
+                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-md rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
                             </div>
                             @endforeach
                             @endif
@@ -328,7 +328,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="text-blue-600 hover:underline font-semibold">Download Replay</a>
+                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-md rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
                             </div>
                             @endforeach
                             @endif
