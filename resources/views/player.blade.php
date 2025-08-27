@@ -99,7 +99,7 @@
                                 $uploadTime = $firstReplay?->created_at;
                                 @endphp
                                 Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
-                                <span class="ml-2 text-gray-400">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
+                                <span class="ml-2 text-gray-500">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
                             <div class="flex flex-row border border-gray-200 mb-6 rounded-lg overflow-hidden">
                                 <!-- Team 1 -->
