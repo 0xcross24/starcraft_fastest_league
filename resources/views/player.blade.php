@@ -81,12 +81,32 @@
                         <div id="season-{{ $selectedSeason->id }}" class="season-ranking block mt-10">
                             @if($format === '2v2')
                             @php
-                            $seasonReplays2v2 = $replays->where('season_id', $selectedSeason->id)->where('format', '2v2');
+                            $seasonReplays2v2 = $replays->where('season_id', $selectedSeason->id)->where('format', '2v2')->sortBy('created_at');
                             @endphp
                             @if($seasonReplays2v2->isEmpty())
                             <p>No 2v2 replays found for this season.</p>
                             @else
-                            @foreach($seasonReplays2v2->groupBy('replay_id') as $replayId => $groupedReplays)
+                            @php
+                            // Calculate ELO progression in ascending order, store for each replay
+                            $eloProgression = [];
+                            $eloTracker = [];
+                            $replayGroupsAsc = $seasonReplays2v2->groupBy('replay_id')->sortBy(function($groupedReplays) { return $groupedReplays->first()->created_at; });
+                            foreach ($replayGroupsAsc as $replayIdAsc => $groupedReplaysAsc) {
+                            foreach (['1', '2'] as $teamNum) {
+                            $team = $groupedReplaysAsc->where('team', $teamNum);
+                            foreach ($team as $player) {
+                            $uid = $player->user_id;
+                            if (!isset($eloTracker[$uid])) {
+                            $eloTracker[$uid] = 1000;
+                            }
+                            $eloTracker[$uid] += ($player->points ?? 0);
+                            $eloProgression[$replayIdAsc][$uid] = $eloTracker[$uid];
+                            }
+                            }
+                            }
+                            $replayGroupsDesc = $seasonReplays2v2->groupBy('replay_id')->sortByDesc(function($groupedReplays) { return $groupedReplays->first()->created_at; });
+                            @endphp
+                            @foreach($replayGroupsDesc as $replayId => $groupedReplays)
                             @php
                             $team1 = $groupedReplays->where('team', '1');
                             $team2 = $groupedReplays->where('team', '2');
@@ -121,13 +141,6 @@
                                         <tbody>
                                             @php
                                             // Track ELO for each player in this team
-                                            static $eloTracker = [];
-                                            foreach($team1 as $player) {
-                                            $uid = $player->user_id;
-                                            if (!isset($eloTracker[$uid])) {
-                                            $eloTracker[$uid] = $userStats[$uid]->elo ?? 1000;
-                                            }
-                                            }
                                             @endphp
                                             @foreach($team1 as $player)
                                             <tr>
@@ -140,8 +153,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
-                                                $eloAfter = $eloTracker[$uid] + ($player->points ?? 0);
-                                                $eloTracker[$uid] = $eloAfter;
+                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
                                             </tr>
@@ -167,12 +179,6 @@
                                         </thead>
                                         <tbody>
                                             @php
-                                            foreach($team2 as $player) {
-                                            $uid = $player->user_id;
-                                            if (!isset($eloTracker[$uid])) {
-                                            $eloTracker[$uid] = $userStats[$uid]->elo ?? 1000;
-                                            }
-                                            }
                                             @endphp
                                             @foreach($team2 as $player)
                                             <tr>
@@ -185,8 +191,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
-                                                $eloAfter = $eloTracker[$uid] + ($player->points ?? 0);
-                                                $eloTracker[$uid] = $eloAfter;
+                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
                                             </tr>
@@ -203,12 +208,32 @@
                             @endif
                             @elseif($format === '3v3')
                             @php
-                            $seasonReplays3v3 = $replays->where('season_id', $selectedSeason->id)->where('format', '3v3');
+                            $seasonReplays3v3 = $replays->where('season_id', $selectedSeason->id)->where('format', '3v3')->sortBy('created_at');
                             @endphp
                             @if($seasonReplays3v3->isEmpty())
                             <p>No 3v3 replays found for this season.</p>
                             @else
-                            @foreach($seasonReplays3v3->groupBy('replay_id') as $replayId => $groupedReplays)
+                            @php
+                            // Calculate ELO progression for 3v3 in ascending order, store for each replay
+                            $eloProgression3v3 = [];
+                            $eloTracker3v3 = [];
+                            $replayGroupsAsc3v3 = $seasonReplays3v3->groupBy('replay_id')->sortBy(function($groupedReplays) { return $groupedReplays->first()->created_at; });
+                            foreach ($replayGroupsAsc3v3 as $replayIdAsc => $groupedReplaysAsc) {
+                            foreach (['1', '2'] as $teamNum) {
+                            $team = $groupedReplaysAsc->where('team', $teamNum);
+                            foreach ($team as $player) {
+                            $uid = $player->user_id;
+                            if (!isset($eloTracker3v3[$uid])) {
+                            $eloTracker3v3[$uid] = 1000;
+                            }
+                            $eloTracker3v3[$uid] += ($player->points ?? 0);
+                            $eloProgression3v3[$replayIdAsc][$uid] = $eloTracker3v3[$uid];
+                            }
+                            }
+                            }
+                            $replayGroupsDesc3v3 = $seasonReplays3v3->groupBy('replay_id')->sortByDesc(function($groupedReplays) { return $groupedReplays->first()->created_at; });
+                            @endphp
+                            @foreach($replayGroupsDesc3v3 as $replayId => $groupedReplays)
                             @php
                             $team1 = $groupedReplays->where('team', '1');
                             $team2 = $groupedReplays->where('team', '2');
@@ -232,23 +257,31 @@
                                     <table class="w-full table-fixed border-collapse">
                                         <thead class="bg-gray-200">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-700">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            @php
+                                            @endphp
                                             @foreach($team1 as $player)
                                             <tr>
-                                                <td class="border text-neonBlue border-gray-200 text-center px-2 py-1">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}">{{ $player->player_name }}</a>
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-md">
+                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
                                                 </td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->race }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
+                                                @php
+                                                $uid = $player->user_id;
+                                                $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
+                                                @endphp
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -262,23 +295,31 @@
                                     <table class="w-full table-fixed border-collapse">
                                         <thead class="bg-gray-200">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-700">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-700">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-700 text-md w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            @php
+                                            @endphp
                                             @foreach($team2 as $player)
                                             <tr>
-                                                <td class="border text-neonBlue border-gray-200 text-center px-2 py-1">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}">{{ $player->player_name }}</a>
+                                                <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-md">
+                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
                                                 </td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->race }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->race }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->apm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
+                                                @php
+                                                $uid = $player->user_id;
+                                                $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
+                                                @endphp
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>

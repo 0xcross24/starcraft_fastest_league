@@ -43,7 +43,27 @@
                             @if($replays->isEmpty())
                             <p>No replays found for this season and format.</p>
                             @else
-                            @foreach($replays->groupBy('replay_id') as $replayId => $groupedReplays)
+                            @php
+                            // Calculate ELO progression in ascending order, store for each replay
+                            $eloProgression = [];
+                            $eloTracker = [];
+                            $replayGroupsAsc = $replays->groupBy('replay_id')->sortBy(function($groupedReplays) { return $groupedReplays->first()->created_at; });
+                            foreach ($replayGroupsAsc as $replayIdAsc => $groupedReplaysAsc) {
+                            foreach (['1', '2'] as $teamNum) {
+                            $team = $groupedReplaysAsc->where('team', $teamNum);
+                            foreach ($team as $player) {
+                            $uid = $player->user_id;
+                            if (!isset($eloTracker[$uid])) {
+                            $eloTracker[$uid] = 1000;
+                            }
+                            $eloTracker[$uid] += ($player->points ?? 0);
+                            $eloProgression[$replayIdAsc][$uid] = $eloTracker[$uid];
+                            }
+                            }
+                            }
+                            $replayGroupsDesc = $replays->groupBy('replay_id')->sortByDesc(function($groupedReplays) { return $groupedReplays->first()->created_at; });
+                            @endphp
+                            @foreach($replayGroupsDesc as $replayId => $groupedReplays)
                             @php
                             $team1 = $groupedReplays->where('team', '1');
                             $team2 = $groupedReplays->where('team', '2');
@@ -77,14 +97,6 @@
                                         </thead>
                                         <tbody>
                                             @php
-                                            static $eloTracker = [];
-                                            foreach($team1 as $player) {
-                                            $uid = $player->user_id;
-                                            if (!isset($eloTracker[$uid])) {
-                                            // You may want to fetch the current ELO from the stats table for more accuracy
-                                            $eloTracker[$uid] = 1000; // Default starting ELO
-                                            }
-                                            }
                                             @endphp
                                             @foreach($team1 as $player)
                                             <tr>
@@ -97,8 +109,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
-                                                $eloAfter = $eloTracker[$uid] + ($player->points ?? 0);
-                                                $eloTracker[$uid] = $eloAfter;
+                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
                                             </tr>
@@ -124,12 +135,6 @@
                                         </thead>
                                         <tbody>
                                             @php
-                                            foreach($team2 as $player) {
-                                            $uid = $player->user_id;
-                                            if (!isset($eloTracker[$uid])) {
-                                            $eloTracker[$uid] = 1000;
-                                            }
-                                            }
                                             @endphp
                                             @foreach($team2 as $player)
                                             <tr>
@@ -142,8 +147,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->user_id;
-                                                $eloAfter = $eloTracker[$uid] + ($player->points ?? 0);
-                                                $eloTracker[$uid] = $eloAfter;
+                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-md">{{ $eloAfter }}</td>
                                             </tr>
