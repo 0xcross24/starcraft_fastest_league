@@ -39,6 +39,12 @@
           @endforeach
         </tbody>
       </table>
+      {{-- Button to view full 2v2 standings --}}
+      <div class="mt-2 text-center" style="width: 100%;">
+        <a href="{{ route('rankings', ['format' => '2v2', 'season_id' => $season->id]) }}" class="text-gray-500 btn btn-primary w-full">
+          View 2v2 standings
+        </a>
+      </div>
       @else
       <div class="text-center text-lg text-red-500 font-bold my-8">No active season</div>
       @endif
@@ -79,6 +85,12 @@
           @endforeach
         </tbody>
       </table>
+      {{-- Button to view full 3v3 standings --}}
+      <div class="mt-2 text-center" style="width: 100%;">
+        <a href="{{ route('rankings', ['format' => '3v3', 'season_id' => $season->id]) }}" class="text-gray-500 btn btn-primary w-full">
+          View 3v3 standings
+        </a>
+      </div>
       @else
       <div class="text-center text-lg text-red-500 font-bold my-8">No active season</div>
       @endif
