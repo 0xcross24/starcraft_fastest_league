@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('build_orders', function (Blueprint $table) {
-            $table->text('matchup')->change();
+        Schema::table('replays', function (Blueprint $table) {
+            $table->boolean('is_invalid')->default(false)->after('points');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('build_orders', function (Blueprint $table) {
-            $table->string('matchup')->change();
+        Schema::table('replays', function (Blueprint $table) {
+            $table->dropColumn('is_invalid');
         });
     }
 };

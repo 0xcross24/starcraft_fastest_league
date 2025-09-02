@@ -3,16 +3,16 @@
     <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
       <!-- 2v2 Leaderboard -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
-        <h2 class="text-lg font-bold mb-2 text-center text-gray-700 dark:text-gray-200 font-logo">Current Season 2v2 Top 5</h2>
+        <h2 class="text-lg font-bold mb-2 text-center text-gray-700 dark:text-gray-200">Current Season 2v2 Top 5</h2>
         @if($season)
         <table class="w-full border-collapse border border-gray-200 text-sm mb-2">
-          <thead class="bg-gray-200 dark:bg-gray-700 font-nav">
+          <thead class="bg-gray-200 dark:bg-gray-700">
             <tr>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">#</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Player</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">ELO</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Grade</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Record</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">#</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Player</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">ELO</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Grade</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Record</th>
             </tr>
           </thead>
           <tbody class="text-gray-900 dark:text-gray-100">
@@ -39,7 +39,7 @@
         </table>
         {{-- Button to view full 2v2 standings --}}
         <div class="mt-2 text-center" style="width: 100%;">
-          <a href="{{ route('rankings', ['format' => '2v2', 'season_id' => $season->id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-center text-xs rounded hover:bg-blue-700 transition font-semibold font-nav">
+          <a href="{{ route('rankings', ['format' => '2v2', 'season_id' => $season->id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-center text-xs rounded hover:bg-blue-700 transition font-semibold">
             View 2v2 Standings
           </a>
         </div>
@@ -49,16 +49,16 @@
       </div>
       <!-- 3v3 Leaderboard -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
-        <h2 class="text-lg font-bold mb-2 text-center text-gray-700 dark:text-gray-200 font-logo">Current Season 3v3 Top 5</h2>
+        <h2 class="text-lg font-bold mb-2 text-center text-gray-700 dark:text-gray-200">Current Season 3v3 Top 5</h2>
         @if($season)
         <table class="w-full border-collapse border border-gray-200 text-sm mb-2">
-          <thead class="bg-gray-200 dark:bg-gray-700 font-nav">
+          <thead class="bg-gray-200 dark:bg-gray-700">
             <tr>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">#</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Player</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">ELO</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Grade</th>
-              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Record</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">#</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Player</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">ELO</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Grade</th>
+              <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Record</th>
             </tr>
           </thead>
           <tbody class="text-gray-900 dark:text-gray-100">
@@ -85,7 +85,7 @@
         </table>
         {{-- Button to view full 3v3 standings --}}
         <div class="mt-2 text-center" style="width: 100%;">
-          <a href="{{ route('rankings', ['format' => '3v3', 'season_id' => $season->id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold font-nav">
+          <a href="{{ route('rankings', ['format' => '3v3', 'season_id' => $season->id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">
             View 3v3 Standings
           </a>
         </div>
@@ -96,7 +96,7 @@
     </div>
 
     <!-- Last 5 Replays Full Details -->
-    <h2 class="text-lg font-bold mt-7 text-center text-gray-700 dark:text-gray-200 font-logo">Recently Played Matches</h2>
+    <h2 class="text-lg font-bold mt-7 text-center text-gray-700 dark:text-gray-200">Recently Played Matches</h2>
     <div class="grid grid-cols-3 gap-1 mt-5">
       @forelse($recentReplayGroups as $group)
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
@@ -110,12 +110,12 @@
         </div>
         <div class="overflow-x-auto">
           <table class="w-full border-collapse border border-gray-200 text-sm mb-2">
-            <thead class="bg-gray-200 dark:bg-gray-700 font-nav">
+            <thead class="bg-gray-200 dark:bg-gray-700">
               <tr>
-                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Player</th>
-                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Result</th>
-                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">Points</th>
-                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200 font-nav">APM</th>
+                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Player</th>
+                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Result</th>
+                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">Points</th>
+                <th class="px-2 py-1 text-center text-gray-700 dark:text-gray-200">APM</th>
               </tr>
             </thead>
             <tbody class="text-gray-900 dark:text-gray-100">
@@ -144,7 +144,7 @@
         </div>
         <!-- Download link below the tables -->
         <div class="w-full text-center py-2 mb-1">
-          <a href="{{ route('replay.download', ['uuid' => $group->first()->replay_id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold font-nav">Download Replay</a>
+          <a href="{{ route('replay.download', ['uuid' => $group->first()->replay_id]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
         </div>
       </div>
       @empty
@@ -154,4 +154,11 @@
       @endforelse
     </div>
   </div>
+  <!-- Neon Gold CSS for S grade -->
+  <style>
+    .text-neonGold {
+      color: #FFD700;
+      text-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700;
+    }
+  </style>
 </x-guest-layout>

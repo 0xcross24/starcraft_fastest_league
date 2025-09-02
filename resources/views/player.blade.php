@@ -347,6 +347,11 @@
 
     <script src="/js/season-dropdown.js"></script>
     <!-- Neon Gold CSS for S grade -->
-
+    <style>
+        .text-neonGold {
+            color: #FFD700;
+            text-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700;
+        }
+    </style>
 
 </x-app-layout>

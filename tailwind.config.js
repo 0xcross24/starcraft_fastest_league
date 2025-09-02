@@ -10,15 +10,6 @@ export default {
         './resources/views/*.blade.php',
     ],
 
-    safelist: [
-        'text-neonGold',
-        'text-neonPink',
-        'text-neonRed',
-        'text-neonYellow',
-        'text-neonBlue',
-        'text-neonGreen',
-        'text-gold',
-    ],
     theme: {
         extend: {
             fontFamily: {
