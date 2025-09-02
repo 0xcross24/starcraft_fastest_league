@@ -15,26 +15,26 @@
               $selectedSeasonId = request('season') ?? ($seasons->count() ? $seasons->max('id') : null);
               @endphp
               <div class="mb-6">
-                <ul class="flex border-b border-gray-200 mb-2">
+                <ul class="flex border-b border-gray-200 mb-2 font-nav">
                   @foreach($seasons as $season)
                   <li class="mr-8">
                     <a href="?season={{ $season->id }}&format={{ request('format', '2v2') }}"
-                      class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $selectedSeasonId ? 'border-b-4 border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300' }}">
+                      class="season-tab inline-block py-2 px-4 text-sm font-medium font-nav focus:outline-none {{ $season->id == $selectedSeasonId ? 'border-b-4 border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300' }}">
                       Season {{ $season->id }}
                     </a>
                   </li>
                   @endforeach
                 </ul>
-                <ul class="flex mb-6">
+                <ul class="flex mb-6 font-nav">
                   <li class="mr-4">
                     <a href="?season={{ $selectedSeasonId }}&format=2v2"
-                      class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format', '2v2') == '2v2' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
+                      class="inline-block py-1 px-4 text-sm font-medium font-nav focus:outline-none {{ request('format', '2v2') == '2v2' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
                       2v2
                     </a>
                   </li>
                   <li>
                     <a href="?season={{ $selectedSeasonId }}&format=3v3"
-                      class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format') == '3v3' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
+                      class="inline-block py-1 px-4 text-sm font-medium font-nav focus:outline-none {{ request('format') == '3v3' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
                       3v3
                     </a>
                   </li>
@@ -49,16 +49,16 @@
               @foreach($seasons as $season)
               @if($season->id == $selectedSeasonId)
               <div id="season-{{ $season->id }}" class="season-ranking block">
-                <h3 class="text-lg font-semibold mb-4">Season {{ $season->id }} Ranking ({{ strtoupper($format) }})</h3>
+                <h3 class="text-lg font-semibold mb-4 font-logo">Season {{ $season->id }} Ranking ({{ strtoupper($format) }})</h3>
                 <div class="overflow-x-auto">
                   <table class="w-full border-collapse border border-gray-200 mb-4">
-                    <thead class="bg-gray-200 dark:bg-gray-700">
+                    <thead class="bg-gray-200 dark:bg-gray-700 font-nav">
                       <tr>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">#</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Player</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Rank</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Elo</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Record</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200 font-nav">#</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200 font-nav">Player</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200 font-nav">Rank</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200 font-nav">Elo</th>
+                        <th class="px-4 py-2 text-left text-center text-gray-200 font-nav">Record</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -104,11 +104,5 @@
 
   <!-- Use the same dropdown JS as player.blade.php -->
   <script src="/js/season-dropdown.js"></script>
-  <!-- Neon Gold CSS for S grade -->
-  <style>
-    .text-neonGold {
-      color: #FFD700;
-      text-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700;
-    }
-  </style>
+  <!-- Neon Gold CSS for S grade removed, now global -->
 </x-app-layout>

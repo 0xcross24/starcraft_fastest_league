@@ -13,6 +13,7 @@
                     <x-nav-link href="/replays" :active="request()->is('replays')">Replays</x-nav-link>
                     <x-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-nav-link>
                     <x-nav-link href="/rules" :active="request()->is('rules')">Rules</x-nav-link>
+                    <x-nav-link href="/builds" :active="request()->is('builds')">Build Orders</x-nav-link>
                 </div>
             </div>
 
@@ -74,6 +75,7 @@
             </div>
 
             <div class="mt-3 space-y-1">
+                <x-responsive-nav-link href="/builds" :active="request()->is('builds')">Build Orders</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
