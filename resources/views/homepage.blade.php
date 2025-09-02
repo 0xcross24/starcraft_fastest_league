@@ -94,7 +94,6 @@
         @endif
       </div>
     </div>
-
     <!-- Last 5 Replays Full Details -->
     <h2 class="text-lg font-bold mt-7 text-center text-gray-700 dark:text-gray-200">Recently Played Matches</h2>
     <div class="grid grid-cols-3 gap-1 mt-5">
