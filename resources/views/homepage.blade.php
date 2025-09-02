@@ -160,4 +160,5 @@
       text-shadow: 0 0 8px #FFD700, 0 0 16px #FFD700;
     }
   </style>
+
 </x-guest-layout>
