@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -10,10 +9,12 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        // Set all Elo ratings to 1000
-        DB::table('stats')->update(['elo' => 1000]);
+        Schema::table('users', function (Blueprint $table) {
+            //
+            $table->string('role')->default('user');
+        });
     }
 
     /**
@@ -21,7 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // You can back up the previous state of the elo column if needed
-        // Example: DB::table('stats')->update(['elo' => 'previous_value']); 
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
     }
 };
