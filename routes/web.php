@@ -1,13 +1,12 @@
 <?php
 
 use App\Http\Controllers\AllReplaysController;
-use App\Http\Controllers\FileController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
 use App\Http\Controllers\StatsController;
-use Illuminate\Support\Facades\Route;
-
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\BuildOrderController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('homepage');
 
@@ -35,5 +34,8 @@ Route::middleware('auth')->group(function () {
   Route::post('/upload', [ReplayController::class, 'upload'])->name('upload.upload');
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
 });
+
+Route::get('/builds', [BuildOrderController::class, 'index'])->name('builds.index');
+
 
 require __DIR__ . '/auth.php';
