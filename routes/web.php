@@ -35,7 +35,15 @@ Route::middleware('auth')->group(function () {
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
 });
 
+// Build Order routes
 Route::get('/builds', [BuildOrderController::class, 'index'])->name('builds.index');
-
+Route::get('/builds/{id}', [BuildOrderController::class, 'show'])->name('builds.show');
+Route::middleware(['auth', 'admin'])->group(function () {
+  Route::get('/builds/create', [BuildOrderController::class, 'create'])->name('builds.create');
+  Route::post('/builds', [BuildOrderController::class, 'store'])->name('builds.store');
+  Route::get('/builds/{id}/edit', [BuildOrderController::class, 'edit'])->name('builds.edit');
+  Route::put('/builds/{id}', [BuildOrderController::class, 'update'])->name('builds.update');
+  Route::delete('/builds/{id}', [BuildOrderController::class, 'destroy'])->name('builds.destroy');
+});
 
 require __DIR__ . '/auth.php';
