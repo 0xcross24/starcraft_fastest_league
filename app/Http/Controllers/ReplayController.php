@@ -68,7 +68,6 @@ class ReplayController extends Controller
         }
 
         // Enforce replay is not older than 48 hours
-        /*
         $startTime = $data['Header']['StartTime'] ?? null;
         if ($startTime) {
             $replayTime = strtotime($startTime);
@@ -76,15 +75,12 @@ class ReplayController extends Controller
                 return back()->with('error', 'Replay is too old (over 48 hours).');
             }
         }
-        */
 
         // Enforce map name starts with 'OP SFL-' or 'SFLClan'
-        /*
         $mapName = $data['Header']['Map'] ?? '';
         if (!(str_starts_with($mapName, 'OP SFL-') || str_starts_with($mapName, 'SFLClan'))) {
             return back()->with('error', 'Replay must be played on a map starting with OP SFL- or SFLClan.');
         }
-        */
 
         // Generate stable fingerprint
         $fingerprint = $this->generateReplayFingerprint($data);
