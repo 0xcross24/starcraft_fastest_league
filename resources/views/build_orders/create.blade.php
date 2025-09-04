@@ -77,7 +77,7 @@
                         </div>
                         <div>
                             <label for="steps" class="block font-semibold font-nav">Steps</label>
-                            <textarea name="steps" id="steps" class="w-full border rounded px-3 py-2 text-gray-900" required>{{ old('steps') }}</textarea>
+                            <textarea name="steps" id="steps" class="w-full border rounded px-3 py-2 text-gray-900" rows="10" required>{{ old('steps') }}</textarea>
                             @error('steps')<div class="text-red-600 text-xs">{{ $message }}</div>@enderror
                         </div>
                         <div class="flex justify-end gap-2">
