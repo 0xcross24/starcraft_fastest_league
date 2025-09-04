@@ -35,9 +35,9 @@ Route::middleware('auth')->group(function () {
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
 });
 
-// Build Order routes
 Route::get('/builds', [BuildOrderController::class, 'index'])->name('builds.index');
 Route::get('/builds/{id}', [BuildOrderController::class, 'show'])->name('builds.show');
+// Build Order routes
 Route::middleware(['auth', 'admin'])->group(function () {
   Route::get('/builds/create', [BuildOrderController::class, 'create'])->name('builds.create');
   Route::post('/builds', [BuildOrderController::class, 'store'])->name('builds.store');
