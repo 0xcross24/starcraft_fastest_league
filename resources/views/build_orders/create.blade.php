@@ -55,7 +55,7 @@
                                     if (race === 'Terran') {
                                         allowed = ['PPT', 'PTZ', 'PT', 'TZ'];
                                     } else if (race === 'Zerg') {
-                                        allowed = ['PPZ', 'PZ', 'TZ'];
+                                        allowed = ['PPZ', 'PTZ', 'PZ', 'TZ'];
                                     } else if (race === 'Protoss') {
                                         allowed = ['PPP', 'PPT', 'PPZ', 'PTZ', 'PP', 'PT', 'PZ']; // everything but TZ
                                     } else {
