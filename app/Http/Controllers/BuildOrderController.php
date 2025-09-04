@@ -18,7 +18,7 @@ class BuildOrderController extends Controller
         if (in_array($race, ['Protoss', 'Terran', 'Zerg'])) {
             $query->where('race', $race);
         }
-        $builds = $query->latest()->paginate(10);
+        $builds = $query->latest()->paginate(20);
         return view('build_orders.index', compact('builds', 'race'));
     }
 
