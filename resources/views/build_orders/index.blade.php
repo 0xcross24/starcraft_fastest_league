@@ -37,7 +37,7 @@
                                 @foreach($builds as $build)
                                 @php $showUrl = route('builds.show', ['id' => $build->id]); @endphp
                                 <tr class="hover:bg-gray-800 hover:text-white dark:hover:bg-gray-900 dark:hover:text-white transition-colors cursor-pointer" onclick="window.location='{{ $showUrl }}'">
-                                    <td class="px-4 py-3 font-semibold text-blue-700 dark:text-blue-300 underline font-nav">{{ $build->title }}</td>
+                                    <td class="px-4 py-3 font-semibold font-nav">{{ $build->title }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-nav">{{ Str::limit($build->description, 60) }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-nav">{{ $build->race }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-nav">
