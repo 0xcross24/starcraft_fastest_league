@@ -4,9 +4,15 @@
 	admin {$CADDY_SERVER_ADMIN_HOST}:{$CADDY_SERVER_ADMIN_PORT}
 
 	frankenphp {
-		worker "{$APP_PUBLIC_PATH}/frankenphp-worker.php" {$CADDY_SERVER_WORKER_COUNT}
+		worker {
+			file "{$APP_PUBLIC_PATH}/frankenphp-worker.php"
+			{$CADDY_SERVER_WORKER_DIRECTIVE}
+			{$CADDY_SERVER_WATCH_DIRECTIVES}
+		}
 	}
 }
+
+{$CADDY_EXTRA_CONFIG}
 
 {$CADDY_SERVER_SERVER_NAME} {
 	log {
@@ -32,6 +38,7 @@
 
 		php_server {
 			index frankenphp-worker.php
+			try_files {path} frankenphp-worker.php
 			# Required for the public/storage/ directory...
 			resolve_root_symlink
 		}

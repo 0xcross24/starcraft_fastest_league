@@ -1,13 +1,12 @@
-
 <?php
 
-use App\Http\Controllers\BuildOrderController;
 use App\Http\Controllers\AllReplaysController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
 use App\Http\Controllers\StatsController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\BuildOrderController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('homepage');
 
@@ -36,12 +35,16 @@ Route::middleware('auth')->group(function () {
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
 });
 
+// Build Order routes
+Route::middleware(['auth', 'admin'])->group(function () {
+  Route::get('/builds/create', [BuildOrderController::class, 'create'])->name('builds.create');
+  Route::post('/builds', [BuildOrderController::class, 'store'])->name('builds.store');
+  Route::get('/builds/{id}/edit', [BuildOrderController::class, 'edit'])->name('builds.edit');
+  Route::put('/builds/{id}', [BuildOrderController::class, 'update'])->name('builds.update');
+  Route::delete('/builds/{id}', [BuildOrderController::class, 'destroy'])->name('builds.destroy');
+});
+
 Route::get('/builds', [BuildOrderController::class, 'index'])->name('builds.index');
-Route::get('/builds/create', [BuildOrderController::class, 'create'])->name('builds.create');
-Route::post('/builds', [BuildOrderController::class, 'store'])->name('builds.store');
 Route::get('/builds/{id}', [BuildOrderController::class, 'show'])->name('builds.show');
-Route::get('/builds/{id}/edit', [BuildOrderController::class, 'edit'])->name('builds.edit');
-Route::put('/builds/{id}', [BuildOrderController::class, 'update'])->name('builds.update');
-Route::delete('/builds/{id}', [BuildOrderController::class, 'destroy'])->name('builds.destroy');
 
 require __DIR__ . '/auth.php';

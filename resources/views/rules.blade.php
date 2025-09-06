@@ -97,6 +97,14 @@
     </div>
   </div>
 
+  <style>
+    .active-tab {
+      font-weight: bold;
+      color: #fff;
+      background-color: #2563eb;
+      /* Tailwind blue-600 */
+    }
+  </style>
   <script>
     // Get references to the tab buttons and content sections
     const gameplayTab = document.getElementById("gameplay-tab");
@@ -107,32 +115,34 @@
     const replayContent = document.getElementById("replay-content");
 
     // Add event listeners to handle tab switching
+    function setActiveTab(tab) {
+      [gameplayTab, leagueTab, replayTab].forEach(btn => btn.classList.remove('active-tab'));
+      tab.classList.add('active-tab');
+    }
+
     gameplayTab.addEventListener("click", () => {
-      gameplayTab.classList.add("border-b-2", "border-indigo-500");
-      leagueTab.classList.remove("border-b-2", "border-indigo-500");
-      replayTab.classList.remove("border-b-2", "border-indigo-500");
       gameplayContent.classList.remove("hidden");
       leagueContent.classList.add("hidden");
       replayContent.classList.add("hidden");
+      setActiveTab(gameplayTab);
     });
 
     leagueTab.addEventListener("click", () => {
-      leagueTab.classList.add("border-b-2", "border-indigo-500");
-      gameplayTab.classList.remove("border-b-2", "border-indigo-500");
-      replayTab.classList.remove("border-b-2", "border-indigo-500");
       leagueContent.classList.remove("hidden");
       gameplayContent.classList.add("hidden");
       replayContent.classList.add("hidden");
+      setActiveTab(leagueTab);
     });
 
     replayTab.addEventListener("click", () => {
-      replayTab.classList.add("border-b-2", "border-indigo-500");
-      gameplayTab.classList.remove("border-b-2", "border-indigo-500");
-      leagueTab.classList.remove("border-b-2", "border-indigo-500");
       replayContent.classList.remove("hidden");
       gameplayContent.classList.add("hidden");
       leagueContent.classList.add("hidden");
+      setActiveTab(replayTab);
     });
+
+    // Set initial active tab
+    setActiveTab(gameplayTab);
   </script>
 
 </x-app-layout>

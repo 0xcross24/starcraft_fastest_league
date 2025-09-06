@@ -37,6 +37,7 @@
                                 <option value="PT" {{ in_array('PT', old('matchup', [])) ? 'selected' : '' }}>PT</option>
                                 <option value="PZ" {{ in_array('PZ', old('matchup', [])) ? 'selected' : '' }}>PZ</option>
                                 <option value="TZ" {{ in_array('TZ', old('matchup', [])) ? 'selected' : '' }}>TZ</option>
+                                <option value="PUB" {{ in_array('PUB', old('matchup', [])) ? 'selected' : '' }}>PUB</option>
                             </select>
                             <div class="text-xs text-gray-500 mt-1">Hold Ctrl (Windows) or Command (Mac) to select multiple.</div>
                             @error('matchup')<div class="text-red-600 text-xs">{{ $message }}</div>@enderror
@@ -53,11 +54,11 @@
                                     matchupSelect.appendChild(allOptions[0]); // 'Select Matchup'
                                     let allowed = [];
                                     if (race === 'Terran') {
-                                        allowed = ['PPT', 'PTZ', 'PT', 'TZ'];
+                                        allowed = ['PPT', 'PTZ', 'PT', 'TZ', 'PUB'];
                                     } else if (race === 'Zerg') {
-                                        allowed = ['PPZ', 'PZ', 'TZ'];
+                                        allowed = ['PPZ', 'PTZ', 'PZ', 'TZ', 'PUB'];
                                     } else if (race === 'Protoss') {
-                                        allowed = ['PPP', 'PPT', 'PPZ', 'PTZ', 'PP', 'PT', 'PZ']; // everything but TZ
+                                        allowed = ['PPP', 'PPT', 'PPZ', 'PTZ', 'PP', 'PT', 'PZ', 'PUB']; // everything but TZ
                                     } else {
                                         allowed = allOptions.slice(1).map(o => o.value);
                                     }
@@ -77,7 +78,7 @@
                         </div>
                         <div>
                             <label for="steps" class="block font-semibold font-nav">Steps</label>
-                            <textarea name="steps" id="steps" class="w-full border rounded px-3 py-2 text-gray-900" required>{{ old('steps') }}</textarea>
+                            <textarea name="steps" id="steps" class="w-full border rounded px-3 py-2 text-gray-900" rows="10" required>{{ old('steps') }}</textarea>
                             @error('steps')<div class="text-red-600 text-xs">{{ $message }}</div>@enderror
                         </div>
                         <div class="flex justify-end gap-2">
