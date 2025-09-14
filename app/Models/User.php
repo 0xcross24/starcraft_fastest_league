@@ -8,10 +8,11 @@ use App\Models\Stats;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Scout\Searchable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -55,5 +56,14 @@ class User extends Authenticatable
     public function replay()
     {
         return $this->hasMany(Replay::class);
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'player_name' => $this->player_name,
+            'email' => $this->email,
+        ];
     }
 }

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Season;
 use App\Models\Stats;
 use App\Services\EloService;
+Use Illuminate\Http\Request;
 
 class StatsController extends Controller
 {
@@ -17,22 +18,15 @@ class StatsController extends Controller
         $this->eloService = $eloService;
     }
 
-    public function displayAllRanking()
+    public function displayAllRanking(Request $request)
     {
+        $searchTerm = $request->input('search');
+        $format = $request->input('format', '2v2');
 
         $seasons = Season::all();
         $activeSeason = $seasons->firstWhere('is_active', true);
+        $activeSeasonId = $activeSeason?->id;
 
-        if ($seasons->isEmpty()) {
-            return view('rankings', [
-                'usersWithStats' => collect(),
-                'seasons' => collect(),
-                'activeSeasonId' => null,
-                'noSeasonMessage' => 'No season has started',
-            ]);
-        }
-
-        $activeSeasonId = $activeSeason ? $activeSeason->id : null;
         if (!$activeSeasonId) {
             return view('rankings', [
                 'usersWithStats' => collect(),
@@ -42,23 +36,28 @@ class StatsController extends Controller
             ]);
         }
 
-        // Retrieve users with their associated stats, grouped by season
-        $usersWithStats = Stats::with('user') // Eager load user relationship
-            ->orderBy('season_id', 'asc')  // Group by season
-            ->orderBy('elo', 'desc')       // Order by Elo in descending order
-            ->orderBy('id')                // Tie-breaker for same Elo, matches profile/homepage
-            ->get()
-            ->groupBy('season_id'); // Group stats by season
+        $statsQuery = Stats::with('user')
+            ->where('season_id', $activeSeasonId)
+            ->where('format', $format);
 
-        // Add Elo grade to each user
-        foreach ($usersWithStats as $seasonId => $stats) {
-            foreach ($stats as $stat) {
-                $elo = $stat->elo ?? 1000;  // Default Elo to 1000 if not available
-                $stat->elo_grade = $this->eloService->getEloGrade($elo);
-            }
+        if ($searchTerm) {
+            $matchingUsers = User::search($searchTerm)->get()->pluck('id');
+            $statsQuery->whereIn('user_id', $matchingUsers);
         }
 
-        return view('rankings', compact('usersWithStats', 'seasons', 'activeSeasonId'));
+        $filteredStats = $statsQuery
+            ->orderByDesc('elo')
+            ->orderBy('id')
+            ->get();
+
+        // Add elo_grade
+        foreach ($filteredStats as $stat) {
+            $stat->elo_grade = $this->eloService->getEloGrade($stat->elo ?? 1000);
+        }
+
+        $usersWithStats = collect([$activeSeasonId => $filteredStats]);
+
+        return view('rankings', compact('usersWithStats', 'seasons', 'activeSeasonId', 'searchTerm'))->with('selectedSeasonId', $activeSeasonId);
     }
 
     public function calculateElo(array $winners, array $losers, string $format)

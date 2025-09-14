@@ -8,6 +8,22 @@
             {{ $noSeasonMessage }}
           </div>
           @else
+          <form method="GET" action="{{ route('rankings') }}" class="mb-4 flex gap-4">
+            <input type="text"
+                  name="search"
+                  placeholder="Search player..."
+                  value="{{ request('search') }}"
+                  class="px-4 py-2 rounded border border-gray-300 dark:bg-gray-700 dark:text-white" />
+
+            <input type="hidden" name="season" value="{{ $selectedSeasonId }}">
+            <input type="hidden" name="format" value="{{ request('format', '2v2') }}">
+
+            <button type="submit"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                Search
+            </button>
+        </form>
+
           <div class="w-full">
             <div class="card">
               <!-- Season Tabs -->

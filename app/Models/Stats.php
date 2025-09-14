@@ -8,7 +8,6 @@ use App\Models\User;
 
 class Stats extends Model
 {
-
     public $timestamps = false; // Disable timestamps
     protected $fillable = ['user_id', 'season_id', 'wins', 'losses', 'elo', 'format'];
 

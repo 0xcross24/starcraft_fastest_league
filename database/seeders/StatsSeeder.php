@@ -39,6 +39,15 @@ class StatsSeeder extends Seeder
             'season_id' => $season->id,
         ]);
 
+        Stats::create([
+            'wins'      => 19,
+            'losses'    => 2,
+            'elo'       => 1222,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', '[SFL]Bigwan')->first();
 
         if (!$user) {
@@ -50,8 +59,17 @@ class StatsSeeder extends Seeder
         Stats::create([
             'wins'      => 14,
             'losses'    => 16,
-            'elo'       => 1099,
+            'elo'       => 999,
             'format'    => '2v2',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
+        Stats::create([
+            'wins'      => 11,
+            'losses'    => 11,
+            'elo'       => 1103,
+            'format'    => '3v3',
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
@@ -73,6 +91,15 @@ class StatsSeeder extends Seeder
             'season_id' => $season->id,
         ]);
 
+        Stats::create([
+            'wins'      => 4,
+            'losses'    => 6,
+            'elo'       => 938,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', '[SFL]gbomb')->first();
 
         if (!$user) {
@@ -90,6 +117,15 @@ class StatsSeeder extends Seeder
             'season_id' => $season->id,
         ]);
 
+        Stats::create([
+            'wins'      => 2,
+            'losses'    => 1,
+            'elo'       => 999,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+        
         $user = User::where('player_name', '[SFL]nightstand')->first();
 
         if (!$user) {
@@ -103,6 +139,15 @@ class StatsSeeder extends Seeder
             'losses'    => 2,
             'elo'       => 1038,
             'format'    => '2v2',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
+        Stats::create([
+            'wins'      => 2,
+            'losses'    => 5,
+            'elo'       => 944,
+            'format'    => '3v3',
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
@@ -123,6 +168,15 @@ class StatsSeeder extends Seeder
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
+
+        Stats::create([
+            'wins'      => 0,
+            'losses'    => 0,
+            'elo'       => 1000,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
         
         $user = User::where('player_name', 'BL1ZZ')->first();
 
@@ -140,6 +194,16 @@ class StatsSeeder extends Seeder
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
+
+        Stats::create([
+            'wins'      => 0,
+            'losses'    => 0,
+            'elo'       => 1000,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', '[SFL]Shrink')->first();
 
         if (!$user) {
@@ -156,6 +220,16 @@ class StatsSeeder extends Seeder
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
+
+        Stats::create([
+            'wins'      => 2,
+            'losses'    => 0,
+            'elo'       => 1087,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', 'Vince88')->first();
 
         if (!$user) {
@@ -172,6 +246,16 @@ class StatsSeeder extends Seeder
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
+
+        Stats::create([
+            'wins'      => 0,
+            'losses'    => 0,
+            'elo'       => 1000,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', 'flowcc')->first();
 
         if (!$user) {
@@ -188,6 +272,16 @@ class StatsSeeder extends Seeder
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
+
+        Stats::create([
+            'wins'      => 4,
+            'losses'    => 1,
+            'elo'       => 1103,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', '[SFL]tb`Hero-')->first();
 
         if (!$user) {
@@ -201,6 +295,15 @@ class StatsSeeder extends Seeder
             'losses'    => 3,
             'elo'       => 982,
             'format'    => '2v2',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
+        Stats::create([
+            'wins'      => 5,
+            'losses'    => 10,
+            'elo'       => 1006,
+            'format'    => '3v3',
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
@@ -222,6 +325,15 @@ class StatsSeeder extends Seeder
             'season_id' => $season->id,
         ]);
 
+        Stats::create([
+            'wins'      => 7,
+            'losses'    => 10,
+            'elo'       => 955,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', '[SFL]Health')->first();
 
         if (!$user) {
@@ -238,6 +350,16 @@ class StatsSeeder extends Seeder
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
+
+        Stats::create([
+            'wins'      => 5,
+            'losses'    => 8,
+            'elo'       => 906,
+            'format'    => '3v3',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
         $user = User::where('player_name', '[SFL]fil0')->first();
 
         if (!$user) {
@@ -251,6 +373,15 @@ class StatsSeeder extends Seeder
             'losses'    => 10,
             'elo'       => 793,
             'format'    => '2v2',
+            'user_id'   => $user->id,
+            'season_id' => $season->id,
+        ]);
+
+        Stats::create([
+            'wins'      => 5,
+            'losses'    => 12,
+            'elo'       => 906,
+            'format'    => '3v3',
             'user_id'   => $user->id,
             'season_id' => $season->id,
         ]);
