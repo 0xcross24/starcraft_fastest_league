@@ -15,6 +15,7 @@ Route::get('/rules', function () {
 });
 
 Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
+Route::get('/rankings/search', [StatsController::class, 'searchAjax'])->name('rankings.search');
 
 Route::get('/replays', [AllReplaysController::class, 'index'])->name('replays.all');
 

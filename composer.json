@@ -8,6 +8,7 @@
         "php": "^8.2",
         "filament/filament": "^4.0",
         "hhxsv5/laravel-s": "~3.0",
+        "http-interop/http-factory-guzzle": "^1.2",
         "laravel/framework": "^11.9",
         "laravel/octane": "^2.5",
         "laravel/scout": "^10.19",

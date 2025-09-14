@@ -41,9 +41,10 @@ class StatsController extends Controller
             ->where('format', $format);
 
         if ($searchTerm) {
-            $matchingUsers = User::search($searchTerm)->get()->pluck('id');
-            $statsQuery->whereIn('user_id', $matchingUsers);
+          $matchingUsers = User::search($searchTerm)->get()->pluck('id');
+          $statsQuery->whereIn('user_id', $matchingUsers);
         }
+
 
         $filteredStats = $statsQuery
             ->orderByDesc('elo')
@@ -59,6 +60,43 @@ class StatsController extends Controller
 
         return view('rankings', compact('usersWithStats', 'seasons', 'activeSeasonId', 'searchTerm'))->with('selectedSeasonId', $activeSeasonId);
     }
+
+    public function searchAjax(Request $request)
+    {
+        $search = $request->input('search', '');
+        $format = $request->input('format', '2v2');
+
+        $activeSeason = Season::where('is_active', true)->first();
+        if (!$activeSeason) {
+            return response()->json(['error' => 'No active season'], 404);
+        }
+
+        // 🔎 Search users in Meilisearch
+        $matchingUsers = User::search($search)->get()->pluck('id');
+
+        // Grab stats for those users in the active season + format
+        $stats = Stats::with('user')
+            ->where('season_id', $activeSeason->id)
+            ->where('format', $format)
+            ->whereIn('user_id', $matchingUsers)
+            ->orderByDesc('elo')
+            ->get();
+
+        // Add elo_grade for each result
+        foreach ($stats as $stat) {
+            $stat->elo_grade = $this->eloService->getEloGrade($stat->elo ?? 1000);
+        }
+
+        // Return the rendered Blade table
+        return response()->json([
+            'html' => view('partials.ranking-table', [
+                'stats' => $stats,
+                'format' => $format,
+            ])->render()
+        ]);
+    }
+
+
 
     public function calculateElo(array $winners, array $losers, string $format)
     {
