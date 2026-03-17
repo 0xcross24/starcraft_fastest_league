@@ -13,20 +13,31 @@ class StatsApiController extends Controller
 {
     public function userStats(Request $request)
     {
-        $username = $request->query('username');
+        // Validate and sanitize inputs - allow most characters but block dangerous ones
+        $request->validate([
+            'username' => [
+                'required',
+                'string',
+                'max:50',
+                'regex:/^[^\x00-\x08\x0B\x0C\x0E-\x1F\x7F<>"\&]+$/' // Block control chars, <, >, ", &
+            ],
+            'season_id' => 'nullable|integer|min:1|max:999',
+            'format' => 'nullable|string|in:2v2,3v3',
+        ]);
+
+        $username = trim(strip_tags($request->query('username')));
+        $seasonId = $request->query('season_id');
+        $format = $request->query('format');
+
         // Log API call with IP and parameters
         Log::info('API /users called', [
             'ip' => $request->ip(),
             'x_forwarded_for' => $request->header('X-Forwarded-For'),
             'username' => $username,
-            'season_id' => $request->query('season_id'),
-            'format' => $request->query('format'),
-            'user_agent' => $request->header('User-Agent'),
+            'season_id' => $seasonId,
+            'format' => $format,
+            'user_agent' => substr($request->header('User-Agent'), 0, 200), // Limit UA length
         ]);
-        if (!$username) {
-            return response("Error: Missing username", 400)
-                ->header('Content-Type', 'text/plain');
-        }
 
         $user = User::where('player_name', $username)->first();
         if (!$user) {
@@ -34,8 +45,8 @@ class StatsApiController extends Controller
                 ->header('Content-Type', 'text/plain');
         }
 
-        $seasonId = $request->query('season_id') ?: \App\Models\Season::max('id');
-        $formatQuery = $request->query('format');
+        $seasonId = $seasonId ?: \App\Models\Season::max('id');
+        $formatQuery = $format;
         $eloService = new EloService();
 
         // Start single-line output
