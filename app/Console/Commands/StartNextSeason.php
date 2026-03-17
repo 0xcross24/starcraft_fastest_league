@@ -82,7 +82,8 @@ class StartNextSeason extends Command
                 'embeds' => [
                     [
                         'title' => 'StarCraft Fastest League - New Season',
-                        'description' => "Season {$seasonId} has begun! Good luck to all players!",
+                        'description' => "Season {$seasonId} has begun! Good luck to all players!\n\n🌐 **Play Now**: [starcraftfastest.us](https://starcraftfastest.us)",
+                        'url' => 'https://starcraftfastest.us',
                         'color' => 0x00ff00, // Green color
                         'timestamp' => now()->toISOString(),
                         'fields' => [
@@ -93,17 +94,23 @@ class StartNextSeason extends Command
                             ],
                             [
                                 'name' => '📅 Started At',
-                                'value' => now()->format('F j, Y \a\t g:i A T'),
+                                'value' => now()->format('F j, Y'),
+                                'inline' => true
+                            ],
+                            [
+                                'name' => '⏰ Season Ends',
+                                'value' => now()->addMonths(3)->format('F j, Y'),
                                 'inline' => true
                             ],
                             [
                                 'name' => '🏆 Status',
                                 'value' => 'All player stats have been reset to 1000 ELO',
                                 'inline' => false
-                            ]
+                            ],
                         ],
                         'footer' => [
-                            'text' => 'StarCraft Fastest League'
+                            'text' => 'StarCraft Fastest League • Next season starts automatically in 3 months',
+                            'icon_url' => 'https://starcraftfastest.us/favicon.ico'
                         ]
                     ]
                 ]
