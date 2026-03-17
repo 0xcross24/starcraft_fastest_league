@@ -7,6 +7,8 @@ use App\Models\Season;
 use App\Models\User;
 use App\Models\Stats;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class StartNextSeason extends Command
 {
@@ -54,6 +56,76 @@ class StartNextSeason extends Command
         }
 
         $this->info("Season {$nextSeasonId} started. Previous season ended. Stats reset for all users and formats.");
+
+        // Send Discord webhook notification
+        $this->sendDiscordNotification($nextSeasonId);
+
         return 0;
+    }
+
+    /**
+     * Send Discord webhook notification for new season
+     */
+    private function sendDiscordNotification($seasonId)
+    {
+        try {
+            $webhookUrl = config('app.discord_webhook_url', env('DISCORD_WEBHOOK_URL'));
+
+            if (!$webhookUrl) {
+                $this->warn('Discord webhook URL not configured - skipping notification');
+                Log::warning('Discord webhook URL not configured - skipping notification');
+                return;
+            }
+
+            $response = Http::post($webhookUrl, [
+                'content' => '🚀 **New Season Started!** 🚀',
+                'embeds' => [
+                    [
+                        'title' => 'StarCraft Fastest League - New Season',
+                        'description' => "Season {$seasonId} has begun! Good luck to all players!",
+                        'color' => 0x00ff00, // Green color
+                        'timestamp' => now()->toISOString(),
+                        'fields' => [
+                            [
+                                'name' => '🎮 Season Number',
+                                'value' => "Season {$seasonId}",
+                                'inline' => true
+                            ],
+                            [
+                                'name' => '📅 Started At',
+                                'value' => now()->format('F j, Y \a\t g:i A T'),
+                                'inline' => true
+                            ],
+                            [
+                                'name' => '🏆 Status',
+                                'value' => 'All player stats have been reset to 1000 ELO',
+                                'inline' => false
+                            ]
+                        ],
+                        'footer' => [
+                            'text' => 'StarCraft Fastest League'
+                        ]
+                    ]
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $this->info('Discord notification sent successfully!');
+                Log::info('Discord webhook notification sent successfully', ['season_id' => $seasonId]);
+            } else {
+                $this->error('Failed to send Discord notification');
+                Log::error('Failed to send Discord webhook notification', [
+                    'season_id' => $seasonId,
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+            }
+        } catch (\Exception $e) {
+            $this->error('Exception while sending Discord notification: ' . $e->getMessage());
+            Log::error('Exception while sending Discord webhook notification', [
+                'season_id' => $seasonId,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

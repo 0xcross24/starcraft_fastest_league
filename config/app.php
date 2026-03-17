@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Discord Webhook Configuration
+    |--------------------------------------------------------------------------
+    |
+    | This URL is used to send Discord notifications for important events
+    | like new season starts. Set DISCORD_WEBHOOK_URL in your .env file.
+    |
+    */
+
+    'discord_webhook_url' => env('DISCORD_WEBHOOK_URL'),
+
 ];
