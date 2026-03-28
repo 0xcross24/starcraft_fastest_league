@@ -80,7 +80,6 @@
                 <div class="card-body">
                   <ul class="list-disc pl-5">
                     <li>Bad manner & toxicity will not be tolerated.</li>
-                    <li>All games will be mirror matchups (ex. PPP vs PPP, PPZ vs PPZ, PTZ vs PTZ).</li>
                     <li>Attempts at balancing teams should be kept honest amongst all included players unless teams are specified beforehand.</li>
                     <li>Minimum turn-rate 12 games.</li>
                     <li>If a player is disconnected due to lag or internet connection issues before 2 minutes, the game is voided.</li>
