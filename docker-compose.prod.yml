@@ -61,6 +61,20 @@ services:
     volumes:
       - redis_data:/data
 
+  # Laravel Scheduler
+  scheduler:
+    image: php:8.3-fpm
+    container_name: sfl_scheduler
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - app
+      - mysql
+      - redis
+    command: sh -c "while true; do php artisan schedule:run --no-ansi >> /dev/null 2>&1; sleep 60; done"
+    restart: unless-stopped
+
   # Meilisearch
   meilisearch:
     image: getmeili/meilisearch:latest
