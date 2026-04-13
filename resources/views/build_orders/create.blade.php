@@ -23,6 +23,7 @@
                                 <option value="Terran" {{ old('race') == 'Terran' ? 'selected' : '' }}>Terran</option>
                                 <option value="Protoss" {{ old('race') == 'Protoss' ? 'selected' : '' }}>Protoss</option>
                                 <option value="Zerg" {{ old('race') == 'Zerg' ? 'selected' : '' }}>Zerg</option>
+                                <option value="Pub" {{ old('race') == 'Pub' ? 'selected' : '' }}>Pub</option>
                             </select>
                             @error('race')<div class="text-red-600 text-xs">{{ $message }}</div>@enderror
                         </div>
