@@ -15,8 +15,10 @@ class BuildOrderController extends Controller
     {
         $race = $request->query('race');
         $query = BuildOrder::query();
-        if (in_array($race, ['Protoss', 'Terran', 'Zerg', 'Pub'])) {
+        if (in_array($race, ['Protoss', 'Terran', 'Zerg'])) {
             $query->where('race', $race);
+        } elseif ($race === 'Pub') {
+            $query->whereJsonContains('matchup', 'PUB');
         }
         $builds = $query->latest()->paginate(20);
         return view('build_orders.index', compact('builds', 'race'));
