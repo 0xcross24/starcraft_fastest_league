@@ -59,7 +59,7 @@ class ProfileController extends Controller
      */
     public function downloadMap($filename)
     {
-        $allowed = ['OP SFL-.scm', 'SFLClan.scm'];
+        $allowed = ['OP SFL-.scm', 'SFLClan.scm', 'WkClan  Styler 빠른무한(Ob).scm'];
         if (!in_array($filename, $allowed)) {
             abort(404);
         }

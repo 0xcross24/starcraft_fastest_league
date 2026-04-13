@@ -15,7 +15,7 @@ class BuildOrderController extends Controller
     {
         $race = $request->query('race');
         $query = BuildOrder::query();
-        if (in_array($race, ['Protoss', 'Terran', 'Zerg'])) {
+        if (in_array($race, ['Protoss', 'Terran', 'Zerg', 'Pub'])) {
             $query->where('race', $race);
         }
         $builds = $query->latest()->paginate(20);
