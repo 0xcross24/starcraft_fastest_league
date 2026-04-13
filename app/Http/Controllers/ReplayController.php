@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ReplayController extends Controller
 {
@@ -42,21 +44,19 @@ class ReplayController extends Controller
             return back()->with('error', 'Unexpected file type.');
         }
 
-
-        // Get current season for directory
-        $currentSeason = \App\Models\Season::where('is_active', 1)->first();
-        if (!$currentSeason) {
-            return back()->with('error', 'No active season found.');
-        }
-        $seasonDir = 'uploads/season_' . $currentSeason->id;
-        $fileName = time() . '.rep';
-        $fileRep = $request->file('file')->storeAs($seasonDir, $fileName, 'public');
-        $filePath = storage_path("app/public/$fileRep");
-
+        // Run screp on the original temp file before storing permanently
+        $tmpPath = $request->file('file')->getPathname();
         $scriptPath = '/var/www/html/screp';
-        exec("$scriptPath $filePath", $output, $return_var);
+        $command = escapeshellarg($scriptPath) . ' ' . escapeshellarg($tmpPath) . ' 2>&1';
+        exec($command, $output, $return_var);
 
         if ($return_var !== 0) {
+            Log::error('Replay parser execution failed', [
+                'command' => $command,
+                'return_code' => $return_var,
+                'output' => implode("\n", $output),
+                'tmp_path' => $tmpPath,
+            ]);
             return back()->with('error', 'Script execution failed.');
         }
 
@@ -76,12 +76,11 @@ class ReplayController extends Controller
             }
         }
 
-        // Enforce map name starts with 'OP SFL-' or 'SFLClan'
-
+        // Enforce exact map name match
         $mapName = $data['Header']['Map'] ?? '';
         $mapName = preg_replace('/[[:^print:]]/', '', $mapName); // Remove non-printable chars
-        if (!(str_starts_with($mapName, 'OP SFL-') || str_starts_with($mapName, 'SFLClan'))) {
-            return back()->with('error', 'Replay must be played on a map starting with OP SFL- or SFLClan.');
+        if (!in_array($mapName, ['OP SFL-', 'SFLClan', 'Clan Wk` Styler(Ob)'], true)) {
+            return back()->with('error', 'Replay must be played on OP SFL-, SFLClan, or Clan Wk` Styler(Ob) exactly. You can find the map in your Profile page');
         }
 
         // Generate stable fingerprint
@@ -91,6 +90,24 @@ class ReplayController extends Controller
         if (Replay::where('hash', $fingerprint)->exists()) {
             return back()->with('error', 'Replay already exists.');
         }
+
+        // All validation passed — now store the file permanently
+        $currentSeason = \App\Models\Season::where('is_active', 1)->first();
+        if (!$currentSeason) {
+            return back()->with('error', 'No active season found.');
+        }
+        $seasonDir = 'uploads/season_' . $currentSeason->id;
+        $fileName = time() . '.rep';
+        $fileRep = $request->file('file')->storeAs($seasonDir, $fileName, 'public');
+        if (!$fileRep) {
+            Log::error('Replay upload storage failed', [
+                'season_dir' => $seasonDir,
+                'file_name' => $fileName,
+                'disk' => 'public',
+            ]);
+            return back()->with('error', 'Failed to store uploaded replay file.');
+        }
+        $filePath = storage_path("app/public/$fileRep");
 
         // Prepare teams data
         $teams = ['Team1' => [], 'Team2' => []];
@@ -122,16 +139,23 @@ class ReplayController extends Controller
             ];
         }
 
-        return $this->store($teams, $filePath, $fingerprint, $fileName, $data);
+        return $this->store($teams, $filePath, $fingerprint, $fileName, $data, $fileRep);
     }
 
-    public function store($data, $filePath, $fingerprint, $fileName = null, $rawData = null)
+    public function store($data, $filePath, $fingerprint, $fileName = null, $rawData = null, $fileRep = null)
     {
+        $cleanup = function () use ($fileRep) {
+            if ($fileRep) {
+                Storage::disk('public')->delete($fileRep);
+            }
+        };
+
         $playerNames = [];
         $playersData = [];
         $uuid = Str::uuid()->toString();
         $currentSeason = Season::where('is_active', 1)->first();
         if (!$currentSeason) {
+            $cleanup();
             return back()->with('error', 'No active season found.');
         }
 
@@ -150,6 +174,7 @@ class ReplayController extends Controller
 
         $unregistered = array_diff($lowercaseNames, $registeredNames);
         if (!empty($unregistered)) {
+            $cleanup();
             return back()->with('error', 'Missing player(s): ' . implode(', ', $unregistered));
         }
 
@@ -169,6 +194,7 @@ class ReplayController extends Controller
 
         // Reject invalid team sizes
         if (!$format) {
+            $cleanup();
             return back()->with('error', 'Invalid replay: must be 2v2 or 3v3.');
         }
 
@@ -183,6 +209,7 @@ class ReplayController extends Controller
             }
         }
         if ($winnerTeam === null) {
+            $cleanup();
             return back()->with('error', 'Replay is a draw. Ignored.');
         }
 
@@ -191,6 +218,7 @@ class ReplayController extends Controller
         $frameRate = 24; // Brood War standard
         $gameSeconds = $frames / $frameRate;
         if ($gameSeconds < 125) { // 2 minutes 5 seconds
+            $cleanup();
             return back()->with('error', 'Game too short (<2:05). Ignored.');
         }
 
