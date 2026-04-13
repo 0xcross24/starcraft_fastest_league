@@ -24,6 +24,7 @@
                                 <option value="Terran" {{ old('race', $buildOrder->race) == 'Terran' ? 'selected' : '' }}>Terran</option>
                                 <option value="Protoss" {{ old('race', $buildOrder->race) == 'Protoss' ? 'selected' : '' }}>Protoss</option>
                                 <option value="Zerg" {{ old('race', $buildOrder->race) == 'Zerg' ? 'selected' : '' }}>Zerg</option>
+                                <option value="Pub" {{ old('race', $buildOrder->race) == 'Pub' ? 'selected' : '' }}>Pub</option>
                             </select>
                             @error('race')<div class="text-red-600 text-xs">{{ $message }}</div>@enderror
                         </div>

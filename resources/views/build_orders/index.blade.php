@@ -19,6 +19,7 @@
                         <a href="{{ route('builds.index', ['race' => 'Protoss']) }}" class="px-3 py-1 rounded {{ (isset($race) && $race === 'Protoss') ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' }}">Protoss</a>
                         <a href="{{ route('builds.index', ['race' => 'Terran']) }}" class="px-3 py-1 rounded {{ (isset($race) && $race === 'Terran') ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' }}">Terran</a>
                         <a href="{{ route('builds.index', ['race' => 'Zerg']) }}" class="px-3 py-1 rounded {{ (isset($race) && $race === 'Zerg') ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' }}">Zerg</a>
+                        <a href="{{ route('builds.index', ['race' => 'Pub']) }}" class="px-3 py-1 rounded {{ (isset($race) && $race === 'Pub') ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100' }}">Pub</a>
                     </div>
                     @if($builds->isEmpty())
                     <p>No build orders found.</p>
