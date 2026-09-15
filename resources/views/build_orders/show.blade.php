@@ -30,10 +30,10 @@
                             </div>
                         </div>
                         <div>
-                            @if($buildOrder->youtube_url)
+                            @if($buildOrder->youtube_embed_id)
                             <div class="mb-2"><span class="font-semibold">YouTube Video:</span></div>
                             <div class="w-full p-0 mb-2">
-                                <iframe id="video" class="w-full h-[600px]" src="https://www.youtube.com/embed/{{ $buildOrder->youtube_url }}" frameborder="0" allowfullscreen></iframe>
+                                <iframe id="video" class="w-full h-[600px]" src="https://www.youtube.com/embed/{{ $buildOrder->youtube_embed_id }}" frameborder="0" allowfullscreen></iframe>
                             </div>
                             @endif
                         </div>
