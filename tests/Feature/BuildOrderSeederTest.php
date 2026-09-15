@@ -19,7 +19,7 @@ class BuildOrderSeederTest extends TestCase
 
         $this->assertSame('Protoss', $build->race);
         $this->assertSame(['PUB'], $build->matchup);
-        $this->assertStringContainsString('6 Pylon', $build->steps);
+        $this->assertStringContainsString('7 Pylon', $build->steps);
         $this->assertStringContainsString('Templar Archive', $build->steps);
     }
 

@@ -33,7 +33,7 @@ class BuildOrderSeeder extends Seeder
                 'matchup' => ['PUB'],
                 'description' => 'Every time you make 3 Zealots, make 1 Pylon.',
                 'steps' => <<<'STEPS'
-                    6 Pylon
+                    7 Pylon
                     9 Gateway
                     11 Gateway
                     11 Gateway
