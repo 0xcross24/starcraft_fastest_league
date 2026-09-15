@@ -1,10 +1,9 @@
-version: "3.8"
-
 services:
   # Laravel app
   app:
     image: php:8.3-fpm
     container_name: sfl_app
+    restart: unless-stopped
     working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
@@ -28,6 +27,7 @@ services:
   web:
     image: nginx:1.25
     container_name: sfl_nginx
+    restart: unless-stopped
     ports:
       - "81:80"
       - "443:443"
@@ -50,14 +50,14 @@ services:
     volumes:
       - sfl_mysql:/var/lib/mysql
     ports:
-      - "3307:3306"
+      # Loopback-only: reachable via SSH tunnel, not from the public internet.
+      - "127.0.0.1:3307:3306"
 
   # Redis
   redis:
     image: redis:7-alpine
     container_name: laravel_redis
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
     volumes:
       - redis_data:/data
 
@@ -79,10 +79,9 @@ services:
   meilisearch:
     image: getmeili/meilisearch:latest
     container_name: laravel_meilisearch
+    restart: unless-stopped
     environment:
       MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY}
-    ports:
-      - "7700:7700"
     volumes:
       - meili_data:/meili_data
 
