@@ -49,6 +49,14 @@ jobs:
           cd "$APP_DIR"
           $COMPOSE run --rm --no-deps app php artisan migrate --force
 
+      - name: Seed build orders
+        run: |
+          cd "$APP_DIR"
+          # Safe to repeat: the seeder only owns rows carrying a seed_key, it
+          # never overwrites admin edits, and soft-deleted builds stay deleted.
+          $COMPOSE run --rm --no-deps app \
+            php artisan db:seed --class=BuildOrderSeeder --force
+
       - name: Restart services
         run: |
           cd "$APP_DIR"
