@@ -12,6 +12,7 @@ class BuildOrder extends Model
     protected $table = 'build_orders';
     protected $fillable = [
         'seed_key',
+        'seed_hash',
         'title',
         'description',
         'race',
