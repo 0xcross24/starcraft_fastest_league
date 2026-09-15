@@ -31,5 +31,10 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Generate an application key
+        # Generated per run rather than committed, so the repository never
+        # carries a credential-shaped literal for secret scanners to flag.
+        run: echo "APP_KEY=base64:$(head -c 32 /dev/urandom | base64)" >> "$GITHUB_ENV"
+
       - name: Run tests
         run: vendor/bin/phpunit

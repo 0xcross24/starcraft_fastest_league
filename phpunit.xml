@@ -19,8 +19,6 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
-        <!-- Throwaway key so the suite runs without a .env, e.g. on CI. -->
-        <env name="APP_KEY" value="base64:oRSTrG4aRpV80uS6Au1RrEkcXn4YlhYCfXueldPaDQU="/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
