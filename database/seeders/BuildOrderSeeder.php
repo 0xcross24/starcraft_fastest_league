@@ -8,26 +8,44 @@ use Illuminate\Database\Seeder;
 class BuildOrderSeeder extends Seeder
 {
     /**
-     * Uses firstOrCreate rather than updateOrCreate so that re-running this to
-     * add new builds never overwrites edits made through the admin UI.
+     * Runs on every deploy, so it has to be safe to repeat.
+     *
+     * It owns only the rows carrying a seed_key. Builds created by hand in the
+     * admin UI have a null seed_key and are never touched.
+     *
+     * Within the rows it owns:
+     *  - a build that is missing is created
+     *  - a build that already exists is left alone, so admin edits survive
+     *  - a build that was deleted stays deleted, because soft deletes leave a
+     *    row behind for this to find
+     *  - a build removed from builds() below is deleted
      */
     public function run(): void
     {
-        foreach ($this->builds() as $build) {
-            BuildOrder::firstOrCreate(
-                [
-                    'title' => $build['title'],
-                    'race' => $build['race'],
-                ],
-                $build
-            );
+        $builds = $this->builds();
+
+        foreach ($builds as $build) {
+            $alreadyHandled = BuildOrder::withTrashed()
+                ->where('seed_key', $build['seed_key'])
+                ->exists();
+
+            if ($alreadyHandled) {
+                continue;
+            }
+
+            BuildOrder::create($build);
         }
+
+        BuildOrder::whereNotNull('seed_key')
+            ->whereNotIn('seed_key', array_column($builds, 'seed_key'))
+            ->delete();
     }
 
     private function builds(): array
     {
         return [
             [
+                'seed_key' => 'protoss-storm-drop-pub',
                 'title' => 'Protoss Storm Drop Build',
                 'race' => 'Protoss',
                 'matchup' => ['PUB'],
