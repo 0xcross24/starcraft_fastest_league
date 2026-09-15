@@ -46,7 +46,7 @@ class ReplayController extends Controller
 
         // Run screp on the original temp file before storing permanently
         $tmpPath = $request->file('file')->getPathname();
-        $scriptPath = '/var/www/html/screp';
+        $scriptPath = base_path('screp');
         $command = escapeshellarg($scriptPath) . ' ' . escapeshellarg($tmpPath) . ' 2>&1';
         exec($command, $output, $return_var);
 
