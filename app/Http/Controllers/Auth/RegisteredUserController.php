@@ -10,6 +10,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -37,30 +38,35 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
-            'player_name' => $request->player_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
         $currentSeason = Season::where('is_active', 1)->first();
 
         if (!$currentSeason) {
-            return redirect()->back()->with('error', 'No active season found. Please activate a season.');
+            return redirect()->back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->with('error', 'No active season found. Please activate a season.');
         }
 
-
-        // Create stats for both 2v2 and 3v3
-        foreach (['2v2', '3v3'] as $format) {
-            Stats::create([
-                'user_id' => $user->id,
-                'wins' => 0,
-                'losses' => 0,
-                'elo' => 1000,
-                'season_id' => $currentSeason->id,
-                'format' => $format,
+        $user = DB::transaction(function () use ($request, $currentSeason) {
+            $user = User::create([
+                'player_name' => $request->player_name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
             ]);
-        }
+
+            // Create stats for both 2v2 and 3v3
+            foreach (['2v2', '3v3'] as $format) {
+                Stats::create([
+                    'user_id' => $user->id,
+                    'wins' => 0,
+                    'losses' => 0,
+                    'elo' => 1000,
+                    'season_id' => $currentSeason->id,
+                    'format' => $format,
+                ]);
+            }
+
+            return $user;
+        });
 
         event(new Registered($user));
 
