@@ -24,7 +24,6 @@ Route::get('/player/{user}', [ReplayController::class, 'displayPlayer'])
 Route::middleware('auth')->group(function () {
   Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
   Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-  Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
   Route::get('/profile/maps/download/{filename}', [ProfileController::class, 'downloadMap'])->where('filename', 'OP SFL-\\.scm|SFLClan\\.scm|WkClan  Styler 빠른무한\(Ob\)\\.scm')->name('maps.download');
 });
 
