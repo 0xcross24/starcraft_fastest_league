@@ -1,9 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,8 +9,15 @@ return new class extends Migration
      */
     public function up()
     {
-        // Set all Elo ratings to 1000
-        DB::table('stats')->update(['elo' => 1000]);
+        // Historical one-off. This reset every stats row to elo 1000 when it
+        // was written, and has already run everywhere it applies.
+        //
+        // It is neutered in place rather than renamed or deleted. The
+        // migrations table records it under this exact filename, so renaming
+        // it would make Laravel treat it as a new migration and wipe every
+        // player's rating. Deleting it would break `migrate:rollback` of that
+        // batch. The stats table already defaults elo to 1000, so a fresh
+        // install loses nothing by this doing nothing.
     }
 
     /**
