@@ -1,7 +1,8 @@
 services:
   # Laravel app
   app:
-    image: php:8.3-fpm
+    build: .
+    image: sfl_app:latest
     container_name: sfl_app
     restart: unless-stopped
     working_dir: /var/www/html
@@ -63,7 +64,7 @@ services:
 
   # Laravel Scheduler
   scheduler:
-    image: php:8.3-fpm
+    image: sfl_app:latest
     container_name: sfl_scheduler
     working_dir: /var/www/html
     volumes:
