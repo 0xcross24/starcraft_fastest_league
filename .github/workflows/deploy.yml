@@ -9,14 +9,61 @@ jobs:
   deploy:
     runs-on: self-hosted
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    env:
+      APP_DIR: /srv/starcraft_fastest_league
+      COMPOSE: docker compose -f /srv/starcraft_fastest_league/docker-compose.prod.yml
 
+    steps:
       - name: Pull latest changes
         run: |
-          cd /srv/starcraft_fastest_league
+          cd "$APP_DIR"
           git reset --hard
           git clean -fd
           git pull origin main
 
+      - name: Build the application image
+        run: |
+          cd "$APP_DIR"
+          $COMPOSE build app
+
+      - name: Install PHP dependencies
+        run: |
+          cd "$APP_DIR"
+          # Runs in a throwaway container so the site keeps serving the old
+          # code until the new vendor tree is complete.
+          $COMPOSE run --rm --no-deps app \
+            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Clear stale bootstrap caches
+        run: |
+          cd "$APP_DIR"
+          # bootstrap/cache is gitignored, so git clean never removes it. A
+          # manifest left over from a previous dependency set will name
+          # providers that no longer exist and every request fails before
+          # routing. Composer's package:discover rewrites it, but clear it
+          # explicitly so a failed install cannot leave a stale one behind.
+          $COMPOSE run --rm --no-deps app sh -c 'rm -f bootstrap/cache/*.php'
+
+      - name: Apply database migrations
+        run: |
+          cd "$APP_DIR"
+          $COMPOSE run --rm --no-deps app php artisan migrate --force
+
+      - name: Restart services
+        run: |
+          cd "$APP_DIR"
+          $COMPOSE up -d
+
+      - name: Verify the site responds
+        run: |
+          for i in $(seq 1 10); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://starcraftfastest.us/ || echo 000)
+            if [ "$code" = "200" ]; then
+              echo "Site healthy (HTTP $code)"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $code, retrying..."
+            sleep 5
+          done
+          echo "Site did not return 200 after deploy"
+          exit 1
