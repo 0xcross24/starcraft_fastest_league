@@ -28,7 +28,7 @@ class BuildOrderSeeder extends Seeder
     {
         return [
             [
-                'title' => '3 Gate Zealot into Robo + Templar',
+                'title' => 'Protoss Storm Drop Build',
                 'race' => 'Protoss',
                 'matchup' => ['PUB'],
                 'description' => 'Every time you make 3 Zealots, make 1 Pylon.',

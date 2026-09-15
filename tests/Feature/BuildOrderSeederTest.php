@@ -15,7 +15,7 @@ class BuildOrderSeederTest extends TestCase
     {
         $this->seed(BuildOrderSeeder::class);
 
-        $build = BuildOrder::where('title', '3 Gate Zealot into Robo + Templar')->firstOrFail();
+        $build = BuildOrder::where('title', 'Protoss Storm Drop Build')->firstOrFail();
 
         $this->assertSame('Protoss', $build->race);
         $this->assertSame(['PUB'], $build->matchup);
@@ -28,14 +28,14 @@ class BuildOrderSeederTest extends TestCase
         $this->seed(BuildOrderSeeder::class);
         $this->seed(BuildOrderSeeder::class);
 
-        $this->assertSame(1, BuildOrder::where('title', '3 Gate Zealot into Robo + Templar')->count());
+        $this->assertSame(1, BuildOrder::where('title', 'Protoss Storm Drop Build')->count());
     }
 
     public function test_running_it_again_preserves_edits_made_in_the_admin_ui(): void
     {
         $this->seed(BuildOrderSeeder::class);
 
-        $build = BuildOrder::where('title', '3 Gate Zealot into Robo + Templar')->firstOrFail();
+        $build = BuildOrder::where('title', 'Protoss Storm Drop Build')->firstOrFail();
         $build->update([
             'steps' => 'Edited by an admin',
             'description' => 'Edited description',
@@ -57,6 +57,6 @@ class BuildOrderSeederTest extends TestCase
 
         $this->get(route('builds.index', ['race' => 'Pub']))
             ->assertOk()
-            ->assertSee('3 Gate Zealot into Robo + Templar');
+            ->assertSee('Protoss Storm Drop Build');
     }
 }
