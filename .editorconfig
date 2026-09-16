@@ -1,0 +1,29 @@
+# .editorconfig - Laravel + JS/React conventions
+
+root = true
+
+# Default settings
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# PHP, Blade, JSON, YAML → 4 spaces
+[*.{php,blade.php,json,yml,yaml}]
+indent_style = space
+indent_size = 4
+
+# JavaScript, JSX, TS, Vue → 2 spaces
+[*.{js,jsx,ts,tsx,vue}]
+indent_style = space
+indent_size = 2
+
+# CSS, SCSS → 2 spaces
+[*.{css,scss}]
+indent_style = space
+indent_size = 2
+
+# Markdown → don’t strip trailing spaces (important for line breaks)
+[*.md]
+trim_trailing_whitespace = false

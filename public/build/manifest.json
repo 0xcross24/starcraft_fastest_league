@@ -1,13 +1,19 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-D3NNvhPU.css",
+    "file": "assets/app-BKfza7Xi.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DQNOlDuK.js",
+    "file": "assets/app-D5qVXB0C.js",
     "name": "app",
     "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/search/RankSearch.jsx": {
+    "file": "assets/RankSearch-D0xuBZHm.js",
+    "name": "RankSearch",
+    "src": "resources/js/search/RankSearch.jsx",
     "isEntry": true
   }
 }

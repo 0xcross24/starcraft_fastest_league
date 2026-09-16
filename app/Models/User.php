@@ -61,9 +61,12 @@ class User extends Authenticatable
     public function toSearchableArray()
     {
         return [
-            'id' => $this->id,
+            'objectID'    => $this->id,
             'player_name' => $this->player_name,
-            'email' => $this->email,
+            'email'       => $this->email,
+            'rank'        =>  '',
+            'elo'         =>  '',
+            'record'      =>  ''
         ];
     }
 }
