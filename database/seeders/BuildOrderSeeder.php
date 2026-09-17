@@ -26,14 +26,21 @@ class BuildOrderSeeder extends Seeder
     public function run(): void
     {
         $builds = $this->builds();
+        $written = [];
 
         foreach ($builds as $build) {
+            $fields = $this->fieldsOf($build);
+
             $existing = BuildOrder::withTrashed()
                 ->where('seed_key', $build['seed_key'])
                 ->first();
 
             if (! $existing) {
-                BuildOrder::create($build + ['seed_hash' => self::hashFor($build)]);
+                BuildOrder::create($fields + [
+                    'seed_key' => $build['seed_key'],
+                    'seed_hash' => self::hashFor($build),
+                ]);
+                $written[] = $build['seed_key'];
                 continue;
             }
 
@@ -48,12 +55,56 @@ class BuildOrderSeeder extends Seeder
                 continue;
             }
 
-            $existing->update($build + ['seed_hash' => self::hashFor($build)]);
+            $existing->update($fields + ['seed_hash' => self::hashFor($build)]);
+            $written[] = $build['seed_key'];
         }
+
+        // Parents are linked in a second pass so a build may be listed before
+        // the one it continues from. Only rows this run wrote are touched, so
+        // a build re-parented in the admin UI keeps that parent.
+        $this->linkParents($builds, $written);
 
         BuildOrder::whereNotNull('seed_key')
             ->whereNotIn('seed_key', array_column($builds, 'seed_key'))
             ->delete();
+    }
+
+    private function linkParents(array $builds, array $written): void
+    {
+        if ($written === []) {
+            return;
+        }
+
+        $idsByKey = BuildOrder::whereNotNull('seed_key')->pluck('id', 'seed_key');
+
+        foreach ($builds as $build) {
+            if (! in_array($build['seed_key'], $written, true)) {
+                continue;
+            }
+
+            $parentKey = $build['parent_seed_key'] ?? null;
+
+            BuildOrder::where('seed_key', $build['seed_key'])->update([
+                'parent_id' => $parentKey === null ? null : ($idsByKey[$parentKey] ?? null),
+            ]);
+        }
+    }
+
+    /**
+     * The columns the seeder writes, separated from its own bookkeeping keys.
+     */
+    private function fieldsOf(array $build): array
+    {
+        return [
+            'title' => $build['title'],
+            'race' => $build['race'],
+            'matchup' => $build['matchup'],
+            'description' => $build['description'] ?? null,
+            'steps' => $build['steps'],
+            'youtube_url' => $build['youtube_url'] ?? null,
+            'phase' => $build['phase'] ?? null,
+            'position' => $build['position'] ?? 0,
+        ];
     }
 
     /**
@@ -68,6 +119,9 @@ class BuildOrderSeeder extends Seeder
             $build['description'] ?? null,
             $build['steps'],
             $build['youtube_url'] ?? null,
+            $build['phase'] ?? null,
+            $build['position'] ?? 0,
+            $build['parent_seed_key'] ?? null,
         ]));
     }
 
@@ -80,10 +134,15 @@ class BuildOrderSeeder extends Seeder
             'description' => $build->description,
             'steps' => $build->steps,
             'youtube_url' => $build->youtube_url,
+            'phase' => $build->phase,
+            'position' => $build->position,
+            // Re-parenting in the admin UI changes this, which is what makes
+            // such a build read as edited and stops the seeder overwriting it.
+            'parent_seed_key' => $build->parent?->seed_key,
         ]);
     }
 
-    private function builds(): array
+    protected function builds(): array
     {
         return [
             [
