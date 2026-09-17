@@ -29,6 +29,21 @@ class BuildOrderSeederTest extends TestCase
         $this->assertSame('https://youtu.be/uJ_-qEyE3es', $build->youtube_url);
     }
 
+    public function test_it_seeds_the_terran_opener(): void
+    {
+        $this->seed(BuildOrderSeeder::class);
+
+        $build = BuildOrder::where('seed_key', 'terran-3rax-15gas-academy')->firstOrFail();
+
+        $this->assertSame('3 Rax 15 Gas Academy', $build->title);
+        $this->assertSame('Terran', $build->race);
+        $this->assertSame(['PUB'], $build->matchup);
+        $this->assertSame('Opener', $build->phase);
+        $this->assertStringContainsString('8 Depot', $build->steps);
+        $this->assertStringContainsString('100% Academy - 3 medics', $build->steps);
+        $this->assertNull($build->parent_id);
+    }
+
     public function test_running_it_again_does_not_duplicate(): void
     {
         $this->seed(BuildOrderSeeder::class);
@@ -55,7 +70,7 @@ class BuildOrderSeederTest extends TestCase
         $this->assertSame('Renamed by an admin', $build->title);
         $this->assertSame('Edited by an admin', $build->steps);
         $this->assertSame('https://example.com/vod', $build->youtube_url);
-        $this->assertSame(1, BuildOrder::count());
+        $this->assertSame(1, BuildOrder::where('seed_key', self::KEY)->count());
     }
 
     public function test_an_unedited_build_is_updated_to_match_the_seeder(): void
@@ -89,7 +104,7 @@ class BuildOrderSeederTest extends TestCase
 
         $this->assertSame('3 gate forge Storm Drop build', $build->description);
         $this->assertStringContainsString('7 Pylon', $build->steps);
-        $this->assertSame(1, BuildOrder::count());
+        $this->assertSame(1, BuildOrder::where('seed_key', self::KEY)->count());
     }
 
     public function test_a_build_seeded_before_hashes_were_recorded_is_adopted(): void
@@ -133,14 +148,14 @@ class BuildOrderSeederTest extends TestCase
 
         $this->seed(BuildOrderSeeder::class);
 
-        $this->assertSame(0, BuildOrder::count());
-        $this->assertSame(1, BuildOrder::withTrashed()->count());
+        $this->assertSame(0, BuildOrder::where('seed_key', self::KEY)->count());
+        $this->assertSame(1, BuildOrder::withTrashed()->where('seed_key', self::KEY)->count());
     }
 
     public function test_a_build_removed_from_the_seeder_is_deleted(): void
     {
         $this->seed(BuildOrderSeeder::class);
-        $this->assertSame(1, BuildOrder::count());
+        $this->assertSame(1, BuildOrder::where('seed_key', self::KEY)->count());
 
         // Stands in for a build being taken out of the seeder's list.
         BuildOrder::where('seed_key', self::KEY)->update(['seed_key' => 'retired-build']);

@@ -177,6 +177,25 @@ class BuildOrderSeeder extends Seeder
                     Around ~5:00 you want to have your choke blocked with 2-3 Cannons + 4th Gateway
                     STEPS,
             ],
+            [
+                'seed_key' => 'terran-3rax-15gas-academy',
+                'title' => '3 Rax 15 Gas Academy',
+                'race' => 'Terran',
+                'matchup' => ['PUB'],
+                'phase' => 'Opener',
+                'description' => 'Three barracks into gas and Academy',
+                'steps' => <<<'STEPS'
+                    8 Depot
+                    9 Barracks
+                    10 Barracks
+                    12 Barracks
+                    14 Depot
+                    15 Gas
+
+                    100% Gas - Academy
+                    100% Academy - 3 medics
+                    STEPS,
+            ],
         ];
     }
 }
