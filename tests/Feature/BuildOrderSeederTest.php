@@ -180,6 +180,69 @@ class BuildOrderSeederTest extends TestCase
             ->assertDontSee(self::TITLE);
     }
 
+    public function test_a_seeded_build_can_declare_its_parent_by_seed_key(): void
+    {
+        $seeder = new class extends BuildOrderSeeder {
+            protected function builds(): array
+            {
+                return [
+                    // Child listed first, to prove order in the file does not matter.
+                    [
+                        'seed_key' => 'child',
+                        'parent_seed_key' => 'parent',
+                        'title' => 'A transition',
+                        'race' => 'Terran',
+                        'matchup' => ['TvP'],
+                        'steps' => 'x',
+                        'phase' => 'Mid game',
+                    ],
+                    [
+                        'seed_key' => 'parent',
+                        'title' => 'An opener',
+                        'race' => 'Terran',
+                        'matchup' => ['TvP'],
+                        'steps' => 'y',
+                    ],
+                ];
+            }
+        };
+
+        $seeder->run();
+
+        $parent = BuildOrder::where('seed_key', 'parent')->firstOrFail();
+        $child = BuildOrder::where('seed_key', 'child')->firstOrFail();
+
+        $this->assertSame($parent->id, $child->parent_id);
+        $this->assertSame('Mid game', $child->phase);
+        $this->assertNull($parent->parent_id);
+        $this->assertSame(['A transition'], $parent->transitions()->pluck('title')->all());
+    }
+
+    public function test_re_parenting_in_the_admin_ui_survives_reseeding(): void
+    {
+        $seeder = new class extends BuildOrderSeeder {
+            protected function builds(): array
+            {
+                return [
+                    ['seed_key' => 'a', 'title' => 'A', 'race' => 'Terran', 'matchup' => ['TvP'], 'steps' => 'x'],
+                    ['seed_key' => 'b', 'title' => 'B', 'race' => 'Terran', 'matchup' => ['TvP'], 'steps' => 'y'],
+                ];
+            }
+        };
+
+        $seeder->run();
+
+        $a = BuildOrder::where('seed_key', 'a')->firstOrFail();
+        $b = BuildOrder::where('seed_key', 'b')->firstOrFail();
+
+        // An admin makes B continue from A.
+        $b->update(['parent_id' => $a->id]);
+
+        $seeder->run();
+
+        $this->assertSame($a->id, $b->fresh()->parent_id);
+    }
+
     public function test_seeded_builds_appear_under_the_pub_filter(): void
     {
         $this->seed(BuildOrderSeeder::class);

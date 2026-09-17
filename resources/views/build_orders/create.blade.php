@@ -11,6 +11,7 @@
                             <input type="text" name="title" id="title" class="w-full border rounded px-3 py-2 text-gray-900" value="{{ old('title') }}" required>
                             @error('title')<div class="text-red-600 text-xs">{{ $message }}</div>@enderror
                         </div>
+                        @include('build_orders.partials.branching', ['parents' => $parents, 'phases' => $phases])
                         <div>
                             <label for="youtube_url" class="block font-semibold font-nav">YouTube Link (optional)</label>
                             <input type="string" name="youtube_url" id="youtube_url" class="w-full border rounded px-3 py-2 text-gray-900" value="{{ old('youtube_url') }}" placeholder="https://www.youtube.com/watch?v=...">
