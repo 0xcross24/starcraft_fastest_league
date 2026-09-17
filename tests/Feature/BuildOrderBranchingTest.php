@@ -107,6 +107,16 @@ class BuildOrderBranchingTest extends TestCase
         $this->assertSame(['Mid', 'Opener'], $late->ancestors()->pluck('title')->all());
     }
 
+    public function test_an_opener_still_gets_a_breadcrumb_back_to_the_listing(): void
+    {
+        $opener = $this->build(['title' => '3 Rax 15 Gas Academy']);
+
+        $this->get(route('builds.show', $opener->id))
+            ->assertOk()
+            ->assertSee('Breadcrumb')
+            ->assertSeeInOrder(['Build Orders', '3 Rax 15 Gas Academy']);
+    }
+
     public function test_a_deep_transition_shows_its_whole_trail(): void
     {
         $opener = $this->build(['title' => '1 Gate Core Expand']);

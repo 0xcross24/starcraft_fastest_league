@@ -6,17 +6,17 @@
                     @if(session('error'))
                     <div class="mb-4 px-4 py-3 rounded bg-red-100 text-red-600 dark:bg-gray-700">{{ session('error') }}</div>
                     @endif
-                    @if($trail->isNotEmpty())
+                    {{-- Shown on every build, not only transitions: an opener
+                         otherwise has no way back to the listing. --}}
                     <nav aria-label="Breadcrumb" class="mb-4 flex flex-wrap items-center gap-2 text-sm font-nav">
-                        <a href="{{ route('builds.index') }}" class="text-gray-500 dark:text-gray-400 hover:underline">Build Orders</a>
+                        <a href="{{ route('builds.index') }}" class="text-blue-600 dark:text-gray-300">Build Orders</a>
                         @foreach($trail as $ancestor)
                         <span class="text-gray-400 dark:text-gray-600">&rsaquo;</span>
-                        <a href="{{ route('builds.show', ['id' => $ancestor->id]) }}" class="text-blue-600 dark:text-gray-200 hover:underline">{{ $ancestor->title }}</a>
+                        <a href="{{ route('builds.show', ['id' => $ancestor->id]) }}" class="text-blue-600 dark:text-gray-300">{{ $ancestor->title }}</a>
                         @endforeach
                         <span class="text-gray-400 dark:text-gray-600">&rsaquo;</span>
                         <span class="text-gray-700 dark:text-gray-200">{{ $buildOrder->title }}</span>
                     </nav>
-                    @endif
                     <div class="flex items-center justify-between mb-6">
                         <h1 class="text-3xl font-bold font-logo m-0">{{ $buildOrder->title }}</h1>
                         @auth
