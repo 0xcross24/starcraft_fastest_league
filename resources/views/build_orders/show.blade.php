@@ -71,10 +71,7 @@
                     </div>
                     <div class="mb-6">
                         <div class="font-semibold mb-1">Steps:</div>
-                        {{-- Safe to print unescaped: steps_html escapes every line before adding markup. --}}
-                        {{-- Styling the generated tags here, not in the model: Tailwind scans
-                             Blade files only, so classes named in app/ get dropped from the build. --}}
-                        <div class="rounded space-y-3 [&_p]:whitespace-pre-line [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">{!! $buildOrder->steps_html !!}</div>
+                        <span class="rounded whitespace-pre-line">{{ $buildOrder->steps }}</span>
                     </div>
                     @if($buildOrder->transitions->isNotEmpty())
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
