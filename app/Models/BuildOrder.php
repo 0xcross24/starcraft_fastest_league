@@ -26,6 +26,7 @@ class BuildOrder extends Model
     protected $fillable = [
         'seed_key',
         'seed_hash',
+        'seed_version',
         'parent_id',
         'title',
         'description',
