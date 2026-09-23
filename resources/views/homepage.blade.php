@@ -16,7 +16,7 @@
             </tr>
           </thead>
           <tbody class="text-gray-900 dark:text-gray-100">
-            @php $eloService = app('App\\Services\\EloService'); $rankNum = 1; @endphp
+            @php $rankNum = 1; @endphp
             @foreach($top2v2 as $stat)
             <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <td class="border border-gray-300 text-center px-2 py-1">{{ $rankNum++ }}</td>
@@ -30,8 +30,7 @@
                 @endif
               </td>
               <td class="border border-gray-300 text-center px-2 py-1">{{ $stat->elo ?? 'N/A' }}</td>
-              @php $grade = $eloService->getEloGrade($stat->elo ?? 0); $color = $eloService->getGradeColorClass($grade); @endphp
-              <td class="border border-gray-300 text-center px-2 py-1"><span class="font-bold {{ $grade === 'S' ? 'text-neonGold' : $color }}">{{ $grade }}</span></td>
+              <td class="border border-gray-300 text-center px-2 py-1"><x-elo-grade :elo="$stat->elo ?? 0" /></td>
               <td class="border border-gray-300 text-center px-2 py-1">{{ $stat->wins ?? 0 }} - {{ $stat->losses ?? 0 }}</td>
             </tr>
             @endforeach
@@ -62,7 +61,7 @@
             </tr>
           </thead>
           <tbody class="text-gray-900 dark:text-gray-100">
-            @php $eloService = app('App\\Services\\EloService'); $rankNum = 1; @endphp
+            @php $rankNum = 1; @endphp
             @foreach($top3v3 as $stat)
             <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <td class="border border-gray-300 text-center px-2 py-1">{{ $rankNum++ }}</td>
@@ -76,8 +75,7 @@
                 @endif
               </td>
               <td class="border border-gray-300 text-center px-2 py-1">{{ $stat->elo ?? 'N/A' }}</td>
-              @php $grade = $eloService->getEloGrade($stat->elo ?? 0); $color = $eloService->getGradeColorClass($grade); @endphp
-              <td class="border border-gray-300 text-center px-2 py-1"><span class="font-bold {{ $grade === 'S' ? 'text-neonGold' : $color }}">{{ $grade }}</span></td>
+              <td class="border border-gray-300 text-center px-2 py-1"><x-elo-grade :elo="$stat->elo ?? 0" /></td>
               <td class="border border-gray-300 text-center px-2 py-1">{{ $stat->wins ?? 0 }} - {{ $stat->losses ?? 0 }}</td>
             </tr>
             @endforeach
