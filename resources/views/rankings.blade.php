@@ -76,13 +76,7 @@
                           @endif
                         </td>
                         <td class="border border-gray-300 text-center px-4 py-2">
-                          @php
-                          $eloService = app('App\\Services\\EloService');
-                          $elo = $stat->elo ?? 0;
-                          $grade = $eloService->getEloGrade($elo);
-                          $color = $eloService->getGradeColorClass($grade);
-                          @endphp
-                          <span class="font-bold {{ $grade === 'S' ? 'text-neonGold' : $color }}">{{ $grade }}</span>
+                          <x-elo-grade :elo="$stat->elo ?? 0" />
                         </td>
                         <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->elo ?? 'N/A' }}</td>
                         <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->wins ?? 'N/A' }} - {{ $stat->losses ?? 'N/A' }}</td>

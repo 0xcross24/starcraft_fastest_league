@@ -53,14 +53,7 @@
                             </div>
                             <div>
                                 <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Grade</div>
-                                @php
-                                $eloService = app('App\\Services\\EloService');
-                                $grade = $eloService->getEloGrade($stats->elo ?? 0);
-                                $color = $eloService->getGradeColorClass($grade);
-                                @endphp
-                                <div class="text-lg font-semibold mt-1 {{ $grade === 'S' ? 'text-neonGold' : $color }}">
-                                    {{ $grade }}
-                                </div>
+                                <x-elo-grade :elo="$stats->elo ?? 0" class="text-lg font-semibold mt-1 block" />
                             </div>
                             <div>
                                 <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Won</div>
