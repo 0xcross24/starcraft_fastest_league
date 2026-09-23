@@ -12,6 +12,7 @@ jobs:
     env:
       APP_DIR: /srv/starcraft_fastest_league
       COMPOSE: docker compose -f /srv/starcraft_fastest_league/docker-compose.prod.yml
+      APP_IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Pull latest changes
@@ -25,6 +26,9 @@ jobs:
         run: |
           cd "$APP_DIR"
           $COMPOSE build app
+          # Keep :latest pointing at this build so a manual `docker compose up`
+          # without APP_IMAGE_TAG still resolves to a real image.
+          docker tag "sfl_app:${APP_IMAGE_TAG}" sfl_app:latest
 
       - name: Install PHP dependencies
         run: |
@@ -62,6 +66,18 @@ jobs:
           cd "$APP_DIR"
           $COMPOSE up -d
 
+      - name: Reload nginx so it re-resolves the app container
+        run: |
+          cd "$APP_DIR"
+          # `up -d` recreates app (and scheduler, which shares the image) and
+          # they can come back on different IPs. nginx resolves its FastCGI
+          # upstream once at startup, so without this it keeps dialling the old
+          # address and every request 502s. The resolver directive in
+          # nginx/conf.d/default.conf handles this at runtime; the reload makes
+          # the switch immediate and covers the case where that config is ever
+          # reverted.
+          $COMPOSE exec -T web nginx -s reload || $COMPOSE restart web
+
       - name: Verify the site responds
         run: |
           for i in $(seq 1 10); do
@@ -75,3 +91,15 @@ jobs:
           done
           echo "Site did not return 200 after deploy"
           exit 1
+
+      - name: Notify on deploy failure
+        if: failure()
+        run: |
+          WEBHOOK="${{ secrets.DISCORD_WEBHOOK }}"
+          if [ -z "$WEBHOOK" ]; then
+            echo "DISCORD_WEBHOOK secret not set - skipping notification"
+            exit 0
+          fi
+          curl -sS -m 15 -H "Content-Type: application/json" -X POST \
+            -d "{\"content\":\":rotating_light: Deploy FAILED - ${GITHUB_REPOSITORY} @ ${GITHUB_SHA} on ${GITHUB_REF_NAME}. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}" \
+            "$WEBHOOK"
