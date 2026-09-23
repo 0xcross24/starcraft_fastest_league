@@ -267,7 +267,7 @@ class ReplayController extends Controller
 
     public function displayPlayer($user)
     {
-        $user = User::where('player_name', $user)->first();
+        $user = User::where('player_name', $user)->firstOrFail();
         $seasons = Season::all();
         $seasonId = request('season') ?: ($seasons->count() ? $seasons->max('id') : null);
         $format = request('format', '2v2');
@@ -296,17 +296,27 @@ class ReplayController extends Controller
             ->first();
         $rank = $stats ? $this->eloService->getEloGrade($stats->elo) : null;
 
-        $allStats = Stats::where('season_id', $seasonId)
-            ->where('format', $format)
-            ->orderByDesc('elo')
-            ->get();
-        $numericRank = null;
-        foreach ($allStats as $i => $s) {
-            if ($s->user_id == $user->id) {
-                $numericRank = $i + 1;
-                break;
-            }
-        }
+        // Rank is "how many players out-rank me, plus one". Counted in the
+        // database rather than loading every stats row for the season and
+        // walking it in PHP.
+        //
+        // Players on equal elo take consecutive positions rather than sharing
+        // one, and the tie is broken by user_id, so whoever registered first
+        // places higher. The previous version relied on whatever order MySQL
+        // returned for equal elo, which meant a tied player's rank could move
+        // between page loads.
+        $numericRank = $stats
+            ? Stats::where('season_id', $seasonId)
+                ->where('format', $format)
+                ->where(function ($query) use ($stats) {
+                    $query->where('elo', '>', $stats->elo)
+                        ->orWhere(function ($tie) use ($stats) {
+                            $tie->where('elo', $stats->elo)
+                                ->where('user_id', '<', $stats->user_id);
+                        });
+                })
+                ->count() + 1
+            : null;
 
         return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
     }
