@@ -280,6 +280,29 @@ class BuildOrderSeeder extends Seeder
                     - If your team is looking strong on units you can always not make dropships and just focus on moving ground force into the middle and pushing straight through. 
                     STEPS,
             ],
+            [
+                'seed_key' => 'terran-fast-factory-dropship-5rax',
+                'parent_seed_key' => 'terran-3rax-15gas-academy',
+                'title' => 'Fast Factory Dropship 5 rax Transition',
+                'race' => 'Terran',
+                'matchup' => ['PUB'],
+                'phase' => 'Mid game',
+                'position' => 2,
+                'description' => 'fast dropships to get around cannon blocks',
+                'steps' => <<<'STEPS'
+                    3:15 factory
+                    2nd gas (fill as soon as done)
+                    4:00 ebay (turret at choke and main when finished)
+                    starport with scv who made factory as soon as factory finishes
+                    5:45 2 more rax
+                    6:00 cc
+                    6:15-6:30 2nd starport
+
+                    Note:
+                    - Staying on 1 cc for a long time is good here or you can't really hit any of the timings you need to. 6:15 cc is ok to get a maybe even5 is better.
+                    - This is a 2 gas build, you want to stay on 2 gas a long time and you also really need that gas fast after adding your factory. You also want a 3rd scv on gas between 22-24 supply because you are spending alot of gas early.
+                    STEPS,
+            ],
         ];
     }
 }
