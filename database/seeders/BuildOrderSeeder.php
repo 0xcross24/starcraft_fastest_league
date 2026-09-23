@@ -285,7 +285,7 @@ class BuildOrderSeeder extends Seeder
                 'parent_seed_key' => 'terran-3rax-15gas-academy',
                 'title' => 'Fast Factory Dropship 5 rax Transition',
                 'race' => 'Terran',
-                'matchup' => ['PUB'],
+                'matchup' => ['PUB', 'TZZ'],
                 'phase' => 'Mid game',
                 'position' => 2,
                 'description' => 'fast dropships to get around cannon blocks',
@@ -301,6 +301,9 @@ class BuildOrderSeeder extends Seeder
                     Note:
                     - Staying on 1 cc for a long time is good here or you can't really hit any of the timings you need to. 6:15 cc is ok to get a maybe even5 is better.
                     - This is a 2 gas build, you want to stay on 2 gas a long time and you also really need that gas fast after adding your factory. You also want a 3rd scv on gas between 22-24 supply because you are spending alot of gas early.
+
+                    Goals:
+                    - Make something happen on the map, this build is a good choice when your blocked in, so use dropships to help a teammate or to counter an enemy so your whole team doesn't just die while your trapped in your base.
                     STEPS,
             ],
         ];
