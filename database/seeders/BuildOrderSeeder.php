@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\BuildOrder;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 
 class BuildOrderSeeder extends Seeder
 {
@@ -18,7 +19,9 @@ class BuildOrderSeeder extends Seeder
      *  - a build still matching the content the seeder last wrote is updated,
      *    so corrections made here reach the site
      *  - a build whose content has diverged was edited in the admin UI, and is
-     *    left alone
+     *    left alone, unless its 'version' in builds() has been raised above the
+     *    version last written, which is an explicit instruction to replace that
+     *    edit
      *  - a build that was deleted stays deleted, because soft deletes leave a
      *    row behind for this to find
      *  - a build removed from builds() below is deleted
@@ -39,6 +42,7 @@ class BuildOrderSeeder extends Seeder
                 BuildOrder::create($fields + [
                     'seed_key' => $build['seed_key'],
                     'seed_hash' => self::hashFor($build),
+                    'seed_version' => $build['version'] ?? 1,
                 ]);
                 $written[] = $build['seed_key'];
                 continue;
@@ -51,11 +55,29 @@ class BuildOrderSeeder extends Seeder
             // A null hash means the row was seeded before hashes were
             // recorded. Adopt it rather than reading it as edited, otherwise
             // those builds could never be corrected again.
-            if ($existing->seed_hash !== null && $existing->seed_hash !== $this->hashOf($existing)) {
+            $edited = $existing->seed_hash !== null
+                && $existing->seed_hash !== $this->hashOf($existing);
+
+            // Raising 'version' in builds() overrides the protection an admin
+            // edit normally gets. Rows seeded before this column existed hold
+            // null, which reads as version 1.
+            $wanted = $build['version'] ?? 1;
+            $forced = $wanted > ($existing->seed_version ?? 1);
+
+            if ($edited && ! $forced) {
+                // Logged so a deploy that ignored a seeder change says so,
+                // rather than looking like it applied.
+                Log::info('BuildOrderSeeder: skipping edited build', [
+                    'seed_key' => $build['seed_key'],
+                    'hint' => 'raise version in builds() to overwrite the admin edit',
+                ]);
                 continue;
             }
 
-            $existing->update($fields + ['seed_hash' => self::hashFor($build)]);
+            $existing->update($fields + [
+                'seed_hash' => self::hashFor($build),
+                'seed_version' => $wanted,
+            ]);
             $written[] = $build['seed_key'];
         }
 

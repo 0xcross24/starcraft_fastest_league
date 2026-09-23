@@ -266,4 +266,40 @@ class BuildOrderSeederTest extends TestCase
             ->assertOk()
             ->assertSee(self::TITLE);
     }
+
+    /**
+     * The escape hatch: raising the version in builds() is an explicit
+     * instruction to replace an admin edit, so a PR updating a build that was
+     * edited in the UI actually reaches the site instead of silently doing
+     * nothing.
+     */
+    public function test_raising_the_version_overwrites_an_admin_edit(): void
+    {
+        $this->seed(BuildOrderSeeder::class);
+
+        $build = BuildOrder::where('seed_key', self::KEY)->firstOrFail();
+        $build->update(['title' => 'Renamed by an admin']);
+
+        // Same content the seeder holds, but a version above the one on the row.
+        $this->seed(VersionBumpedBuildOrderSeeder::class);
+
+        $build->refresh();
+
+        $this->assertSame(self::TITLE, $build->title, 'A raised version must replace the admin edit.');
+        $this->assertSame(2, $build->seed_version);
+    }
+
+    public function test_an_unchanged_version_still_protects_an_admin_edit(): void
+    {
+        $this->seed(BuildOrderSeeder::class);
+
+        $build = BuildOrder::where('seed_key', self::KEY)->firstOrFail();
+        $build->update(['title' => 'Renamed by an admin']);
+
+        $this->seed(BuildOrderSeeder::class);
+
+        $build->refresh();
+
+        $this->assertSame('Renamed by an admin', $build->title);
+    }
 }
