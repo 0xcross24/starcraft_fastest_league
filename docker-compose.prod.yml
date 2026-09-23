@@ -2,7 +2,9 @@ services:
   # Laravel app
   app:
     build: .
-    image: sfl_app:latest
+    # Tagged by SHA during CI so it is always obvious which build a container
+    # is running. Falls back to :latest for manual `docker compose` use.
+    image: sfl_app:${APP_IMAGE_TAG:-latest}
     container_name: sfl_app
     restart: unless-stopped
     working_dir: /var/www/html
@@ -64,7 +66,7 @@ services:
 
   # Laravel Scheduler
   scheduler:
-    image: sfl_app:latest
+    image: sfl_app:${APP_IMAGE_TAG:-latest}
     container_name: sfl_scheduler
     working_dir: /var/www/html
     volumes:
