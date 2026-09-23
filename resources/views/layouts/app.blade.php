@@ -22,7 +22,7 @@
 </head>
 
 
-<body class="font-sans antialiased min-h-screen flex flex-col">
+<body class="font-sans antialiased min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
     <div class="flex-1 flex flex-col bg-gray-100 dark:bg-gray-900">
         @include('layouts.navigation')
 
