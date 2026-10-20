@@ -75,9 +75,6 @@
     <!-- Responsive Navigation Menu: every link, for guests too -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @auth
-            <x-responsive-nav-link href="/upload" :active="request()->is('upload')">Upload</x-responsive-nav-link>
-            @endauth
             <x-responsive-nav-link href="/replays" :active="request()->is('replays')">Replays</x-responsive-nav-link>
             <x-responsive-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-responsive-nav-link>
             <x-responsive-nav-link href="/rules" :active="request()->is('rules')">Rules</x-responsive-nav-link>
