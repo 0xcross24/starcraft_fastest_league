@@ -43,7 +43,7 @@ class StatsController extends Controller
         }
 
         // Retrieve users with their associated stats, grouped by season
-        $usersWithStats = Stats::with('user') // Eager load user relationship
+        $usersWithStats = Stats::with('playerName')
             ->orderBy('season_id', 'asc')  // Group by season
             ->orderBy('elo', 'desc')       // Order by Elo in descending order
             ->orderBy('id')                // Tie-breaker for same Elo, matches profile/homepage
@@ -61,6 +61,10 @@ class StatsController extends Controller
         return view('rankings', compact('usersWithStats', 'seasons', 'activeSeasonId'));
     }
 
+    /**
+     * @param  int[]  $winners  player_name ids
+     * @param  int[]  $losers  player_name ids
+     */
     public function calculateElo(array $winners, array $losers, string $format)
     {
         // Retrieve the active season
@@ -82,7 +86,7 @@ class StatsController extends Controller
 
         // Calculate the total Elo for winners
         foreach ($winners as $winnerId) {
-            $stats = Stats::where('user_id', $winnerId)
+            $stats = Stats::where('player_name_id', $winnerId)
                 ->where('season_id', $activeSeason->id)
                 ->where('format', $format)
                 ->first();
@@ -94,7 +98,7 @@ class StatsController extends Controller
 
         // Calculate the total Elo for losers
         foreach ($losers as $loserId) {
-            $stats = Stats::where('user_id', $loserId)
+            $stats = Stats::where('player_name_id', $loserId)
                 ->where('season_id', $activeSeason->id)
                 ->where('format', $format)
                 ->first();
@@ -106,7 +110,7 @@ class StatsController extends Controller
 
         // Update Elo ratings for winners and track changes
         foreach ($winners as $winnerId) {
-            $stats = Stats::where('user_id', $winnerId)
+            $stats = Stats::where('player_name_id', $winnerId)
                 ->where('season_id', $activeSeason->id)
                 ->where('format', $format)
                 ->first();
@@ -130,7 +134,7 @@ class StatsController extends Controller
 
         // Update Elo ratings for losers and track changes
         foreach ($losers as $loserId) {
-            $stats = Stats::where('user_id', $loserId)
+            $stats = Stats::where('player_name_id', $loserId)
                 ->where('season_id', $activeSeason->id)
                 ->where('format', $format)
                 ->first();

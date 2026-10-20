@@ -3,6 +3,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
+                <!-- Site name on phones, where the links below are in the menu -->
+                <a href="/" class="sm:hidden inline-flex items-center font-extrabold text-white tracking-wide">Starcraft Fastest League</a>
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:flex">
                     <a href="/" class="inline-flex items-center px-1 pt-1 font-extrabold text-white tracking-wide drop-shadow-lg">Starcraft Fastest League</a>
@@ -51,6 +53,12 @@
                     </x-slot>
                 </x-dropdown>
             </div>
+            @else
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <x-nav-link :href="route('login')" :active="request()->routeIs('login')">Login</x-nav-link>
+                <x-nav-link :href="route('register')" :active="request()->routeIs('register')">Register</x-nav-link>
+            </div>
+            @endauth
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
@@ -64,19 +72,24 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
+    <!-- Responsive Navigation Menu: every link, for guests too -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link href="/replays" :active="request()->is('replays')">Replays</x-responsive-nav-link>
+            <x-responsive-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-responsive-nav-link>
+            <x-responsive-nav-link href="/rules" :active="request()->is('rules')">Rules</x-responsive-nav-link>
+            <x-responsive-nav-link href="/builds" :active="request()->is('builds')">Build Orders</x-responsive-nav-link>
+        </div>
 
-        <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
+            @auth
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->player_name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link href="/builds" :active="request()->is('builds')">Build Orders</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('profile.edit')">
+                <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
@@ -91,20 +104,12 @@
                     </x-responsive-nav-link>
                 </form>
             </div>
-        </div>
-    </div>
-    @endauth
-    @guest
-
-    <div class="flex justify-between h-16">
-        <div class="flex">
-            <!-- Navigation Links -->
-            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                <!-- Common Navigation Links -->
-                <x-nav-link :href="route('login')" :active="request()->routeIs('login')">Login</x-nav-link>
-                <x-nav-link :href="route('register')" :active="request()->routeIs('register')">Register</x-nav-link>
+            @else
+            <div class="space-y-1">
+                <x-responsive-nav-link :href="route('login')" :active="request()->routeIs('login')">Login</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('register')" :active="request()->routeIs('register')">Register</x-responsive-nav-link>
             </div>
+            @endauth
         </div>
     </div>
-    @endguest
 </nav>

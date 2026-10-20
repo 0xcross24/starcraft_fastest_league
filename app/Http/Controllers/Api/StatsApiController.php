@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlayerName;
 use App\Models\Stats;
-use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\EloService;
 use Illuminate\Support\Facades\Log;
@@ -39,8 +39,8 @@ class StatsApiController extends Controller
             'user_agent' => substr($request->header('User-Agent'), 0, 200), // Limit UA length
         ]);
 
-        $user = User::where('player_name', $username)->first();
-        if (!$user) {
+        $playerName = PlayerName::where('name', $username)->first();
+        if (!$playerName) {
             return response("User not found", 404)
                 ->header('Content-Type', 'text/plain');
         }
@@ -50,19 +50,19 @@ class StatsApiController extends Controller
         $eloService = new EloService();
 
         // Start single-line output
-        $output = "Season {$seasonId} | Username: {$user->player_name}";
+        $output = "Season {$seasonId} | Username: {$playerName->name}";
 
         if ($formatQuery) {
             $formats = [$formatQuery];
         } else {
-            $formats = Stats::where('user_id', $user->id)
+            $formats = Stats::where('player_name_id', $playerName->id)
                 ->where('season_id', $seasonId)
                 ->pluck('format')
                 ->toArray();
         }
 
         foreach ($formats as $fmt) {
-            $stats = Stats::where('user_id', $user->id)
+            $stats = Stats::where('player_name_id', $playerName->id)
                 ->where('season_id', $seasonId)
                 ->where('format', $fmt)
                 ->first();
@@ -78,7 +78,7 @@ class StatsApiController extends Controller
                 ->orderBy('id')
                 ->get();
 
-            $rank = $allStats->search(fn($s) => $s->user_id == $user->id);
+            $rank = $allStats->search(fn($s) => $s->player_name_id == $playerName->id);
             $rank = $rank !== false ? $rank + 1 : "N/A";
             $grade = $eloService->getEloGrade($stats->elo);
 

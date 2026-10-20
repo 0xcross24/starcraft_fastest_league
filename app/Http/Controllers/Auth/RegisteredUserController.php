@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlayerName;
 use App\Models\User;
-use App\Models\Stats;
 use App\Models\Season;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -33,7 +33,11 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'player_name' => ['required', 'string', 'max:255'],
+            'player_name' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
+                if (PlayerName::isTaken($value)) {
+                    $fail('That player name is already taken.');
+                }
+            }],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
@@ -53,17 +57,7 @@ class RegisteredUserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // Create stats for both 2v2 and 3v3
-            foreach (['2v2', '3v3'] as $format) {
-                Stats::create([
-                    'user_id' => $user->id,
-                    'wins' => 0,
-                    'losses' => 0,
-                    'elo' => 1000,
-                    'season_id' => $currentSeason->id,
-                    'format' => $format,
-                ]);
-            }
+            $user->primaryPlayerName()->ensureStats($currentSeason);
 
             return $user;
         });

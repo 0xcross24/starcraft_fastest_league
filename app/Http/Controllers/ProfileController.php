@@ -21,25 +21,24 @@ class ProfileController extends Controller
         $seasonId = $request->input('season') ?? ($seasons->count() ? $seasons->max('id') : null);
         $format = $request->input('format', '2v2');
 
-        // Get all stats for the user, grouped by season and format
-        $userStats = $user->stats()->get()->groupBy(function ($item) {
-            return $item->season_id . '-' . $item->format;
-        });
+        // Each player name has its own stats; the dropdown picks which one.
+        $playerNames = $user->playerNames;
+        $playerName = $playerNames->firstWhere('id', (int) $request->input('name'))
+            ?? $user->primaryPlayerName();
 
-        // Get stats for the selected season/format
-        $stats = $userStats[$seasonId . '-' . $format][0] ?? null;
+        $stats = $playerName
+            ? $playerName->stats()->where('season_id', $seasonId)->where('format', $format)->first()
+            : null;
 
-        // Calculate rank for this user in this season/format (match rankings page order for ties)
+        // Calculate rank for this name in this season/format (match rankings page order for ties)
         $rank = null;
-        if ($seasonId) {
+        if ($stats) {
             $allStats = \App\Models\Stats::where('season_id', $seasonId)
                 ->where('format', $format)
                 ->orderByDesc('elo')
                 ->orderBy('id') // secondary sort for tie-breaker, matches rankings page
-                ->get();
-            $rank = $allStats->search(function ($s) use ($user) {
-                return $s->user_id == $user->id;
-            });
+                ->pluck('id');
+            $rank = $allStats->search($stats->id);
             $rank = $rank !== false ? $rank + 1 : null;
         }
 
@@ -50,7 +49,8 @@ class ProfileController extends Controller
             'format' => $format,
             'stats' => $stats,
             'rank' => $rank,
-            'userStats' => $userStats,
+            'playerNames' => $playerNames,
+            'playerName' => $playerName,
         ]);
     }
 

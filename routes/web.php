@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AllReplaysController;
+use App\Http\Controllers\PlayerNameController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
 use App\Http\Controllers\StatsController;
@@ -24,6 +25,8 @@ Route::get('/player/{user}', [ReplayController::class, 'displayPlayer'])
 Route::middleware('auth')->group(function () {
   Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
   Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+  Route::post('/profile/names', [PlayerNameController::class, 'store'])->name('player-names.store');
+  Route::delete('/profile/names/{playerName}', [PlayerNameController::class, 'destroy'])->name('player-names.destroy');
   Route::get('/profile/maps/download/{filename}', [ProfileController::class, 'downloadMap'])->where('filename', 'OP SFL-\\.scm|SFLClan\\.scm|WkClan  Styler 빠른무한\(Ob\)\\.scm')->name('maps.download');
 });
 

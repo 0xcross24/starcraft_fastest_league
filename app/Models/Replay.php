@@ -13,6 +13,7 @@ class Replay extends Model
   protected $primaryKey = 'id';
   protected $fillable = [
     'user_id',
+    'player_name_id',
     'replay_id',
     'player_name',
     'winning_team',
@@ -32,6 +33,11 @@ class Replay extends Model
   function user()
   {
     return $this->hasMany(User::class);
+  }
+
+  public function playerName()
+  {
+    return $this->belongsTo(PlayerName::class);
   }
 
   public function season()

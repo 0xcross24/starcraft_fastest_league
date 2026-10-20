@@ -22,7 +22,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->post('/login', [
-            'player_name' => $user->player_name,
+            'email' => $user->email,
             'password' => 'password',
         ]);
 
@@ -35,9 +35,30 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $this->post('/login', [
-            'player_name' => $user->player_name,
+            'email' => $user->email,
             'password' => 'wrong-password',
         ]);
+
+        $this->assertGuest();
+    }
+
+    public function test_email_is_matched_regardless_of_case(): void
+    {
+        $user = User::factory()->create(['email' => 'player@example.com']);
+
+        $this->post('/login', ['email' => 'Player@Example.COM', 'password' => 'password']);
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_a_player_name_no_longer_logs_in(): void
+    {
+        $user = User::factory()->create();
+
+        $this->post('/login', ['email' => $user->player_name, 'password' => 'password'])
+            ->assertSessionHasErrors('email');
+        $this->post('/login', ['player_name' => $user->player_name, 'password' => 'password'])
+            ->assertSessionHasErrors('email');
 
         $this->assertGuest();
     }

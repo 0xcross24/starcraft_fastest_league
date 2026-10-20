@@ -48,6 +48,25 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        // The registered name is always the account's first player name.
+        static::created(function (User $user) {
+            $user->playerNames()->create(['name' => $user->player_name]);
+        });
+    }
+
+    public function playerNames()
+    {
+        return $this->hasMany(PlayerName::class)->orderBy('id');
+    }
+
+    public function primaryPlayerName(): ?PlayerName
+    {
+        return $this->playerNames()->where('name', $this->player_name)->first()
+            ?? $this->playerNames()->first();
+    }
+
     public function stats()
     {
         return $this->hasMany(Stats::class);
