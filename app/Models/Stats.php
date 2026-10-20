@@ -10,7 +10,22 @@ class Stats extends Model
 {
 
     public $timestamps = false; // Disable timestamps
-    protected $fillable = ['user_id', 'season_id', 'wins', 'losses', 'elo', 'format'];
+    protected $fillable = ['user_id', 'player_name_id', 'season_id', 'wins', 'losses', 'elo', 'format'];
+
+    protected static function booted(): void
+    {
+        // Callers that only know the user get the account's registered name.
+        static::creating(function (Stats $stats) {
+            if (! $stats->player_name_id && $stats->user_id) {
+                $stats->player_name_id = User::find($stats->user_id)?->primaryPlayerName()?->id;
+            }
+        });
+    }
+
+    public function playerName()
+    {
+        return $this->belongsTo(PlayerName::class);
+    }
 
     public function user()
     {

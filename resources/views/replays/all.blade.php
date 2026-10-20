@@ -52,7 +52,7 @@
                             foreach (['1', '2'] as $teamNum) {
                             $team = $groupedReplaysAsc->where('team', $teamNum);
                             foreach ($team as $player) {
-                            $uid = $player->user_id;
+                            $uid = $player->player_name_id ?? $player->user_id;
                             if (!isset($eloTracker[$uid])) {
                             $eloTracker[$uid] = 1000;
                             }
@@ -108,7 +108,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->user_id;
+                                                $uid = $player->player_name_id ?? $player->user_id;
                                                 $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
@@ -146,7 +146,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->user_id;
+                                                $uid = $player->player_name_id ?? $player->user_id;
                                                 $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>

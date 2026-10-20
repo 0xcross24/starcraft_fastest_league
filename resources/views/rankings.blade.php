@@ -67,9 +67,9 @@
                       <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="border border-gray-300 text-center px-4 py-2">{{ $rankNum++ }}</td>
                         <td class="border border-gray-300 text-center px-4 py-2">
-                          @if(isset($stat->user->player_name))
-                          <a href="{{ route('player', ['user' => $stat->user->player_name]) }}" class="font-semibold text-blue-500 hover:font-bold">
-                            {{ $stat->user->player_name }}
+                          @if(isset($stat->playerName))
+                          <a href="{{ route('player', ['user' => $stat->playerName->name]) }}" class="font-semibold text-blue-500 hover:font-bold">
+                            {{ $stat->playerName->name }}
                           </a>
                           @else
                           <span class="text-gray-500">Unknown Player</span>

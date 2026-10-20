@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlayerName;
 use App\Models\Replay;
 use App\Models\User;
 use App\Models\Stats;
@@ -168,9 +169,10 @@ class ReplayController extends Controller
             }
         }
 
+        // Each replay name must be one of a registered account's player names.
         $lowercaseNames = array_map('strtolower', $playerNames);
-        $users = User::whereIn(DB::raw('LOWER(player_name)'), $lowercaseNames)->get();
-        $registeredNames = $users->pluck('player_name')->map('strtolower')->toArray();
+        $names = PlayerName::named(...$playerNames)->get();
+        $registeredNames = $names->pluck('name')->map('strtolower')->toArray();
 
         $unregistered = array_diff($lowercaseNames, $registeredNames);
         if (!empty($unregistered)) {
@@ -178,14 +180,24 @@ class ReplayController extends Controller
             return back()->with('error', 'Missing player(s): ' . implode(', ', $unregistered));
         }
 
+        // One account playing under two of its names in the same game would
+        // be rating itself.
+        $sharedAccounts = $names->groupBy('user_id')->filter(fn($group) => $group->count() > 1);
+        if ($sharedAccounts->isNotEmpty()) {
+            $cleanup();
+            return back()->with('error', 'These names belong to the same account: ' . $sharedAccounts->flatten()->pluck('name')->implode(', '));
+        }
+
+        $nameFor = fn($replayName) => $names->first(fn($n) => strtolower($n->name) === strtolower($replayName));
+
         $winners = $losers = [];
         foreach ($playersData as $playerData) {
             $isWinner = $playerData['player']['IsWinner'] ?? false;
-            $user = $users->first(fn($u) => strtolower($u->player_name) === strtolower($playerData['name']));
-            if (!$user) continue;
+            $playerName = $nameFor($playerData['name']);
+            if (!$playerName) continue;
 
-            if ($isWinner) $winners[] = $user->id;
-            else $losers[] = $user->id;
+            if ($isWinner) $winners[] = $playerName->id;
+            else $losers[] = $playerName->id;
         }
 
         $team1Count = count($data['Team1'] ?? []);
@@ -222,12 +234,17 @@ class ReplayController extends Controller
             return back()->with('error', 'Game too short (<2:05). Ignored.');
         }
 
+        // A name added mid-season may not have a row for this season yet.
+        foreach ($names as $playerName) {
+            $playerName->ensureStats($currentSeason);
+        }
+
         $eloResults = $this->statsController->calculateElo($winners, $losers, $format);
 
         foreach ($playersData as $playerData) {
             $player = $playerData['player'];
-            $user = $users->first(fn($u) => strtolower($u->player_name) === strtolower($playerData['name']));
-            if (!$user) continue;
+            $playerName = $nameFor($playerData['name']);
+            if (!$playerName) continue;
 
             Replay::create([
                 'replay_id' => $uuid,
@@ -239,9 +256,10 @@ class ReplayController extends Controller
                 'apm' => $player['APM'],
                 'eapm' => $player['EAPM'],
                 'hash' => $fingerprint,
-                'user_id' => $user->id,
+                'user_id' => $playerName->user_id,
+                'player_name_id' => $playerName->id,
                 'replay_file' => $filePath,
-                'points' => $eloResults['eloChanges'][$user->id] ?? 0,
+                'points' => $eloResults['eloChanges'][$playerName->id] ?? 0,
                 'season_id' => $currentSeason->id,
                 'format' => $format,
             ]);
@@ -265,14 +283,16 @@ class ReplayController extends Controller
         );
     }
 
-    public function displayPlayer($user)
+    public function displayPlayer($name)
     {
-        $user = User::where('player_name', $user)->firstOrFail();
+        $playerName = PlayerName::where('name', $name)->firstOrFail();
+        $user = $playerName->user;
+        $accountNames = $user->playerNames;
         $seasons = Season::all();
         $seasonId = request('season') ?: ($seasons->count() ? $seasons->max('id') : null);
         $format = request('format', '2v2');
 
-        $replayIds = Replay::where('player_name', $user->player_name)
+        $replayIds = Replay::where('player_name_id', $playerName->id)
             ->where('season_id', $seasonId)
             ->where('format', $format)
             ->pluck('replay_id');
@@ -283,28 +303,21 @@ class ReplayController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $user_ids = $replays->pluck('user_id')->unique();
-        $statsCollection = Stats::whereIn('user_id', $user_ids)
-            ->where('format', $format)
-            ->where('season_id', $seasonId)
-            ->get();
-        $userStats = $statsCollection->keyBy('user_id');
-
-        $stats = Stats::where('user_id', $user->id)
+        $stats = Stats::where('player_name_id', $playerName->id)
             ->where('season_id', $seasonId)
             ->where('format', $format)
             ->first();
         $rank = $stats ? $this->eloService->getEloGrade($stats->elo) : null;
 
-        // Rank is "how many players out-rank me, plus one". Counted in the
+        // Rank is "how many names out-rank this one, plus one". Counted in the
         // database rather than loading every stats row for the season and
         // walking it in PHP.
         //
-        // Players on equal elo take consecutive positions rather than sharing
-        // one, and the tie is broken by user_id, so whoever registered first
-        // places higher. The previous version relied on whatever order MySQL
-        // returned for equal elo, which meant a tied player's rank could move
-        // between page loads.
+        // Names on equal elo take consecutive positions rather than sharing
+        // one, and the tie is broken by player_name_id, so whichever name was
+        // registered first places higher. The previous version relied on
+        // whatever order MySQL returned for equal elo, which meant a tied
+        // player's rank could move between page loads.
         $numericRank = $stats
             ? Stats::where('season_id', $seasonId)
                 ->where('format', $format)
@@ -312,13 +325,13 @@ class ReplayController extends Controller
                     $query->where('elo', '>', $stats->elo)
                         ->orWhere(function ($tie) use ($stats) {
                             $tie->where('elo', $stats->elo)
-                                ->where('user_id', '<', $stats->user_id);
+                                ->where('player_name_id', '<', $stats->player_name_id);
                         });
                 })
                 ->count() + 1
             : null;
 
-        return view('player', compact('user', 'replays', 'userStats', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
+        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
     }
 
     public function download($uuid)

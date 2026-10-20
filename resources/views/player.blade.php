@@ -32,10 +32,14 @@
                                 </a>
                             </li>
                         </ul>
-                        <div class="mb-6">
+                        <div class="mb-6 flex flex-wrap items-center gap-4">
                             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">
-                                Profile: {{ $user->player_name }}
+                                Profile: {{ $playerName->name }}
                             </h2>
+                            @if($accountNames->count() > 1)
+                            <x-username-select :names="$accountNames" :selected="$playerName"
+                                :url-for="fn($n) => route('player', ['user' => $n->name, 'season' => $seasonId, 'format' => $format])" />
+                            @endif
                         </div>
                         <!-- Player Stats/Ranking for Selected Season/Format -->
                         @php
@@ -87,7 +91,7 @@
                             foreach (['1', '2'] as $teamNum) {
                             $team = $groupedReplaysAsc->where('team', $teamNum);
                             foreach ($team as $player) {
-                            $uid = $player->user_id;
+                            $uid = $player->player_name_id ?? $player->user_id;
                             if (!isset($eloTracker[$uid])) {
                             $eloTracker[$uid] = 1000;
                             }
@@ -144,7 +148,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->user_id;
+                                                $uid = $player->player_name_id ?? $player->user_id;
                                                 $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
@@ -182,7 +186,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->user_id;
+                                                $uid = $player->player_name_id ?? $player->user_id;
                                                 $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
@@ -214,7 +218,7 @@
                             foreach (['1', '2'] as $teamNum) {
                             $team = $groupedReplaysAsc->where('team', $teamNum);
                             foreach ($team as $player) {
-                            $uid = $player->user_id;
+                            $uid = $player->player_name_id ?? $player->user_id;
                             if (!isset($eloTracker3v3[$uid])) {
                             $eloTracker3v3[$uid] = 1000;
                             }
@@ -270,7 +274,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->user_id;
+                                                $uid = $player->player_name_id ?? $player->user_id;
                                                 $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
@@ -308,7 +312,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->user_id;
+                                                $uid = $player->player_name_id ?? $player->user_id;
                                                 $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
                                                 @endphp
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>

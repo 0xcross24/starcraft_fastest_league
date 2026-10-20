@@ -21,9 +21,9 @@
             <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <td class="border border-gray-300 text-center px-2 py-1">{{ $rankNum++ }}</td>
               <td class="border border-gray-300 text-center px-2 py-1">
-                @if(isset($stat->user->player_name))
-                <a href="{{ route('player', ['user' => $stat->user->player_name]) }}" class="text-blue-500 font-semibold hover:font-bold">
-                  {{ $stat->user->player_name }}
+                @if(isset($stat->playerName))
+                <a href="{{ route('player', ['user' => $stat->playerName->name]) }}" class="text-blue-500 font-semibold hover:font-bold">
+                  {{ $stat->playerName->name }}
                 </a>
                 @else
                 <span class="text-gray-500">Unknown Player</span>
@@ -66,9 +66,9 @@
             <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
               <td class="border border-gray-300 text-center px-2 py-1">{{ $rankNum++ }}</td>
               <td class="border border-gray-300 text-center font-semibold px-2 py-1">
-                @if(isset($stat->user->player_name))
-                <a href="{{ route('player', ['user' => $stat->user->player_name]) }}" class="text-blue-500 hover:font-bold">
-                  {{ $stat->user->player_name }}
+                @if(isset($stat->playerName))
+                <a href="{{ route('player', ['user' => $stat->playerName->name]) }}" class="text-blue-500 hover:font-bold">
+                  {{ $stat->playerName->name }}
                 </a>
                 @else
                 <span class="text-gray-500">Unknown Player</span>

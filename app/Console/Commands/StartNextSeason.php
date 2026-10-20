@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Season;
-use App\Models\User;
-use App\Models\Stats;
+use App\Models\PlayerName;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -39,20 +38,9 @@ class StartNextSeason extends Command
             Storage::disk('public')->makeDirectory($seasonDir);
         }
 
-        // For each user, create stats for 2v2 and 3v3 for the new season
-        $users = User::all();
-        $formats = ['2v2', '3v3'];
-        foreach ($users as $user) {
-            foreach ($formats as $format) {
-                Stats::create([
-                    'wins' => 0,
-                    'losses' => 0,
-                    'elo' => 1000,
-                    'format' => $format,
-                    'user_id' => $user->id,
-                    'season_id' => $nextSeasonId,
-                ]);
-            }
+        // Every player name starts the new season on fresh 2v2 and 3v3 stats
+        foreach (PlayerName::all() as $playerName) {
+            $playerName->ensureStats($season);
         }
 
         $this->info("Season {$nextSeasonId} started. Previous season ended. Stats reset for all users and formats.");
