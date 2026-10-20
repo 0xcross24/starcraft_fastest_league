@@ -12,7 +12,7 @@
                             @foreach($seasons as $season)
                             <li class="mr-8">
                                 <a href="?season={{ $season->id }}&format={{ request('format', '2v2') }}"
-                                    class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $seasonId ? 'border-b-4 border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300' }}">
+                                    class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $seasonId ? 'border-b-4 border-blue-500 text-gray-900 dark:text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300' }}">
                                     Season {{ $season->id }}
                                 </a>
                             </li>
@@ -117,21 +117,21 @@
                                 Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
                                 <span class="ml-2 text-gray-300">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
-                            <div class="flex flex-row mb-6 overflow-hidden">
+                            <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
                                 <!-- Team 1 -->
-                                <div class="w-1/2">
+                                <div class="w-full md:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full table-fixed border-collapse border border-gray-200">
+                                    <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20 hidden sm:table-cell">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -145,7 +145,7 @@
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->player_name_id ?? $player->user_id;
@@ -158,19 +158,19 @@
                                     </table>
                                 </div>
                                 <!-- Team 2 -->
-                                <div class="w-1/2">
+                                <div class="w-full md:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full table-fixed border-collapse border border-gray-200">
+                                    <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20 hidden sm:table-cell">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -183,7 +183,7 @@
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->player_name_id ?? $player->user_id;
@@ -244,21 +244,21 @@
                                 Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
                                 <span class="ml-2 text-gray-300">{{ $timestamp ? (\Carbon\Carbon::parse($timestamp)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
-                            <div class="flex flex-row mb-6 overflow-hidden">
+                            <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
                                 <!-- Team 1 -->
-                                <div class="w-1/2">
+                                <div class="w-full md:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full table-fixed border-collapse border border-gray-200">
+                                    <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20 hidden sm:table-cell">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -271,7 +271,7 @@
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->player_name_id ?? $player->user_id;
@@ -284,19 +284,19 @@
                                     </table>
                                 </div>
                                 <!-- Team 2 -->
-                                <div class="w-1/2">
+                                <div class="w-full md:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full table-fixed border-collapse border border-gray-200">
+                                    <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20 hidden sm:table-cell">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -309,7 +309,7 @@
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->eapm ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
                                                 $uid = $player->player_name_id ?? $player->user_id;

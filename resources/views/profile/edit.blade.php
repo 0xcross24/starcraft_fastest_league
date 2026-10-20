@@ -14,7 +14,7 @@
                     @foreach($seasons as $season)
                     <li class="mr-8">
                         <a href="?name={{ $playerName?->id }}&season={{ $season->id }}&format={{ $format ?? '2v2' }}"
-                            class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $seasonId ? 'border-b-4 border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
+                            class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $seasonId ? 'border-b-4 border-blue-500 text-gray-900 dark:text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
                             Season {{ $season->id }}
                         </a>
                     </li>

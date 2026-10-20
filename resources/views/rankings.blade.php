@@ -19,7 +19,7 @@
                   @foreach($seasons as $season)
                   <li class="mr-8">
                     <a href="?season={{ $season->id }}&format={{ request('format', '2v2') }}"
-                      class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $selectedSeasonId ? 'border-b-4 border-blue-500 text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300' }}">
+                      class="season-tab inline-block py-2 px-4 text-sm font-medium focus:outline-none {{ $season->id == $selectedSeasonId ? 'border-b-4 border-blue-500 text-gray-900 dark:text-white font-bold dark:bg-gray-900' : 'border-b-0 text-gray-700 dark:text-gray-300' }}">
                       Season {{ $season->id }}
                     </a>
                   </li>
@@ -54,19 +54,19 @@
                   <table class="w-full border-collapse border border-gray-200 mb-4">
                     <thead class="bg-gray-200 dark:bg-gray-700">
                       <tr>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">#</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Player</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Rank</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Elo</th>
-                        <th class="px-4 py-2 text-left text-center text-gray-200">Record</th>
+                        <th class="px-2 sm:px-4 py-2 text-left text-center text-gray-200">#</th>
+                        <th class="px-2 sm:px-4 py-2 text-left text-center text-gray-200">Player</th>
+                        <th class="px-2 sm:px-4 py-2 text-left text-center text-gray-200">Rank</th>
+                        <th class="px-2 sm:px-4 py-2 text-left text-center text-gray-200">Elo</th>
+                        <th class="px-2 sm:px-4 py-2 text-left text-center text-gray-200">Record</th>
                       </tr>
                     </thead>
                     <tbody>
                       @php $rankNum = 1; @endphp
                       @foreach(($usersWithStats[$season->id] ?? collect())->where('format', $format) as $stat)
                       <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $rankNum++ }}</td>
-                        <td class="border border-gray-300 text-center px-4 py-2">
+                        <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">{{ $rankNum++ }}</td>
+                        <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">
                           @if(isset($stat->playerName))
                           <a href="{{ route('player', ['user' => $stat->playerName->name]) }}" class="font-semibold text-blue-500 hover:font-bold">
                             {{ $stat->playerName->name }}
@@ -75,11 +75,11 @@
                           <span class="text-gray-500">Unknown Player</span>
                           @endif
                         </td>
-                        <td class="border border-gray-300 text-center px-4 py-2">
+                        <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">
                           <x-elo-grade :elo="$stat->elo ?? 0" />
                         </td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->elo ?? 'N/A' }}</td>
-                        <td class="border border-gray-300 text-center px-4 py-2">{{ $stat->wins ?? 'N/A' }} - {{ $stat->losses ?? 'N/A' }}</td>
+                        <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">{{ $stat->elo ?? 'N/A' }}</td>
+                        <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">{{ $stat->wins ?? 'N/A' }} - {{ $stat->losses ?? 'N/A' }}</td>
                       </tr>
                       @endforeach
                     </tbody>

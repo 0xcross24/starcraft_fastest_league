@@ -1,6 +1,6 @@
 <x-guest-layout>
   <div class="pb-12">
-    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
       <!-- 2v2 Leaderboard -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
         <h2 class="text-lg font-bold mb-2 text-center text-gray-700 dark:text-gray-200">Current Season 2v2 Top 5</h2>
@@ -94,7 +94,7 @@
     </div>
     <!-- Last 5 Replays Full Details -->
     <h2 class="text-lg font-bold mt-7 text-center text-gray-700 dark:text-gray-200">Recently Played Matches</h2>
-    <div class="grid grid-cols-3 gap-1 mt-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-5">
       @forelse($recentReplayGroups as $group)
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">
         <div class="w-full text-center text-xs text-gray-300 mb-6">

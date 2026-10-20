@@ -30,7 +30,7 @@
                                 <tr>
                                     <th class="px-2 py-2 w-10"><span class="sr-only">Transitions</span></th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider font-nav">Title</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider font-nav">Subtitle</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider font-nav hidden sm:table-cell">Subtitle</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider font-nav">Race</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider font-nav">Matchup</th>
                                 </tr>
@@ -66,7 +66,7 @@
                                             @endif
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-nav">{{ Str::limit($build->description, 60) }}</td>
+                                    <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-nav hidden sm:table-cell">{{ Str::limit($build->description, 60) }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-nav">{{ $build->race }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200 font-nav">
                                         @if(is_array($build->matchup))
@@ -97,7 +97,7 @@
                                             </span>
                                         </span>
                                     </td>
-                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 font-nav">{{ Str::limit($transition->description, 60) }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 font-nav hidden sm:table-cell">{{ Str::limit($transition->description, 60) }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 font-nav">{{ $transition->race }}</td>
                                     <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 font-nav">
                                         @if(is_array($transition->matchup))
