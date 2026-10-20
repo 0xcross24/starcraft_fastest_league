@@ -46,10 +46,10 @@ class PlayerNameController extends Controller
     {
         abort_unless($playerName->user_id === $request->user()->id, 403);
 
-        // The registered name is the login, and a name with games behind it
+        // The registered name is the account's main name, and a name with games behind it
         // carries rated history, so neither can be removed.
         if ($playerName->name === $request->user()->player_name) {
-            return back()->with('error', 'Your login username cannot be removed.');
+            return back()->with('error', 'Your main username cannot be removed.');
         }
         if ($playerName->replays()->exists()) {
             return back()->with('error', 'A username with uploaded replays cannot be removed.');

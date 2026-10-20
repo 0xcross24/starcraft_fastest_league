@@ -83,7 +83,7 @@
                         <li class="flex items-center justify-between py-2">
                             <a href="{{ route('player', ['user' => $name->name]) }}" class="text-blue-500 hover:font-bold">{{ $name->name }}</a>
                             @if($name->name === $user->player_name)
-                            <span class="text-xs text-gray-500 dark:text-gray-400">Login name</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Main name</span>
                             @else
                             <form method="post" action="{{ route('player-names.destroy', $name) }}">
                                 @csrf

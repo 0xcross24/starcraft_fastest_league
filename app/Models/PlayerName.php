@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * An in-game name owned by a user. A user can own up to MAX_PER_USER of them,
  * and each one has its own stats, elo and rank. The first one is the name the
- * user registered (and logs in) with.
+ * user registered with.
  */
 class PlayerName extends Model
 {
