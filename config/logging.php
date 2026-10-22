@@ -62,6 +62,10 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            // Deploy steps and the scheduler run artisan as root. Whoever creates
+            // the day's file must leave it writable by php-fpm (www-data, via
+            // the setgid storage/logs group), or every later log write throws.
+            'permission' => 0664,
             'replace_placeholders' => true,
         ],
 
@@ -69,6 +73,10 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            // Deploy steps and the scheduler run artisan as root. Whoever creates
+            // the day's file must leave it writable by php-fpm (www-data, via
+            // the setgid storage/logs group), or every later log write throws.
+            'permission' => 0664,
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
         ],
