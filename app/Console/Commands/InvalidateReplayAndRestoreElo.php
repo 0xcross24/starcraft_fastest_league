@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Replay;
-use App\Models\Stats;
-use Illuminate\Support\Facades\DB;
+use App\Services\ReplayInvalidator;
 
 class InvalidateReplayAndRestoreElo extends Command
 {
@@ -38,28 +37,7 @@ class InvalidateReplayAndRestoreElo extends Command
             }
         }
 
-        DB::transaction(function () use ($replays) {
-            foreach ($replays as $replay) {
-                $stats = Stats::where('player_name_id', $replay->player_name_id)
-                    ->where('season_id', $replay->season_id)
-                    ->where('format', $replay->format)
-                    ->first();
-                if ($stats) {
-                    // Reverse ELO/points
-                    $stats->elo -= $replay->points;
-                    // Reverse win/loss
-                    if ($replay->winning_team) {
-                        $stats->wins = max(0, $stats->wins - 1);
-                    } else {
-                        $stats->losses = max(0, $stats->losses - 1);
-                    }
-                    $stats->save();
-                }
-                $replay->is_invalid = true;
-                $replay->points = 0;
-                $replay->save();
-            }
-        });
+        app(ReplayInvalidator::class)->invalidate($replays);
         $this->info('Replay invalidated and ELO/points restored for all players.');
         return 0;
     }
