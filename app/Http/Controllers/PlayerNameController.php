@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\PlayerName;
-use App\Models\Season;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Lets a logged-in user add the other in-game names they play under, so
@@ -19,24 +17,10 @@ class PlayerNameController extends Controller
         $user = $request->user();
 
         $validated = $request->validateWithBag('playerName', [
-            'name' => ['required', 'string', 'max:50', 'regex:/^[^\x00-\x1F\x7F<>"&\/]+$/', function ($attribute, $value, $fail) use ($user) {
-                if ($user->playerNames()->count() >= PlayerName::MAX_PER_USER) {
-                    $fail('You can have at most ' . PlayerName::MAX_PER_USER . ' usernames.');
-                } elseif (PlayerName::isTaken(trim($value))) {
-                    $fail('That username is already registered.');
-                }
-            }],
+            'name' => PlayerName::rulesFor($user),
         ]);
 
-        $playerName = DB::transaction(function () use ($user, $validated) {
-            $playerName = $user->playerNames()->create(['name' => trim($validated['name'])]);
-
-            if ($season = Season::where('is_active', 1)->first()) {
-                $playerName->ensureStats($season);
-            }
-
-            return $playerName;
-        });
+        $playerName = PlayerName::addFor($user, $validated['name']);
 
         return redirect()->route('profile.edit', ['name' => $playerName->id])
             ->with('status', 'username-added');
@@ -46,13 +30,10 @@ class PlayerNameController extends Controller
     {
         abort_unless($playerName->user_id === $request->user()->id, 403);
 
-        // The registered name is the account's main name, and a name with games behind it
-        // carries rated history, so neither can be removed.
-        if ($playerName->name === $request->user()->player_name) {
-            return back()->with('error', 'Your main username cannot be removed.');
-        }
-        if ($playerName->replays()->exists()) {
-            return back()->with('error', 'A username with uploaded replays cannot be removed.');
+        // The main name identifies the account, and a name with games behind
+        // it carries rated history, so neither can be removed.
+        if ($blocker = $playerName->removalBlocker()) {
+            return back()->with('error', $blocker);
         }
 
         $playerName->delete();

@@ -1,0 +1,93 @@
+<x-app-layout>
+    <div class="py-12">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100">
+                @include('admin.partials.nav')
+
+                <a href="{{ route('admin.users.index') }}" class="text-sm text-gray-400 hover:underline">&larr; All users</a>
+                <h2 class="text-xl font-semibold mt-2">{{ $user->player_name }}</h2>
+                <p class="text-sm text-gray-400">
+                    Account #{{ $user->id }} · joined {{ $user->created_at?->format('Y-m-d') }} · {{ $user->replay_count }} replay {{ Str::plural('row', $user->replay_count) }}
+                </p>
+
+                {{-- Account --}}
+                <form method="post" action="{{ route('admin.users.update', $user) }}" class="mt-6 space-y-4">
+                    @csrf
+                    @method('patch')
+                    <div>
+                        <x-input-label for="email" value="Email (used to log in)" />
+                        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required />
+                        <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                    </div>
+                    <div>
+                        <x-input-label for="role" value="Role" />
+                        <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-200">
+                            @foreach($roles as $role)
+                            <option value="{{ $role }}" @selected(old('role', $user->role) === $role)>{{ $role }}</option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400">Admins can manage builds and use this portal.</p>
+                        <x-input-error class="mt-2" :messages="$errors->get('role')" />
+                    </div>
+                    <x-primary-button>Save</x-primary-button>
+                </form>
+            </div>
+
+            {{-- Usernames --}}
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100">
+                <h3 class="text-lg font-semibold">Usernames</h3>
+                <p class="text-sm text-gray-400">Up to {{ \App\Models\PlayerName::MAX_PER_USER }}. Each is ranked separately.</p>
+                <ul class="mt-3 divide-y divide-gray-700">
+                    @foreach($user->playerNames as $name)
+                    <li class="flex items-center justify-between py-2">
+                        <a href="{{ route('player', ['user' => $name->name]) }}" class="text-blue-400 hover:underline">{{ $name->name }}</a>
+                        @if($blocker = $name->removalBlocker())
+                        <span class="text-xs text-gray-400">{{ $name->name === $user->player_name ? 'Main name' : 'Has replays' }}</span>
+                        @else
+                        <form method="post" action="{{ route('admin.users.names.destroy', [$user, $name]) }}"
+                            onsubmit="return confirm('Remove the username {{ addslashes($name->name) }}?')">
+                            @csrf
+                            @method('delete')
+                            <button class="text-xs text-red-400 hover:underline">Remove</button>
+                        </form>
+                        @endif
+                    </li>
+                    @endforeach
+                </ul>
+                @if($user->playerNames->count() < \App\Models\PlayerName::MAX_PER_USER)
+                <form method="post" action="{{ route('admin.users.names.store', $user) }}" class="mt-3 flex items-start gap-3">
+                    @csrf
+                    <div class="flex-1">
+                        <x-text-input name="name" type="text" class="block w-full" :value="old('name')" placeholder="In-game name" required maxlength="50" />
+                        <x-input-error class="mt-2" :messages="$errors->playerName->get('name')" />
+                    </div>
+                    <x-primary-button>Add</x-primary-button>
+                </form>
+                @endif
+            </div>
+
+            {{-- Actions --}}
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100 space-y-4">
+                <h3 class="text-lg font-semibold">Actions</h3>
+                <form method="post" action="{{ route('admin.users.password-reset', $user) }}">
+                    @csrf
+                    <x-secondary-button type="submit">Send password reset email</x-secondary-button>
+                    <p class="mt-1 text-xs text-gray-400">Emails a reset link to {{ $user->email }}.</p>
+                </form>
+                @if($user->is(auth()->user()))
+                <p class="text-xs text-gray-400">You cannot delete your own account here.</p>
+                @elseif($user->replay_count > 0)
+                <p class="text-xs text-gray-400">Delete account: not possible, this account has replays. Invalidate bad games in Replays instead.</p>
+                @else
+                <form method="post" action="{{ route('admin.users.destroy', $user) }}"
+                    onsubmit="return confirm('Permanently delete {{ addslashes($user->player_name) }} and all their usernames?')">
+                    @csrf
+                    @method('delete')
+                    <x-danger-button>Delete account</x-danger-button>
+                    <p class="mt-1 text-xs text-gray-400">Removes the account and its usernames. Cannot be undone.</p>
+                </form>
+                @endif
+            </div>
+        </div>
+    </div>
+</x-app-layout>

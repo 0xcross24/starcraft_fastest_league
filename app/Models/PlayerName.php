@@ -41,6 +41,51 @@ class PlayerName extends Model
         return $query->whereIn(DB::raw('LOWER(name)'), array_map('strtolower', $names));
     }
 
+    /**
+     * Validation for adding a name to $user's account.
+     */
+    public static function rulesFor(User $user): array
+    {
+        return ['required', 'string', 'max:50', 'regex:/^[^\x00-\x1F\x7F<>"&\/]+$/', function ($attribute, $value, $fail) use ($user) {
+            if ($user->playerNames()->count() >= self::MAX_PER_USER) {
+                $fail('An account can have at most ' . self::MAX_PER_USER . ' usernames.');
+            } elseif (self::isTaken(trim($value))) {
+                $fail('That username is already registered.');
+            }
+        }];
+    }
+
+    /**
+     * Add a validated name to $user and give it stats for the active season.
+     */
+    public static function addFor(User $user, string $name): self
+    {
+        return DB::transaction(function () use ($user, $name) {
+            $playerName = $user->playerNames()->create(['name' => trim($name)]);
+
+            if ($season = Season::where('is_active', 1)->first()) {
+                $playerName->ensureStats($season);
+            }
+
+            return $playerName;
+        });
+    }
+
+    /**
+     * Why this name cannot be removed, or null if it can.
+     */
+    public function removalBlocker(): ?string
+    {
+        if ($this->name === $this->user->player_name) {
+            return 'The main username cannot be removed.';
+        }
+        if ($this->replays()->exists()) {
+            return 'A username with uploaded replays cannot be removed.';
+        }
+
+        return null;
+    }
+
     public static function isTaken(string $name): bool
     {
         return static::named($name)->exists();

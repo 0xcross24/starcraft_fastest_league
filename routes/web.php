@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ReplayController as AdminReplayController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AllReplaysController;
 use App\Http\Controllers\PlayerNameController;
 use App\Http\Controllers\ProfileController;
@@ -35,6 +37,20 @@ Route::middleware('auth')->group(function () {
   Route::get('/upload', [ReplayController::class, 'index'])->name('upload.index');
   Route::post('/upload', [ReplayController::class, 'upload'])->name('upload.upload');
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
+});
+
+// Admin portal
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+  Route::redirect('/', '/admin/users')->name('index');
+  Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+  Route::get('/users/{user}', [AdminUserController::class, 'edit'])->name('users.edit');
+  Route::patch('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+  Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+  Route::post('/users/{user}/names', [AdminUserController::class, 'addName'])->name('users.names.store');
+  Route::delete('/users/{user}/names/{playerName}', [AdminUserController::class, 'removeName'])->scopeBindings()->name('users.names.destroy');
+  Route::post('/users/{user}/password-reset', [AdminUserController::class, 'sendPasswordReset'])->name('users.password-reset');
+  Route::get('/replays', [AdminReplayController::class, 'index'])->name('replays.index');
+  Route::post('/replays/{replayId}/invalidate', [AdminReplayController::class, 'invalidate'])->name('replays.invalidate');
 });
 
 // Build Order routes
