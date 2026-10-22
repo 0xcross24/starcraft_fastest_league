@@ -16,6 +16,9 @@ class PlayerName extends Model
 
     public const FORMATS = ['2v2', '3v3'];
 
+    // No control characters, and none of < > " & / (the name is used in URLs).
+    public const NAME_PATTERN = '/^[^\x00-\x1F\x7F<>"&\/]+$/';
+
     protected $fillable = ['user_id', 'name'];
 
     public function user()
@@ -46,7 +49,7 @@ class PlayerName extends Model
      */
     public static function rulesFor(User $user): array
     {
-        return ['required', 'string', 'max:50', 'regex:/^[^\x00-\x1F\x7F<>"&\/]+$/', function ($attribute, $value, $fail) use ($user) {
+        return ['required', 'string', 'max:50', 'regex:' . self::NAME_PATTERN, function ($attribute, $value, $fail) use ($user) {
             if ($user->playerNames()->count() >= self::MAX_PER_USER) {
                 $fail('An account can have at most ' . self::MAX_PER_USER . ' usernames.');
             } elseif (self::isTaken(trim($value))) {

@@ -42,7 +42,7 @@
                                 <a href="{{ route('replay.download', ['uuid' => $game->replay_id]) }}" class="text-blue-400 hover:underline">Download</a>
                                 @unless($invalid)
                                 <form method="post" action="{{ route('admin.replays.invalidate', $game->replay_id) }}"
-                                    onsubmit="return confirm('Invalidate game {{ substr($game->replay_id, 0, 8) }}? This reverses the ELO and wins/losses it gave every player.')">
+                                    onsubmit="return confirm(@js('Invalidate game '.substr($game->replay_id, 0, 8).'? This reverses the ELO and wins/losses it gave every player.'))">
                                     @csrf
                                     <button class="text-red-400 hover:underline">Invalidate</button>
                                 </form>

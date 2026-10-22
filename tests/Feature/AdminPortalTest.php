@@ -23,6 +23,7 @@ class AdminPortalTest extends TestCase
         parent::setUp();
         Season::create(['is_active' => 1]);
         $this->admin = User::factory()->admin()->create(['player_name' => 'TheAdmin']);
+        $this->withSession(['auth.password_confirmed_at' => time()]);
     }
 
     private function replayRow(User $user, string $replayId, bool $won, int $points): Replay
@@ -45,6 +46,15 @@ class AdminPortalTest extends TestCase
 
         $this->actingAs($this->admin)->get('/admin/users')->assertOk();
         $this->actingAs($this->admin)->get('/admin/replays')->assertOk();
+    }
+
+    public function test_the_portal_asks_an_admin_for_their_password_first(): void
+    {
+        $this->flushSession();
+
+        $this->actingAs($this->admin)->get('/admin/users')->assertRedirect(route('password.confirm'));
+        $this->actingAs($this->admin)->post(route('password.confirm'), ['password' => 'password']);
+        $this->actingAs($this->admin)->get('/admin/users')->assertOk();
     }
 
     public function test_non_admins_cannot_change_anything(): void

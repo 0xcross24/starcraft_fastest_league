@@ -33,7 +33,7 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'player_name' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
+            'player_name' => ['required', 'string', 'max:50', 'regex:' . PlayerName::NAME_PATTERN, function ($attribute, $value, $fail) {
                 if (PlayerName::isTaken($value)) {
                     $fail('That player name is already taken.');
                 }
@@ -52,7 +52,7 @@ class RegisteredUserController extends Controller
 
         $user = DB::transaction(function () use ($request, $currentSeason) {
             $user = User::create([
-                'player_name' => $request->player_name,
+                'player_name' => trim($request->player_name),
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
