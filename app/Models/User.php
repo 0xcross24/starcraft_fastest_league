@@ -22,7 +22,7 @@ class User extends Authenticatable
         'player_name',
         'email',
         'password',
-        'role',
+        // 'role' is deliberately not mass assignable; only the admin portal sets it.
     ];
 
     /**

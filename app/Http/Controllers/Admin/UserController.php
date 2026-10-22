@@ -55,7 +55,8 @@ class UserController extends Controller
             return back()->with('error', 'You cannot remove your own admin role.');
         }
 
-        $user->fill($validated);
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }

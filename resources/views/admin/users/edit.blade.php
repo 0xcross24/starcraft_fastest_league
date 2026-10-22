@@ -45,7 +45,7 @@
                         <span class="text-xs text-gray-400">{{ $name->name === $user->player_name ? 'Main name' : 'Has replays' }}</span>
                         @else
                         <form method="post" action="{{ route('admin.users.names.destroy', [$user, $name]) }}"
-                            onsubmit="return confirm('Remove the username {{ addslashes($name->name) }}?')">
+                            onsubmit="return confirm(@js('Remove the username '.$name->name.'?'))">
                             @csrf
                             @method('delete')
                             <button class="text-xs text-red-400 hover:underline">Remove</button>
@@ -80,7 +80,7 @@
                 <p class="text-xs text-gray-400">Delete account: not possible, this account has replays. Invalidate bad games in Replays instead.</p>
                 @else
                 <form method="post" action="{{ route('admin.users.destroy', $user) }}"
-                    onsubmit="return confirm('Permanently delete {{ addslashes($user->player_name) }} and all their usernames?')">
+                    onsubmit="return confirm(@js('Permanently delete '.$user->player_name.' and all their usernames?'))">
                     @csrf
                     @method('delete')
                     <x-danger-button>Delete account</x-danger-button>

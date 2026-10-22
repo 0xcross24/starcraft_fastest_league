@@ -35,12 +35,14 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
   Route::get('/upload', [ReplayController::class, 'index'])->name('upload.index');
-  Route::post('/upload', [ReplayController::class, 'upload'])->name('upload.upload');
+  Route::post('/upload', [ReplayController::class, 'upload'])->middleware('throttle:30,10')->name('upload.upload');
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
 });
 
 // Admin portal
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+// password.confirm: re-enter the password before using the portal (valid 3 hours),
+// so a hijacked or left-open session cannot change roles or delete accounts.
+Route::middleware(['auth', 'admin', 'password.confirm'])->prefix('admin')->name('admin.')->group(function () {
   Route::redirect('/', '/admin/users')->name('index');
   Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
   Route::get('/users/{user}', [AdminUserController::class, 'edit'])->name('users.edit');
