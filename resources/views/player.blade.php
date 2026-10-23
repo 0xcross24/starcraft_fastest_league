@@ -47,8 +47,17 @@
                         $selectedSeason = $seasons->firstWhere('id', $seasonId);
                         @endphp
                         @if($selectedSeason && $stats)
-                        <div class="pb-3">
+                        <div class="pb-3 flex flex-wrap items-center justify-between gap-3">
                             <div class=" text-lg font-semibold text-gray-700 dark:text-gray-200">Season {{ $selectedSeason->id }} ({{ strtoupper($format) }})</div>
+                            <div class="flex flex-wrap gap-2">
+                                {{-- This format (Wk`Cross-_s2_3v3.zip) and the whole season (Wk`Cross-_s2.zip) --}}
+                                @if($games->total() > 0)
+                                <x-zip-download-button :season="$selectedSeason->id" :format="$format" :player="$playerName->name" :count="$games->total()" :label="'Download ' . $format" />
+                                @endif
+                                @if($seasonGameCount > 0)
+                                <x-zip-download-button :season="$selectedSeason->id" :player="$playerName->name" :count="$seasonGameCount" label="Download all formats" />
+                                @endif
+                            </div>
                         </div>
                         <div class="flex flex-wrap items-center justify-start gap-8 bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-10">
                             <div>

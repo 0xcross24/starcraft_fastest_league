@@ -32,13 +32,18 @@
                         $format = request('format', '2v2');
                         $selectedSeason = $seasons->firstWhere('id', $seasonId);
                         @endphp
-                        <h1 class="text-lg font-semibold mb-4">
-                            @if($selectedSeason)
-                            Season {{ $selectedSeason->id }} Replays ({{ strtoupper($format) }})
-                            @else
-                            All Replays
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                            <h1 class="text-lg font-semibold">
+                                @if($selectedSeason)
+                                Season {{ $selectedSeason->id }} Replays ({{ strtoupper($format) }})
+                                @else
+                                All Replays
+                                @endif
+                            </h1>
+                            @if($selectedSeason && $games->total() > 0)
+                            <x-zip-download-button :season="$selectedSeason->id" :format="$format" :count="$games->total()" />
                             @endif
-                        </h1>
+                        </div>
                         <div class="mt-4">
                             @if($replays->isEmpty())
                             <p>No replays found for this season and format.</p>
