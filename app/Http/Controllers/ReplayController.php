@@ -88,7 +88,7 @@ class ReplayController extends Controller
         $fingerprint = $this->generateReplayFingerprint($data);
 
         // Check for duplicate
-        if (Replay::where('hash', $fingerprint)->exists()) {
+        if (Replay::alreadyUploaded($fingerprint)) {
             return back()->with('error', 'Replay already exists.');
         }
 
