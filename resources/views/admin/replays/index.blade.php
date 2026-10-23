@@ -21,7 +21,15 @@
                     <x-primary-button>Filter</x-primary-button>
                 </form>
 
-                <p class="text-sm text-gray-400 mb-4">{{ $games->total() }} {{ Str::plural('game', $games->total()) }}</p>
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <p class="text-sm text-gray-400">{{ $games->total() }} {{ Str::plural('game', $games->total()) }}</p>
+                    {{-- Whole-season backup: valid games of every format, unless a format is picked --}}
+                    @if($seasonId)
+                    <x-zip-download-button :season="$seasonId" :format="$format" />
+                    @else
+                    <span class="text-xs text-gray-400">Pick a season to download it as a zip.</span>
+                    @endif
+                </div>
 
                 <div class="space-y-4">
                     @forelse($games as $game)

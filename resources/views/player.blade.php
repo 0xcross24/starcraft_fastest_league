@@ -47,8 +47,11 @@
                         $selectedSeason = $seasons->firstWhere('id', $seasonId);
                         @endphp
                         @if($selectedSeason && $stats)
-                        <div class="pb-3">
+                        <div class="pb-3 flex flex-wrap items-center justify-between gap-3">
                             <div class=" text-lg font-semibold text-gray-700 dark:text-gray-200">Season {{ $selectedSeason->id }} ({{ strtoupper($format) }})</div>
+                            @if($games->total() > 0)
+                            <x-zip-download-button :season="$selectedSeason->id" :format="$format" :player="$playerName->name" :count="$games->total()" />
+                            @endif
                         </div>
                         <div class="flex flex-wrap items-center justify-start gap-8 bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-10">
                             <div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\AllReplaysController;
 use App\Http\Controllers\PlayerNameController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
+use App\Http\Controllers\ReplayZipController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BuildOrderController;
@@ -37,6 +38,7 @@ Route::middleware('auth')->group(function () {
   Route::get('/upload', [ReplayController::class, 'index'])->name('upload.index');
   Route::post('/upload', [ReplayController::class, 'upload'])->middleware('throttle:30,10')->name('upload.upload');
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
+  Route::get('/replays/download', [ReplayZipController::class, 'download'])->middleware('throttle:5,10')->name('replays.download-zip');
 });
 
 // Admin portal
