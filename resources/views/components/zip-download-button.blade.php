@@ -1,4 +1,4 @@
-@props(['season', 'format' => null, 'player' => null, 'count' => null])
+@props(['season', 'format' => null, 'player' => null, 'count' => null, 'label' => 'Download all'])
 
 {{-- Download every listed game as one zip. Logged-in only, like single downloads. --}}
 @auth
@@ -7,6 +7,6 @@
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
     </svg>
-    Download all{{ $count ? " ({$count})" : '' }} .zip
+    {{ $label }}{{ $count ? " ({$count})" : '' }} .zip
 </a>
 @endauth

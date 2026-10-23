@@ -101,7 +101,7 @@ class ReplayZipDownloadTest extends TestCase
 
         $response = $this->download(['season' => 1, 'format' => '2v2'])->assertOk();
 
-        $this->assertStringContainsString('season1_2v2.zip', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('filename=s1_2v2.zip', $response->headers->get('Content-Disposition'));
         $this->assertSame([
             '2026-10-01_2015_2v2_Wk`Cross-+Clan_[SFL]_vs_Odd-Name+D.rep' => 'replay g1',
             '2026-10-02_0905_2v2_Odd-Name+D_vs_Wk`Cross-+Clan_[SFL].rep' => 'replay g2',
@@ -120,11 +120,12 @@ class ReplayZipDownloadTest extends TestCase
 
         $onlyAResponse = $this->download(['season' => 1, 'player' => 'A']);
         $this->assertSame(['replay two', 'replay three'], array_values($this->entries($onlyAResponse->streamedContent())));
-        $this->assertStringContainsString('filename=A_season1.zip', $onlyAResponse->headers->get('Content-Disposition'));
-        $this->assertStringContainsString('filename=season1.zip', $this->download(['season' => 1])->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('filename=A_s1.zip', $onlyAResponse->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('filename=s1.zip', $this->download(['season' => 1])->headers->get('Content-Disposition'));
 
-        $aIn2v2 = $this->entries($this->download(['season' => 1, 'format' => '2v2', 'player' => 'A'])->streamedContent());
-        $this->assertSame(['replay two'], array_values($aIn2v2));
+        $aIn2v2Response = $this->download(['season' => 1, 'format' => '2v2', 'player' => 'A']);
+        $this->assertSame(['replay two'], array_values($this->entries($aIn2v2Response->streamedContent())));
+        $this->assertStringContainsString('filename=A_s1_2v2.zip', $aIn2v2Response->headers->get('Content-Disposition'));
     }
 
     public function test_games_whose_file_is_missing_are_skipped_and_an_empty_result_goes_back(): void
@@ -163,7 +164,9 @@ class ReplayZipDownloadTest extends TestCase
         // The profile button covers the whole season, both formats
         $this->game('a-3v3', [$a, $b, $c], [$d, $this->makeName('E'), $this->makeName('F')], '3v3');
         $this->actingAs(User::factory()->create())->get('/player/A?season=1&format=2v2')
+            ->assertSee(route('replays.download-zip', ['season' => 1, 'format' => '2v2', 'player' => 'A']))
+            ->assertSee('Download 2v2 (1) .zip')
             ->assertSee(route('replays.download-zip', ['season' => 1, 'player' => 'A']))
-            ->assertSee('Download all (2) .zip');
+            ->assertSee('Download all formats (2) .zip');
     }
 }
