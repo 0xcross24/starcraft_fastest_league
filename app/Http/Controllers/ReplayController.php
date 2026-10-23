@@ -241,6 +241,12 @@ class ReplayController extends Controller
 
         $eloResults = $this->statsController->calculateElo($winners, $losers, $format);
 
+        // Each name's ELO after this game, stored on its replay row
+        $eloAfter = Stats::where('season_id', $currentSeason->id)
+            ->where('format', $format)
+            ->whereIn('player_name_id', $names->pluck('id'))
+            ->pluck('elo', 'player_name_id');
+
         foreach ($playersData as $playerData) {
             $player = $playerData['player'];
             $playerName = $nameFor($playerData['name']);
@@ -260,6 +266,7 @@ class ReplayController extends Controller
                 'player_name_id' => $playerName->id,
                 'replay_file' => $filePath,
                 'points' => $eloResults['eloChanges'][$playerName->id] ?? 0,
+                'elo_after' => $eloAfter[$playerName->id] ?? null,
                 'season_id' => $currentSeason->id,
                 'format' => $format,
             ]);
@@ -292,14 +299,13 @@ class ReplayController extends Controller
         $seasonId = request('season') ?: ($seasons->count() ? $seasons->max('id') : null);
         $format = request('format', '2v2');
 
-        $replayIds = Replay::where('player_name_id', $playerName->id)
-            ->where('season_id', $seasonId)
-            ->where('format', $format)
-            ->pluck('replay_id');
+        $games = Replay::gamesPage(
+            Replay::where('player_name_id', $playerName->id)
+                ->where('season_id', $seasonId)
+                ->where('format', $format)
+        );
 
-        $replays = Replay::whereIn('replay_id', $replayIds)
-            ->where('season_id', $seasonId)
-            ->where('format', $format)
+        $replays = Replay::whereIn('replay_id', $games->pluck('replay_id'))
             ->orderByDesc('created_at')
             ->get();
 
@@ -331,7 +337,7 @@ class ReplayController extends Controller
                 ->count() + 1
             : null;
 
-        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
+        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
     }
 
     public function download($uuid)
