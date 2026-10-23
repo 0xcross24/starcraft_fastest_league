@@ -14,11 +14,13 @@ class AllReplaysController extends Controller
         $seasonId = $request->input('season') ?: ($seasons->count() ? $seasons->max('id') : null);
         $format = $request->input('format', '2v2');
 
-        $replays = Replay::where('season_id', $seasonId)
-            ->where('format', $format)
+        $games = Replay::gamesPage(
+            Replay::where('season_id', $seasonId)->where('format', $format)
+        );
+        $replays = Replay::whereIn('replay_id', $games->pluck('replay_id'))
             ->orderByDesc('created_at')
             ->get();
 
-        return view('replays.all', compact('seasons', 'seasonId', 'format', 'replays'));
+        return view('replays.all', compact('seasons', 'seasonId', 'format', 'replays', 'games'));
     }
 }

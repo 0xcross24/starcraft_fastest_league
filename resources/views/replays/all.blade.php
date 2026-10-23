@@ -44,23 +44,6 @@
                             <p>No replays found for this season and format.</p>
                             @else
                             @php
-                            // Calculate ELO progression in ascending order, store for each replay
-                            $eloProgression = [];
-                            $eloTracker = [];
-                            $replayGroupsAsc = $replays->groupBy('replay_id')->sortBy(function($groupedReplays) { return $groupedReplays->first()->created_at; });
-                            foreach ($replayGroupsAsc as $replayIdAsc => $groupedReplaysAsc) {
-                            foreach (['1', '2'] as $teamNum) {
-                            $team = $groupedReplaysAsc->where('team', $teamNum);
-                            foreach ($team as $player) {
-                            $uid = $player->player_name_id ?? $player->user_id;
-                            if (!isset($eloTracker[$uid])) {
-                            $eloTracker[$uid] = 1000;
-                            }
-                            $eloTracker[$uid] += ($player->points ?? 0);
-                            $eloProgression[$replayIdAsc][$uid] = $eloTracker[$uid];
-                            }
-                            }
-                            }
                             $replayGroupsDesc = $replays->groupBy('replay_id')->sortByDesc(function($groupedReplays) { return $groupedReplays->first()->created_at; });
                             @endphp
                             @foreach($replayGroupsDesc as $replayId => $groupedReplays)
@@ -108,10 +91,9 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->player_name_id ?? $player->user_id;
-                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
+                                                $eloAfter = $player->elo_after;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter ?? '—' }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -146,10 +128,9 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->player_name_id ?? $player->user_id;
-                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
+                                                $eloAfter = $player->elo_after;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter ?? '—' }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -161,6 +142,7 @@
                                 <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
                             </div>
                             @endforeach
+                            <div class="mt-6">{{ $games->links() }}</div>
                             @endif
                         </div>
                     </div>

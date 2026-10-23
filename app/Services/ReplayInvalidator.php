@@ -40,6 +40,7 @@ class ReplayInvalidator
                 }
                 $replay->is_invalid = true;
                 $replay->points = 0;
+                $replay->elo_after = null;
                 $replay->save();
             }
         });
