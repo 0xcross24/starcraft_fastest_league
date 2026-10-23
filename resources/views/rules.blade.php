@@ -67,6 +67,7 @@
                     <li>No buildings can be used to block the players' choke.</li>
                     <li>Photon Cannons cannot be built outside of players' bases. Pylons & other buildings are allowed outside of players' bases.</li>
                     <li>There are no limits to Photon Cannons inside a player's own base. However, Photon Cannons built inside the base must not be able to reach the choke of the base except for the one allowance.</li>
+                    <li>No units are allowed on cliffs.</li>
                   </ul>
                 </div>
               </div>
