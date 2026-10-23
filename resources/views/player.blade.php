@@ -83,23 +83,6 @@
                             <p>No 2v2 replays found for this season.</p>
                             @else
                             @php
-                            // Calculate ELO progression in ascending order, store for each replay
-                            $eloProgression = [];
-                            $eloTracker = [];
-                            $replayGroupsAsc = $seasonReplays2v2->groupBy('replay_id')->sortBy(function($groupedReplays) { return $groupedReplays->first()->created_at; });
-                            foreach ($replayGroupsAsc as $replayIdAsc => $groupedReplaysAsc) {
-                            foreach (['1', '2'] as $teamNum) {
-                            $team = $groupedReplaysAsc->where('team', $teamNum);
-                            foreach ($team as $player) {
-                            $uid = $player->player_name_id ?? $player->user_id;
-                            if (!isset($eloTracker[$uid])) {
-                            $eloTracker[$uid] = 1000;
-                            }
-                            $eloTracker[$uid] += ($player->points ?? 0);
-                            $eloProgression[$replayIdAsc][$uid] = $eloTracker[$uid];
-                            }
-                            }
-                            }
                             $replayGroupsDesc = $seasonReplays2v2->groupBy('replay_id')->sortByDesc(function($groupedReplays) { return $groupedReplays->first()->created_at; });
                             @endphp
                             @foreach($replayGroupsDesc as $replayId => $groupedReplays)
@@ -148,10 +131,9 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->player_name_id ?? $player->user_id;
-                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
+                                                $eloAfter = $player->elo_after;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter ?? '—' }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -186,10 +168,9 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->player_name_id ?? $player->user_id;
-                                                $eloAfter = $eloProgression[$replayId][$uid] ?? 1000;
+                                                $eloAfter = $player->elo_after;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter ?? '—' }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -210,23 +191,6 @@
                             <p>No 3v3 replays found for this season.</p>
                             @else
                             @php
-                            // Calculate ELO progression for 3v3 in ascending order, store for each replay
-                            $eloProgression3v3 = [];
-                            $eloTracker3v3 = [];
-                            $replayGroupsAsc3v3 = $seasonReplays3v3->groupBy('replay_id')->sortBy(function($groupedReplays) { return $groupedReplays->first()->created_at; });
-                            foreach ($replayGroupsAsc3v3 as $replayIdAsc => $groupedReplaysAsc) {
-                            foreach (['1', '2'] as $teamNum) {
-                            $team = $groupedReplaysAsc->where('team', $teamNum);
-                            foreach ($team as $player) {
-                            $uid = $player->player_name_id ?? $player->user_id;
-                            if (!isset($eloTracker3v3[$uid])) {
-                            $eloTracker3v3[$uid] = 1000;
-                            }
-                            $eloTracker3v3[$uid] += ($player->points ?? 0);
-                            $eloProgression3v3[$replayIdAsc][$uid] = $eloTracker3v3[$uid];
-                            }
-                            }
-                            }
                             $replayGroupsDesc3v3 = $seasonReplays3v3->groupBy('replay_id')->sortByDesc(function($groupedReplays) { return $groupedReplays->first()->created_at; });
                             @endphp
                             @foreach($replayGroupsDesc3v3 as $replayId => $groupedReplays)
@@ -274,10 +238,9 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->player_name_id ?? $player->user_id;
-                                                $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
+                                                $eloAfter = $player->elo_after;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter ?? '—' }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -312,10 +275,9 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
                                                 @php
-                                                $uid = $player->player_name_id ?? $player->user_id;
-                                                $eloAfter = $eloProgression3v3[$replayId][$uid] ?? 1000;
+                                                $eloAfter = $player->elo_after;
                                                 @endphp
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $eloAfter ?? '—' }}</td>
                                             </tr>
                                             @endforeach
                                         </tbody>
@@ -329,6 +291,7 @@
                             @endforeach
                             @endif
                             @endif
+                            <div class="mt-6">{{ $games->links() }}</div>
                         </div>
                         @endif
 
