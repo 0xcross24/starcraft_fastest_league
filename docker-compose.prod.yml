@@ -11,7 +11,8 @@ services:
     volumes:
       - ./:/var/www/html
       - ./storage:/var/www/html/storage
-    environment:
+    # Anchored so the scheduler gets exactly the same settings (see below).
+    environment: &app-env
       APP_ENV: production
       APP_DEBUG: false
       APP_URL: https://starcraftfastest.us
@@ -75,6 +76,10 @@ services:
       - app
       - mysql
       - redis
+    # Same DB settings as app. Without them the scheduler fell back to parsing
+    # .env itself, where an unquoted '#' in DB_PASSWORD cut the password short,
+    # so every scheduled job (including season:start-next) was denied by MySQL.
+    environment: *app-env
     command: sh -c "while true; do php artisan schedule:run --no-ansi >> /dev/null 2>&1; sleep 60; done"
     restart: unless-stopped
 
