@@ -31,9 +31,28 @@ class Replay extends Model
     'is_invalid',
   ];
 
+  /**
+   * Whether this game is already on record. Rows an admin invalidated don't
+   * count, so the corrected upload of that game can go through; the invalid
+   * rows stay as history.
+   */
+  public static function alreadyUploaded(string $fingerprint): bool
+  {
+    return static::where('hash', $fingerprint)->where('is_invalid', false)->exists();
+  }
+
   function user()
   {
     return $this->hasMany(User::class);
+  }
+
+  /**
+   * Rows that count. Invalidated games stay in the table as history (and in
+   * the admin portal) but are hidden from the public lists.
+   */
+  public function scopeValid($query)
+  {
+    return $query->where('is_invalid', false);
   }
 
   public const GAMES_PER_PAGE = 20;
