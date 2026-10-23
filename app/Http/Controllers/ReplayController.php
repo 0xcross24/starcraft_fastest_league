@@ -309,6 +309,13 @@ class ReplayController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        // The profile's zip download covers the whole season, both formats
+        $seasonGameCount = Replay::valid()
+            ->where('player_name_id', $playerName->id)
+            ->where('season_id', $seasonId)
+            ->distinct()
+            ->count('replay_id');
+
         $stats = Stats::where('player_name_id', $playerName->id)
             ->where('season_id', $seasonId)
             ->where('format', $format)
@@ -337,7 +344,7 @@ class ReplayController extends Controller
                 ->count() + 1
             : null;
 
-        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
+        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'seasonGameCount', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
     }
 
     public function download($uuid)

@@ -50,7 +50,9 @@ class ReplayZipController extends Controller
             return back()->with('error', 'No replays to download for that selection.');
         }
 
-        $zipName = collect(['SFL', 'season-' . $season->id, $format, $playerName ? $this->safe($playerName->name) : null])
+        // Wk`Cross-_season2.zip from a profile, season2_2v2.zip from the list,
+        // season2.zip for a whole season.
+        $zipName = collect([$playerName ? $this->safe($playerName->name) : null, 'season' . $season->id, $format])
             ->filter()->implode('_') . '.zip';
 
         return response()->streamDownload(function () use ($files) {
