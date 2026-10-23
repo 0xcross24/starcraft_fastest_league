@@ -103,9 +103,21 @@ class ReplayZipDownloadTest extends TestCase
 
         $this->assertStringContainsString('filename=s1_2v2.zip', $response->headers->get('Content-Disposition'));
         $this->assertSame([
-            '2026-10-01_2015_2v2_Wk`Cross-+Clan_[SFL]_vs_Odd-Name+D.rep' => 'replay g1',
-            '2026-10-02_0905_2v2_Odd-Name+D_vs_Wk`Cross-+Clan_[SFL].rep' => 'replay g2',
+            '2026-10-01_Wk`Cross-+Clan_[SFL]_vs_Odd-Name+D.rep' => 'replay g1',
+            '2026-10-02_Odd-Name+D_vs_Wk`Cross-+Clan_[SFL].rep' => 'replay g2',
         ], $this->entries($response->streamedContent()));
+    }
+
+    public function test_a_rematch_on_the_same_day_gets_a_number(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('first', [$a, $b], [$c, $d], '2v2', '2026-10-01 20:00:00');
+        $this->game('second', [$a, $b], [$c, $d], '2v2', '2026-10-01 21:00:00');
+
+        $this->assertSame([
+            '2026-10-01_A+B_vs_C+D.rep' => 'replay first',
+            '2026-10-01_A+B_vs_C+D_2.rep' => 'replay second',
+        ], $this->entries($this->download(['season' => 1])->streamedContent()));
     }
 
     public function test_format_and_player_filters(): void

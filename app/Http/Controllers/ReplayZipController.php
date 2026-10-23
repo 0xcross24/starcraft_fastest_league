@@ -70,7 +70,8 @@ class ReplayZipController extends Controller
 
     /**
      * Archive name => path on disk, skipping games whose file is missing.
-     * Names read like 2025-09-16_0414_2v2_A+B_vs_C+D.rep.
+     * Names read like 2025-09-16_A+B_vs_C+D.rep; a second game with the same
+     * teams that day becomes ..._2.rep (games are in the order played).
      */
     private function files(Collection $games): Collection
     {
@@ -86,8 +87,8 @@ class ReplayZipController extends Controller
             $teams = $rows->groupBy('team')->map(
                 fn($team) => $team->pluck('player_name')->map(fn($n) => $this->safe($n))->implode('+')
             );
-            $base = Carbon::parse($first->start_time ?? $first->created_at)->format('Y-m-d_Hi')
-                . '_' . $first->format . '_' . $teams->implode('_vs_');
+            $base = Carbon::parse($first->start_time ?? $first->created_at)->format('Y-m-d')
+                . '_' . $teams->implode('_vs_');
 
             $name = Str::limit($base, 180, '') . '.rep';
             for ($i = 2; $files->has($name); $i++) {
