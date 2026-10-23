@@ -15,7 +15,7 @@ class AllReplaysController extends Controller
         $format = $request->input('format', '2v2');
 
         $games = Replay::gamesPage(
-            Replay::where('season_id', $seasonId)->where('format', $format)
+            Replay::valid()->where('season_id', $seasonId)->where('format', $format)
         );
         $replays = Replay::whereIn('replay_id', $games->pluck('replay_id'))
             ->orderByDesc('created_at')

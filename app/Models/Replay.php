@@ -46,6 +46,15 @@ class Replay extends Model
     return $this->hasMany(User::class);
   }
 
+  /**
+   * Rows that count. Invalidated games stay in the table as history (and in
+   * the admin portal) but are hidden from the public lists.
+   */
+  public function scopeValid($query)
+  {
+    return $query->where('is_invalid', false);
+  }
+
   public const GAMES_PER_PAGE = 20;
 
   /**

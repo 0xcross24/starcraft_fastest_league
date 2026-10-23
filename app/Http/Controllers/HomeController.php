@@ -36,7 +36,7 @@ class HomeController extends Controller
             ->get();
 
         // Get 5 most recent replays (optionally filter by current season)
-        $recentReplays = \App\Models\Replay::with('season')
+        $recentReplays = \App\Models\Replay::valid()->with('season')
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
@@ -44,7 +44,7 @@ class HomeController extends Controller
         // Get the 5 most recent replay_ids and group all players for each replay
 
         // MySQL does not allow orderBy with distinct, so use a subquery to get the latest 5 replay_ids
-        $recentReplayIds = \App\Models\Replay::select('replay_id', 'created_at')
+        $recentReplayIds = \App\Models\Replay::valid()->select('replay_id', 'created_at')
             ->orderByDesc('created_at')
             ->get()
             ->unique('replay_id')

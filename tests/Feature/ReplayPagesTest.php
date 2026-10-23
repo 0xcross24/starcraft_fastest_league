@@ -132,4 +132,21 @@ class ReplayPagesTest extends TestCase
         $page->assertSeeInOrder(['Opp1', 'Zerg', '1030']);
         $page->assertDontSee('>990<', false);
     }
+
+    public function test_invalidated_games_are_hidden_from_public_lists_but_not_from_admins(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('kept-game', [$a, $b], [$c, $d], 10, '2026-01-01 10:00:00');
+        $this->game('voided-game', [$a, $b], [$c, $d], 10, '2026-01-01 11:00:00');
+        app(ReplayInvalidator::class)->invalidate(Replay::where('replay_id', 'voided-game')->get());
+
+        foreach (['/replays?season=1&format=2v2', '/player/A?season=1&format=2v2', '/'] as $url) {
+            $this->get($url)->assertOk()->assertSee('kept-gam')->assertDontSee('voided-g');
+        }
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->withSession(['auth.password_confirmed_at' => time()])
+            ->get('/admin/replays')
+            ->assertOk()->assertSee('voided-g');
+    }
 }

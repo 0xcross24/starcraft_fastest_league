@@ -300,7 +300,7 @@ class ReplayController extends Controller
         $format = request('format', '2v2');
 
         $games = Replay::gamesPage(
-            Replay::where('player_name_id', $playerName->id)
+            Replay::valid()->where('player_name_id', $playerName->id)
                 ->where('season_id', $seasonId)
                 ->where('format', $format)
         );
