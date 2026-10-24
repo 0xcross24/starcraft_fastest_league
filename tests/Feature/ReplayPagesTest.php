@@ -149,4 +149,23 @@ class ReplayPagesTest extends TestCase
             ->get('/admin/replays')
             ->assertOk()->assertSee('voided-g');
     }
+
+    public function test_profile_shows_its_own_team_first_with_win_or_loss(): void
+    {
+        [$me, $mate, $opp1, $opp2] = array_map(fn($n) => $this->makeName($n), ['Me', 'Mate', 'Opp1', 'Opp2']);
+        // Me is on team 2 in both games: lost the first, won the second
+        $this->game('lost-game', [$opp1, $opp2], [$me, $mate], 10, '2026-01-01 10:00:00');
+        $this->game('won-game', [$me, $mate], [$opp1, $opp2], 10, '2026-01-01 11:00:00');
+        Replay::where('replay_id', 'won-game')->update(['team' => \DB::raw("CASE team WHEN '1' THEN '2' ELSE '1' END")]);
+        $me->ensureStats($this->season);
+
+        $page = $this->get('/player/Me?season=1&format=2v2')->assertOk()->assertDontSee('Team 1')->assertDontSee('Team 2');
+
+        // Newest first; each game: own result, own team, then the opponents
+        $page->assertSeeInOrder(['won-gam', 'Win', 'Me', 'Mate', 'Opponents', 'Opp1', 'Opp2',
+                                 'lost-ga', 'Loss', 'Me', 'Mate', 'Opponents', 'Opp1', 'Opp2']);
+
+        // The Replays page keeps neutral Team 1 / Team 2
+        $this->get('/replays?season=1&format=2v2')->assertSee('Team 1')->assertSee('Team 2');
+    }
 }

@@ -96,8 +96,10 @@
                             @endphp
                             @foreach($replayGroupsDesc as $replayId => $groupedReplays)
                             @php
-                            $team1 = $groupedReplays->where('team', '1');
-                            $team2 = $groupedReplays->where('team', '2');
+                            // From this profile's side: its team on the left, opponents on the right
+                            $ownTeam = optional($groupedReplays->firstWhere('player_name_id', $playerName->id))->team ?? '1';
+                            $team1 = $groupedReplays->where('team', $ownTeam);
+                            $team2 = $groupedReplays->where('team', '!=', $ownTeam);
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
@@ -110,10 +112,10 @@
                                 <span class="ml-2 text-gray-300">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
-                                <!-- Team 1 -->
+                                <!-- This profile's team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
+                                        {{ $team1Win ? 'Win' : 'Loss' }}
                                     </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
@@ -148,10 +150,10 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <!-- Team 2 -->
+                                <!-- Opponents -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
+                                    <div class="p-2 font-bold text-left text-gray-400">
+                                        Opponents
                                     </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
@@ -204,8 +206,10 @@
                             @endphp
                             @foreach($replayGroupsDesc3v3 as $replayId => $groupedReplays)
                             @php
-                            $team1 = $groupedReplays->where('team', '1');
-                            $team2 = $groupedReplays->where('team', '2');
+                            // From this profile's side: its team on the left, opponents on the right
+                            $ownTeam = optional($groupedReplays->firstWhere('player_name_id', $playerName->id))->team ?? '1';
+                            $team1 = $groupedReplays->where('team', $ownTeam);
+                            $team2 = $groupedReplays->where('team', '!=', $ownTeam);
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
@@ -218,10 +222,10 @@
                                 <span class="ml-2 text-gray-300">{{ $timestamp ? (\Carbon\Carbon::parse($timestamp)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
-                                <!-- Team 1 -->
+                                <!-- This profile's team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
+                                        {{ $team1Win ? 'Win' : 'Loss' }}
                                     </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
@@ -255,10 +259,10 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <!-- Team 2 -->
+                                <!-- Opponents -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
+                                    <div class="p-2 font-bold text-left text-gray-400">
+                                        Opponents
                                     </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
