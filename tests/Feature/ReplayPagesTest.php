@@ -165,6 +165,10 @@ class ReplayPagesTest extends TestCase
         $page->assertSeeInOrder(['WIN', 'Me', 'Mate', 'vs', 'Opp1', 'Opp2', '+10', 'won-gam', 'Me', 'Mate', 'Opp1', 'Opp2',
                                  'LOST', 'Me', 'Mate', 'vs', 'Opp1', 'Opp2', '-10', 'lost-ga', 'Me', 'Mate', 'Opp1', 'Opp2']);
         $page->assertDontSee('Opponents');
+        // The profile's own name is never a link to the page you're on; others are
+        $page->assertDontSee(route('player', ['user' => 'Me']), false)
+            ->assertSee(route('player', ['user' => 'Mate']), false)
+            ->assertSee(route('player', ['user' => 'Opp1']), false);
         $page->assertSee('All (2)')->assertSee('Wins (1)')->assertSee('Lost (1)');
 
         // Filters: only the losses (and to whom), only the wins

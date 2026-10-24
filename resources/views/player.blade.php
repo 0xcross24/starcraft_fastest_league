@@ -141,7 +141,7 @@
                                             @foreach($team1 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -175,7 +175,7 @@
                                             @foreach($team2 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -238,7 +238,7 @@
                                             @foreach($team1 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -272,7 +272,7 @@
                                             @foreach($team2 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
