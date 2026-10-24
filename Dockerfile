@@ -19,6 +19,14 @@ RUN { \
         echo 'opcache.revalidate_freq=0'; \
     } > /usr/local/etc/php/conf.d/opcache-deploy.ini
 
+# Batch replay uploads: up to 20 files of up to 2 MB each in one request.
+# nginx/conf.d sets client_max_body_size to match.
+RUN { \
+        echo 'upload_max_filesize=2M'; \
+        echo 'max_file_uploads=20'; \
+        echo 'post_max_size=50M'; \
+    } > /usr/local/etc/php/conf.d/uploads.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
