@@ -3,7 +3,7 @@
         <div class="max-w-screen-xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <div class="container w-full">
+                    <div class="w-full">
                         <ul class="flex border-b border-gray-200 mb-2">
                             @foreach($seasons as $season)
                             <li class="mr-8">
@@ -66,21 +66,21 @@
                                 Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
                                 <span class="ml-2 text-gray-300">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
                             </div>
-                            <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
+                            <div class="flex flex-col xl:flex-row gap-3 xl:gap-0 mb-6">
                                 <!-- Team 1 -->
-                                <div class="w-full md:w-1/2 overflow-x-auto">
+                                <div class="w-full xl:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full md:table-fixed border-collapse border border-gray-200">
+                                    <table class="w-full xl:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20 hidden sm:table-cell">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20 hidden sm:table-cell">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -105,19 +105,19 @@
                                     </table>
                                 </div>
                                 <!-- Team 2 -->
-                                <div class="w-full md:w-1/2 overflow-x-auto">
+                                <div class="w-full xl:w-1/2 overflow-x-auto">
                                     <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
                                         Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
                                     </div>
-                                    <table class="w-full md:table-fixed border-collapse border border-gray-200">
+                                    <table class="w-full xl:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-40">Player</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Race</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">APM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20 hidden sm:table-cell">EAPM</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">Points</th>
-                                                <th class="px-2 py-1 text-center text-gray-200 text-sm md:w-20">New ELO</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-40">Player</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">Race</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">APM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20 hidden sm:table-cell">EAPM</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">Points</th>
+                                                <th class="px-2 py-1 text-center text-gray-200 text-sm xl:w-20">New ELO</th>
                                             </tr>
                                         </thead>
                                         <tbody>
