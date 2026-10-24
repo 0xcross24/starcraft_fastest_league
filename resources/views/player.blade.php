@@ -20,13 +20,13 @@
                         </ul>
                         <ul class="flex mb-6">
                             <li class="mr-4">
-                                <a href="?season={{ $seasonId }}&format=2v2"
+                                <a href="?season={{ $seasonId }}&format=2v2{{ $result ? '&result='.$result : '' }}"
                                     class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format', '2v2') == '2v2' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
                                     2v2
                                 </a>
                             </li>
                             <li>
-                                <a href="?season={{ $seasonId }}&format=3v3"
+                                <a href="?season={{ $seasonId }}&format=3v3{{ $result ? '&result='.$result : '' }}"
                                     class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format') == '3v3' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
                                     3v3
                                 </a>
@@ -84,6 +84,21 @@
                         @endif
                         @if($selectedSeason)
                         <div id="season-{{ $selectedSeason->id }}" class="season-ranking block mt-10">
+                            {{-- All / Wins / Lost: every game this player lost, and to whom, in one click --}}
+                            <ul class="flex gap-2 mb-4 text-sm">
+                                @foreach(['all' => 'All', 'win' => 'Wins', 'lost' => 'Lost'] as $key => $label)
+                                @php
+                                $n = match ($key) { 'all' => $resultCounts->sum(), 'win' => $resultCounts[1] ?? 0, 'lost' => $resultCounts[0] ?? 0 };
+                                $active = ($result ?? 'all') === $key;
+                                @endphp
+                                <li>
+                                    <a href="?{{ http_build_query(array_filter(['season' => $seasonId, 'format' => $format, 'result' => $key === 'all' ? null : $key])) }}"
+                                        class="inline-block rounded px-3 py-1 font-semibold {{ $active ? ['all' => 'bg-blue-600', 'win' => 'bg-emerald-600', 'lost' => 'bg-red-600'][$key] . ' text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }}">
+                                        {{ $label }} ({{ $n }})
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
                             @if($format === '2v2')
                             @php
                             $seasonReplays2v2 = $replays->where('season_id', $selectedSeason->id)->where('format', '2v2')->sortBy('created_at');
@@ -96,25 +111,18 @@
                             @endphp
                             @foreach($replayGroupsDesc as $replayId => $groupedReplays)
                             @php
-                            $team1 = $groupedReplays->where('team', '1');
-                            $team2 = $groupedReplays->where('team', '2');
+                            // From this profile's side: its team on the left, opponents on the right
+                            $ownTeam = optional($groupedReplays->firstWhere('player_name_id', $playerName->id))->team ?? '1';
+                            $team1 = $groupedReplays->where('team', $ownTeam);
+                            $team2 = $groupedReplays->where('team', '!=', $ownTeam);
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
-                            <div class="w-full text-xs text-gray-300 px-3 py-1 border-b border-gray-200 dark:border-gray-700">
-                                @php
-                                $firstReplay = $groupedReplays->first();
-                                $uploadTime = $firstReplay?->created_at;
-                                @endphp
-                                Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
-                                <span class="ml-2 text-gray-300">Upload: {{ $uploadTime ? (\Carbon\Carbon::parse($uploadTime)->format('Y-m-d H:i')) : '' }}</span>
-                            </div>
+                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
+                                :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
-                                <!-- Team 1 -->
+                                <!-- This profile's team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
-                                    </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
@@ -133,7 +141,7 @@
                                             @foreach($team1 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -148,11 +156,8 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <!-- Team 2 -->
+                                <!-- Other team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
-                                    </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
@@ -170,7 +175,7 @@
                                             @foreach($team2 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -204,25 +209,18 @@
                             @endphp
                             @foreach($replayGroupsDesc3v3 as $replayId => $groupedReplays)
                             @php
-                            $team1 = $groupedReplays->where('team', '1');
-                            $team2 = $groupedReplays->where('team', '2');
+                            // From this profile's side: its team on the left, opponents on the right
+                            $ownTeam = optional($groupedReplays->firstWhere('player_name_id', $playerName->id))->team ?? '1';
+                            $team1 = $groupedReplays->where('team', $ownTeam);
+                            $team2 = $groupedReplays->where('team', '!=', $ownTeam);
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
-                            <div class="w-full text-xs text-gray-300 px-3 py-1 border-b border-gray-200 dark:border-gray-700">
-                                @php
-                                $firstReplay = $groupedReplays->first();
-                                $timestamp = $firstReplay?->start_time ?? $firstReplay?->created_at;
-                                @endphp
-                                Replay ID: <span class="font-mono">{{ substr($replayId, 0, 8) }}</span>
-                                <span class="ml-2 text-gray-300">{{ $timestamp ? (\Carbon\Carbon::parse($timestamp)->format('Y-m-d H:i')) : '' }}</span>
-                            </div>
+                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
+                                :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
-                                <!-- Team 1 -->
+                                <!-- This profile's team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 1 {{ $team1Win ? 'Won' : 'Lost' }}
-                                    </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
@@ -240,7 +238,7 @@
                                             @foreach($team1 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -255,11 +253,8 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <!-- Team 2 -->
+                                <!-- Other team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team2Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        Team 2 {{ $team2Win ? 'Won' : 'Lost' }}
-                                    </div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
@@ -277,7 +272,7 @@
                                             @foreach($team2 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    <a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>
+                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>

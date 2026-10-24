@@ -149,4 +149,39 @@ class ReplayPagesTest extends TestCase
             ->get('/admin/replays')
             ->assertOk()->assertSee('voided-g');
     }
+
+    public function test_profile_shows_its_own_team_first_with_win_or_loss(): void
+    {
+        [$me, $mate, $opp1, $opp2] = array_map(fn($n) => $this->makeName($n), ['Me', 'Mate', 'Opp1', 'Opp2']);
+        // Me is on team 2 in both games: lost the first, won the second
+        $this->game('lost-game', [$opp1, $opp2], [$me, $mate], 10, '2026-01-01 10:00:00');
+        $this->game('won-game', [$me, $mate], [$opp1, $opp2], 10, '2026-01-01 11:00:00');
+        Replay::where('replay_id', 'won-game')->update(['team' => \DB::raw("CASE team WHEN '1' THEN '2' ELSE '1' END")]);
+        $me->ensureStats($this->season);
+
+        $page = $this->get('/player/Me?season=1&format=2v2')->assertOk()->assertDontSee('Team 1')->assertDontSee('Team 2');
+
+        // Header: result, points, replay id and no names; then the tables
+        $page->assertSeeInOrder(['WIN', '+10', 'won-gam', 'Me', 'Mate', 'Opp1', 'Opp2',
+                                 'LOST', '-10', 'lost-ga', 'Me', 'Mate', 'Opp1', 'Opp2']);
+        foreach (['won-game' => 'WIN', 'lost-game' => 'LOST'] as $game => $badge) {
+            $header = \Illuminate\Support\Str::betweenFirst($page->getContent(), ">{$badge}<", substr($game, 0, 8));
+            $this->assertDoesNotMatchRegularExpression('/Me|Mate|Opp1|Opp2|vs/', $header);
+        }
+        $page->assertDontSee('Opponents');
+        // The profile's own name is never a link to the page you're on; others are
+        $page->assertDontSee(route('player', ['user' => 'Me']), false)
+            ->assertSee(route('player', ['user' => 'Mate']), false)
+            ->assertSee(route('player', ['user' => 'Opp1']), false);
+        $page->assertSee('All (2)')->assertSee('Wins (1)')->assertSee('Lost (1)');
+
+        // Filters: only the losses (and to whom), only the wins
+        $this->get('/player/Me?season=1&format=2v2&result=lost')->assertOk()
+            ->assertSee('lost-ga')->assertDontSee('won-gam');
+        $this->get('/player/Me?season=1&format=2v2&result=win')->assertOk()
+            ->assertSee('won-gam')->assertDontSee('lost-ga');
+
+        // The Replays page keeps neutral Team 1 / Team 2
+        $this->get('/replays?season=1&format=2v2')->assertSee('Team 1')->assertSee('Team 2');
+    }
 }
