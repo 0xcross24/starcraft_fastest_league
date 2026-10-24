@@ -161,10 +161,13 @@ class ReplayPagesTest extends TestCase
 
         $page = $this->get('/player/Me?season=1&format=2v2')->assertOk()->assertDontSee('Team 1')->assertDontSee('Team 2');
 
-        // Header: result, teammate vs opponents, points (no own name); then the tables
-        $page->assertSeeInOrder(['WIN', 'Mate', 'vs', 'Opp1', 'Opp2', '+10', 'won-gam', 'Me', 'Mate', 'Opp1', 'Opp2',
-                                 'LOST', 'Mate', 'vs', 'Opp1', 'Opp2', '-10', 'lost-ga', 'Me', 'Mate', 'Opp1', 'Opp2']);
-        $this->assertDoesNotMatchRegularExpression('/(WIN|LOST)<\/span>\s*<span class="text-sm text-gray-200">\s*[^<]*Me\b/', $page->getContent());
+        // Header: result, points, replay id and no names; then the tables
+        $page->assertSeeInOrder(['WIN', '+10', 'won-gam', 'Me', 'Mate', 'Opp1', 'Opp2',
+                                 'LOST', '-10', 'lost-ga', 'Me', 'Mate', 'Opp1', 'Opp2']);
+        foreach (['won-game' => 'WIN', 'lost-game' => 'LOST'] as $game => $badge) {
+            $header = \Illuminate\Support\Str::betweenFirst($page->getContent(), ">{$badge}<", substr($game, 0, 8));
+            $this->assertDoesNotMatchRegularExpression('/Me|Mate|Opp1|Opp2|vs/', $header);
+        }
         $page->assertDontSee('Opponents');
         // The profile's own name is never a link to the page you're on; others are
         $page->assertDontSee(route('player', ['user' => 'Me']), false)

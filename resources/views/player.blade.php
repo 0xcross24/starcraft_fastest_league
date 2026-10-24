@@ -118,7 +118,7 @@
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
-                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win" :team="$team1" :opponents="$team2"
+                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
                                 :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
                                 <!-- This profile's team -->
@@ -216,7 +216,7 @@
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
-                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win" :team="$team1" :opponents="$team2"
+                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
                                 :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
                                 <!-- This profile's team -->
