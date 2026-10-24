@@ -161,9 +161,17 @@ class ReplayPagesTest extends TestCase
 
         $page = $this->get('/player/Me?season=1&format=2v2')->assertOk()->assertDontSee('Team 1')->assertDontSee('Team 2');
 
-        // Newest first; each game: own result, own team, then the opponents
-        $page->assertSeeInOrder(['won-gam', 'Win', 'Me', 'Mate', 'Opponents', 'Opp1', 'Opp2',
-                                 'lost-ga', 'Loss', 'Me', 'Mate', 'Opponents', 'Opp1', 'Opp2']);
+        // Newest first. Each game opens with a result line (WIN/LOST vs who, points),
+        // then the profile's team and the opponents.
+        $page->assertSeeInOrder(['WIN', 'vs', 'Opp1', 'Opp2', '+10', 'won-gam', 'Win', 'Me', 'Mate', 'Opponents', 'Opp1', 'Opp2',
+                                 'LOST', 'vs', 'Opp1', 'Opp2', '-10', 'lost-ga', 'Lost', 'Me', 'Mate', 'Opponents', 'Opp1', 'Opp2']);
+        $page->assertSee('All (2)')->assertSee('Wins (1)')->assertSee('Lost (1)');
+
+        // Filters: only the losses (and to whom), only the wins
+        $this->get('/player/Me?season=1&format=2v2&result=lost')->assertOk()
+            ->assertSee('lost-ga')->assertDontSee('won-gam')->assertSee('vs');
+        $this->get('/player/Me?season=1&format=2v2&result=win')->assertOk()
+            ->assertSee('won-gam')->assertDontSee('lost-ga');
 
         // The Replays page keeps neutral Team 1 / Team 2
         $this->get('/replays?season=1&format=2v2')->assertSee('Team 1')->assertSee('Team 2');

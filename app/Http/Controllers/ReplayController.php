@@ -369,11 +369,19 @@ class ReplayController extends Controller
         $seasonId = request('season') ?: ($seasons->count() ? $seasons->max('id') : null);
         $format = request('format', '2v2');
 
+        // Optional filter: only the games this name won, or only the ones it lost
+        $result = in_array(request('result'), ['win', 'lost'], true) ? request('result') : null;
+        $ownGames = fn() => Replay::valid()->where('player_name_id', $playerName->id)
+            ->where('season_id', $seasonId)
+            ->where('format', $format);
+
         $games = Replay::gamesPage(
-            Replay::valid()->where('player_name_id', $playerName->id)
-                ->where('season_id', $seasonId)
-                ->where('format', $format)
+            $ownGames()->when($result, fn($q) => $q->where('winning_team', $result === 'win' ? 1 : 0))
         );
+        $resultCounts = $ownGames()
+            ->selectRaw('winning_team, count(distinct replay_id) as games')
+            ->groupBy('winning_team')
+            ->pluck('games', 'winning_team');
 
         $replays = Replay::whereIn('replay_id', $games->pluck('replay_id'))
             ->orderByDesc('created_at')
@@ -414,7 +422,7 @@ class ReplayController extends Controller
                 ->count() + 1
             : null;
 
-        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'seasonGameCount', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
+        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'seasonGameCount', 'result', 'resultCounts', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
     }
 
     public function download($uuid)
