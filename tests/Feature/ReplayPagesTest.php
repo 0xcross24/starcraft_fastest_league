@@ -161,9 +161,10 @@ class ReplayPagesTest extends TestCase
 
         $page = $this->get('/player/Me?season=1&format=2v2')->assertOk()->assertDontSee('Team 1')->assertDontSee('Team 2');
 
-        // Header: result, this player first, teammate, vs, opponents, points; then the tables
-        $page->assertSeeInOrder(['WIN', 'Me', 'Mate', 'vs', 'Opp1', 'Opp2', '+10', 'won-gam', 'Me', 'Mate', 'Opp1', 'Opp2',
-                                 'LOST', 'Me', 'Mate', 'vs', 'Opp1', 'Opp2', '-10', 'lost-ga', 'Me', 'Mate', 'Opp1', 'Opp2']);
+        // Header: result, teammate vs opponents, points (no own name); then the tables
+        $page->assertSeeInOrder(['WIN', 'Mate', 'vs', 'Opp1', 'Opp2', '+10', 'won-gam', 'Me', 'Mate', 'Opp1', 'Opp2',
+                                 'LOST', 'Mate', 'vs', 'Opp1', 'Opp2', '-10', 'lost-ga', 'Me', 'Mate', 'Opp1', 'Opp2']);
+        $this->assertDoesNotMatchRegularExpression('/(WIN|LOST)<\/span>\s*<span class="text-sm text-gray-200">\s*[^<]*Me\b/', $page->getContent());
         $page->assertDontSee('Opponents');
         // The profile's own name is never a link to the page you're on; others are
         $page->assertDontSee(route('player', ['user' => 'Me']), false)
