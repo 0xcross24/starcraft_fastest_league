@@ -118,14 +118,12 @@
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
-                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win" :opponents="$team2"
+                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
                                 :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
                                 <!-- This profile's team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        {{ $team1Win ? 'Win' : 'Lost' }}
-                                    </div>
+                                    <div class="p-2 font-bold hidden md:block" aria-hidden="true">&nbsp;</div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
@@ -222,14 +220,12 @@
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
-                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win" :opponents="$team2"
+                            <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
                                 :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
                             <div class="flex flex-col md:flex-row gap-3 md:gap-0 mb-6">
                                 <!-- This profile's team -->
                                 <div class="w-full md:w-1/2 overflow-x-auto">
-                                    <div class="p-2 font-bold text-left {{ $team1Win ? 'text-emerald-500' : 'text-red-500' }}">
-                                        {{ $team1Win ? 'Win' : 'Lost' }}
-                                    </div>
+                                    <div class="p-2 font-bold hidden md:block" aria-hidden="true">&nbsp;</div>
                                     <table class="w-full md:table-fixed border-collapse border border-gray-200">
                                         <thead class="bg-gray-200 dark:bg-gray-700">
                                             <tr>
