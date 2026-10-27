@@ -73,83 +73,26 @@ class StatsController extends Controller
             return ['error' => 'No active season found'];
         }
 
-        // Initialize variables for total Elo ratings
-        $totalWinnerElo = 0;
-        $totalLoserElo = 0;
+        $statsFor = fn(array $ids) => Stats::whereIn('player_name_id', $ids)
+            ->where('season_id', $activeSeason->id)
+            ->where('format', $format)
+            ->get()
+            ->keyBy('player_name_id');
+        $winnerStats = $statsFor($winners);
+        $loserStats = $statsFor($losers);
 
-        // Initialize an array to store Elo changes
-        $eloChanges = [];
-        $currentElo = [];
+        // Elo before changes, and each player's change from the iCCup table
+        $currentElo = $winnerStats->pluck('elo', 'player_name_id')->all() + $loserStats->pluck('elo', 'player_name_id')->all();
+        $eloChanges = $this->eloService->rateGame(
+            $winnerStats->pluck('elo', 'player_name_id')->all(),
+            $loserStats->pluck('elo', 'player_name_id')->all(),
+        );
 
-        // Calculate the total Elo for winners
-        foreach ($winners as $winnerId) {
-            $stats = Stats::where('player_name_id', $winnerId)
-                ->where('season_id', $activeSeason->id)
-                ->where('format', $format)
-                ->first();
-            if ($stats) {
-                $totalWinnerElo += $stats->elo;
-            }
-        }
-        $averageWinnerElo = count($winners) > 0 ? $totalWinnerElo / count($winners) : 1000; // Default to 1000 if empty
-
-        // Calculate the total Elo for losers
-        foreach ($losers as $loserId) {
-            $stats = Stats::where('player_name_id', $loserId)
-                ->where('season_id', $activeSeason->id)
-                ->where('format', $format)
-                ->first();
-            if ($stats) {
-                $totalLoserElo += $stats->elo;
-            }
-        }
-        $averageLoserElo = count($losers) > 0 ? $totalLoserElo / count($losers) : 1000; // Default to 1000 if empty
-
-        // Update Elo ratings for winners and track changes
-        foreach ($winners as $winnerId) {
-            $stats = Stats::where('player_name_id', $winnerId)
-                ->where('season_id', $activeSeason->id)
-                ->where('format', $format)
-                ->first();
-            if ($stats) {
-                // iCCup points: own rank against the losing team's average
-                $eloChange = $this->eloService->points($stats->elo, $averageLoserElo, true);
-
-                // Save current user's Elo before update
-                $currentElo[$winnerId] = $stats->elo;
-
-                // Update the user's Elo
-                $stats->elo += $eloChange;
-                $stats->wins += 1;
+        foreach ([[$winnerStats, 'wins'], [$loserStats, 'losses']] as [$team, $counter]) {
+            foreach ($team as $id => $stats) {
+                $stats->elo += $eloChanges[$id];
+                $stats->{$counter} += 1;
                 $stats->save();
-
-                // Store the Elo change
-                $eloChanges[$winnerId] = $eloChange;
-            }
-        }
-
-        // Update Elo ratings for losers and track changes
-        foreach ($losers as $loserId) {
-            $stats = Stats::where('player_name_id', $loserId)
-                ->where('season_id', $activeSeason->id)
-                ->where('format', $format)
-                ->first();
-            if ($stats) {
-                // iCCup points: own rank against the winning team's average.
-                // Never below 0, so the stored change is exactly what an
-                // invalidation has to give back.
-                $eloChange = max($this->eloService->points($stats->elo, $averageWinnerElo, false), -$stats->elo);
-
-                // Save current user's Elo before update
-                $currentElo[$loserId] = $stats->elo;
-
-                // Update the user's Elo
-                $stats->elo += $eloChange;
-                $stats->losses += 1;
-                $stats->save();
-
-                // Store the Elo change
-                $eloChanges[$loserId] = $eloChange;
             }
         }
 

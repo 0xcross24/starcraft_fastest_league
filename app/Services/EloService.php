@@ -56,6 +56,32 @@ class EloService
         return $won ? $win : -$loss;
     }
 
+    /**
+     * Each player's change for one game: own rank against the other team's
+     * average. Ratings stop at 0, so a change never takes more than the
+     * player has and reversing it restores them exactly.
+     *
+     * @param  array<int, int|float>  $winners  id => elo before the game
+     * @param  array<int, int|float>  $losers  id => elo before the game
+     * @return array<int, int>  id => change
+     */
+    public function rateGame(array $winners, array $losers): array
+    {
+        $average = fn(array $team) => $team ? array_sum($team) / count($team) : 1000;
+        $winnerAverage = $average($winners);
+        $loserAverage = $average($losers);
+
+        $changes = [];
+        foreach ($winners as $id => $elo) {
+            $changes[$id] = $this->points($elo, $loserAverage, true);
+        }
+        foreach ($losers as $id => $elo) {
+            $changes[$id] = max($this->points($elo, $winnerAverage, false), (int) -$elo);
+        }
+
+        return $changes;
+    }
+
     private function bracket($elo): string
     {
         $grade = $this->getEloGrade($elo);
