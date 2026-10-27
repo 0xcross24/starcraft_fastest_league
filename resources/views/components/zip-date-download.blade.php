@@ -1,7 +1,6 @@
 @props(['season', 'format' => null, 'player' => null, 'label' => 'By date'])
 
 {{-- Same zip as x-zip-download-button, limited to games played between two dates (both optional, inclusive). --}}
-@auth
 <details class="relative text-xs" @if(session('error')) open @endif>
     <summary class="inline-flex items-center gap-1 px-3 py-1 cursor-pointer select-none rounded border border-blue-600 text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-600 hover:text-white transition">
         {{ $label }}&hellip;
@@ -25,4 +24,3 @@
         @endif
     </form>
 </details>
-@endauth

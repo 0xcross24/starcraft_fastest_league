@@ -208,14 +208,15 @@ class ReplayZipDownloadTest extends TestCase
         $this->actingAs($user)->get(route('replays.download-zip', ['season' => 1]))->assertStatus(429);
     }
 
-    public function test_pages_show_the_button_only_to_logged_in_users(): void
+    public function test_pages_show_the_buttons_to_everyone(): void
     {
         [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
         $this->game('g1', [$a, $b], [$c, $d]);
         $a->ensureStats($this->season);
         $zipUrl = route('replays.download-zip', ['season' => 1, 'format' => '2v2']);
 
-        $this->get('/replays?season=1&format=2v2')->assertOk()->assertDontSee('Download all')->assertDontSee('name="from"', false);
+        // Guests see them too; clicking sends them to log in and back (DownloadAfterLoginTest)
+        $this->get('/replays?season=1&format=2v2')->assertOk()->assertSee('Download all (1) .zip')->assertSee('name="from"', false);
         $this->actingAs(User::factory()->create())->get('/replays?season=1&format=2v2')
             ->assertSee('Download all (1) .zip')->assertSee($zipUrl);
         // The profile button covers the whole season, both formats
