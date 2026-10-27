@@ -161,13 +161,13 @@ class MultipleUsernamesTest extends TestCase
 
         $this->storeReplay(['smurf', 'A'], ['B', 'C']);
 
-        $this->assertSame(1050, $this->elo('Smurf'));
+        $this->assertSame(1100, $this->elo('Smurf'));
         $this->assertSame(1000, $this->elo('Main'));
 
         $replay = Replay::where('player_name', 'smurf')->firstOrFail();
         $this->assertSame($user->id, $replay->user_id);
         $this->assertSame(PlayerName::where('name', 'Smurf')->value('id'), $replay->player_name_id);
-        $this->assertSame(50, $replay->points);
+        $this->assertSame(100, $replay->points);
     }
 
     public function test_one_account_cannot_appear_twice_in_a_replay(): void

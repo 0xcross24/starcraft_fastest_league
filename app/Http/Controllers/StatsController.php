@@ -73,9 +73,6 @@ class StatsController extends Controller
             return ['error' => 'No active season found'];
         }
 
-        // Define the K-factor
-        $kFactor = 100;
-
         // Initialize variables for total Elo ratings
         $totalWinnerElo = 0;
         $totalLoserElo = 0;
@@ -115,9 +112,8 @@ class StatsController extends Controller
                 ->where('format', $format)
                 ->first();
             if ($stats) {
-                // Calculate expected score
-                $expectedScore = 1 / (1 + pow(10, ($averageLoserElo - $stats->elo) / 400));
-                $eloChange = $kFactor * (1 - $expectedScore);
+                // iCCup points: own rank against the losing team's average
+                $eloChange = $this->eloService->points($stats->elo, $averageLoserElo, true);
 
                 // Save current user's Elo before update
                 $currentElo[$winnerId] = $stats->elo;
@@ -139,9 +135,10 @@ class StatsController extends Controller
                 ->where('format', $format)
                 ->first();
             if ($stats) {
-                // Calculate expected score
-                $expectedScore = 1 / (1 + pow(10, ($averageWinnerElo - $stats->elo) / 400));
-                $eloChange = $kFactor * (0 - $expectedScore);
+                // iCCup points: own rank against the winning team's average.
+                // Never below 0, so the stored change is exactly what an
+                // invalidation has to give back.
+                $eloChange = max($this->eloService->points($stats->elo, $averageWinnerElo, false), -$stats->elo);
 
                 // Save current user's Elo before update
                 $currentElo[$loserId] = $stats->elo;

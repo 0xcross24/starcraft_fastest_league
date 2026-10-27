@@ -69,7 +69,7 @@ class ReplayPagesTest extends TestCase
             '/tmp/x.rep', 'hash-1', 'x.rep', ['Header' => ['Frames' => 24 * 300]],
         );
 
-        $this->assertSame(['A' => 1050, 'B' => 1050, 'C' => 950, 'D' => 950],
+        $this->assertSame(['A' => 1100, 'B' => 1100, 'C' => 950, 'D' => 950],
             Replay::orderBy('player_name')->pluck('elo_after', 'player_name')->all());
     }
 

@@ -27,6 +27,42 @@ class EloService
         'D-' => 500,
     ];
 
+    /**
+     * iCCup's points table: [your bracket][opponent's bracket] => [win, loss].
+     * D, C and B each cover their -/+ grades (E counts as D); A-, A, A+ and S
+     * are brackets of their own. Not zero-sum: an underdog gains more than
+     * the favourite loses, and beating a much stronger player costs them
+     * nothing.
+     */
+    private const POINTS = [
+        'D' => ['D' => [100, 50], 'C' => [125, 37], 'B' => [150, 25], 'A-' => [175, 12], 'A' => [200, 0], 'A+' => [200, 0], 'S' => [200, 0]],
+        'C' => ['D' => [75, 62], 'C' => [100, 50], 'B' => [125, 37], 'A-' => [150, 25], 'A' => [175, 12], 'A+' => [200, 0], 'S' => [200, 0]],
+        'B' => ['D' => [50, 75], 'C' => [75, 62], 'B' => [100, 50], 'A-' => [125, 37], 'A' => [150, 25], 'A+' => [175, 12], 'S' => [200, 0]],
+        'A-' => ['D' => [25, 131], 'C' => [50, 112], 'B' => [75, 93], 'A-' => [100, 75], 'A' => [125, 56], 'A+' => [150, 37], 'S' => [175, 25]],
+        'A' => ['D' => [10, 150], 'C' => [25, 131], 'B' => [50, 112], 'A-' => [75, 93], 'A' => [100, 75], 'A+' => [125, 56], 'S' => [150, 37]],
+        'A+' => ['D' => [10, 150], 'C' => [10, 150], 'B' => [25, 131], 'A-' => [50, 112], 'A' => [75, 93], 'A+' => [100, 75], 'S' => [125, 56]],
+        'S' => ['D' => [10, 200], 'C' => [10, 200], 'B' => [10, 200], 'A-' => [25, 175], 'A' => [50, 150], 'A+' => [75, 125], 'S' => [100, 100]],
+    ];
+
+    /**
+     * Points a player at $elo gains (win) or loses (negative) against an
+     * opponent at $opponentElo. In team games $opponentElo is the other
+     * team's average.
+     */
+    public function points($elo, $opponentElo, bool $won): int
+    {
+        [$win, $loss] = self::POINTS[$this->bracket($elo)][$this->bracket($opponentElo)];
+
+        return $won ? $win : -$loss;
+    }
+
+    private function bracket($elo): string
+    {
+        $grade = $this->getEloGrade($elo);
+
+        return in_array($grade, ['A-', 'A', 'A+', 'S'], true) ? $grade : str_replace('E', 'D', $this->getGradeTier($grade));
+    }
+
     public function getEloGrade($elo): string
     {
         $elo = (float) ($elo ?? 0);

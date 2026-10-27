@@ -68,8 +68,9 @@ class BatchReplayUploadTest extends TestCase
 
     public function test_games_are_rated_oldest_first_whatever_order_they_were_picked(): void
     {
-        // Picked newest first. Rated in order: A+B win at 1000 (+50), then C+D
-        // win from 950 against 1050 (+64), then A+B win from 986 vs 1014 (+54).
+        // Picked newest first. Rated in order: A+B win at 1000 (+100), then C+D
+        // win from 950 against 1100 (A loses 50), then A+B win again (+100).
+        // Everyone stays in the D bracket, so every game is D vs D.
         $this->upload([
             $this->replay('third.rep', 1, 1, host: 'h3'),
             $this->replay('second.rep', 2, 2, host: 'h2'),
@@ -81,10 +82,9 @@ class BatchReplayUploadTest extends TestCase
             array_column(session('results'), 'file'),
         );
         // Points come out the same as uploading them one by one in play order
-        // (MySQL stores these as integers; the sqlite test database keeps the decimals.)
         $rounded = fn($column) => Replay::where('player_name', 'A')->orderBy('id')->pluck($column)->map(fn($v) => (int) round($v))->all();
-        $this->assertSame([50, -64, 54], $rounded('points'));
-        $this->assertSame([1050, 986, 1040], $rounded('elo_after'));
+        $this->assertSame([100, -50, 100], $rounded('points'));
+        $this->assertSame([1100, 1050, 1150], $rounded('elo_after'));
     }
 
     public function test_a_bad_file_does_not_stop_the_rest(): void
@@ -97,7 +97,7 @@ class BatchReplayUploadTest extends TestCase
 
         $results = collect(session('results'))->keyBy('file');
         $this->assertTrue($results['good.rep']['ok']);
-        $this->assertStringStartsWith('Uploaded: A +50', $results['good.rep']['message']);
+        $this->assertStringStartsWith('Uploaded: A +100', $results['good.rep']['message']);
         $this->assertStringStartsWith('Replay must be played on', $results['wrong-map.rep']['message']);
         $this->assertSame('Replay is too old (over 48 hours).', $results['too-old.rep']['message']);
         $this->assertSame(1, Replay::distinct()->count('replay_id'));
