@@ -19,6 +19,10 @@
                 </div>
             </div>
 
+            <div class="hidden sm:flex sm:items-center sm:ms-auto">
+                <x-player-search class="w-40 lg:w-56" />
+            </div>
+
             <!-- Settings Dropdown -->
             @auth
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -77,6 +81,9 @@
 
     <!-- Responsive Navigation Menu: every link, for guests too -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="px-4 pt-3">
+            <x-player-search />
+        </div>
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link href="/replays" :active="request()->is('replays')">Replays</x-responsive-nav-link>
             <x-responsive-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-responsive-nav-link>
