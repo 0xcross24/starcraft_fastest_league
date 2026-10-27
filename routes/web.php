@@ -6,6 +6,7 @@ use App\Http\Controllers\AllReplaysController;
 use App\Http\Controllers\PlayerNameController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
+use App\Http\Controllers\PlayerSearchController;
 use App\Http\Controllers\ReplayZipController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\HomeController;
@@ -21,6 +22,10 @@ Route::get('/rules', function () {
 Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
 
 Route::get('/replays', [AllReplaysController::class, 'index'])->name('replays.all');
+
+Route::get('/players/search', [PlayerSearchController::class, 'index'])
+  ->middleware('throttle:60,1')
+  ->name('players.search');
 
 Route::get('/player/{user}', [ReplayController::class, 'displayPlayer'])
   ->name('player');
