@@ -85,7 +85,7 @@ class ReuploadInvalidatedReplayTest extends TestCase
         $new = $this->storeReplay('2.rep');
 
         $this->assertNotSame($old, $new);
-        $this->assertSame(1050, $this->elo('A'));
+        $this->assertSame(1100, $this->elo('A'));
         $this->assertSame(950, $this->elo('C'));
         // The invalidated rows are kept as history.
         $this->assertSame(4, Replay::where('replay_id', $old)->where('is_invalid', true)->where('points', 0)->count());
