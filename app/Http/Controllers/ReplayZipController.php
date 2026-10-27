@@ -15,10 +15,13 @@ use ZipStream\ZipStream;
 
 /**
  * Downloads every valid game of a season (optionally one format, one player's
- * games, and/or a date range) as a single zip, streamed so nothing is written to disk.
+ * games, a date range, and/or hand-picked games) as a single zip, streamed so
+ * nothing is written to disk.
  */
 class ReplayZipController extends Controller
 {
+    public const MAX_PICKED = 100;
+
     public function download(Request $request): Response
     {
         $validated = $request->validate([
@@ -27,7 +30,11 @@ class ReplayZipController extends Controller
             'player' => ['nullable', 'string', 'max:255'],
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to' => ['nullable', 'date_format:Y-m-d'],
+            // Games ticked on the replay list / player page (x-zip-selected-download)
+            'games' => ['nullable', 'array', 'max:' . self::MAX_PICKED],
+            'games.*' => ['string', 'max:64'],
         ]);
+        $picked = $validated['games'] ?? null;
         $season = Season::findOrFail($validated['season']);
         $format = $validated['format'] ?? null;
         $playerName = isset($validated['player'])
@@ -45,6 +52,7 @@ class ReplayZipController extends Controller
             ->where('season_id', $season->id)
             ->when($format, fn($q) => $q->where('format', $format))
             ->when($playerName, fn($q) => $q->where('player_name_id', $playerName->id))
+            ->when($picked, fn($q) => $q->whereIn('replay_id', $picked))
             ->when($from, fn($q) => $q->whereRaw("{$playedAt} >= ?", [$from . ' 00:00:00']))
             ->when($to, fn($q) => $q->whereRaw("{$playedAt} < ?", [Carbon::parse($to)->addDay()->format('Y-m-d') . ' 00:00:00']))
             ->distinct()
@@ -64,14 +72,15 @@ class ReplayZipController extends Controller
 
         // Named after what's in it: s2_2v2.zip, Wk`Cross-_s2_3v3.zip,
         // Wk`Cross-_s2.zip (all formats), s2.zip (whole season), plus the
-        // dates if picked: s2_2v2_2026-10-01_to_2026-10-15.zip, s2_from_2026-10-01.zip.
+        // dates if picked: s2_2v2_2026-10-01_to_2026-10-15.zip, s2_from_2026-10-01.zip,
+        // and hand-picked games: s2_2v2_selected.zip.
         $dates = match (true) {
             $from && $to => $from === $to ? $from : "{$from}_to_{$to}",
             (bool) $from => "from_{$from}",
             (bool) $to => "to_{$to}",
             default => null,
         };
-        $zipName = collect([$playerName ? $this->safe($playerName->name) : null, 's' . $season->id, $format, $dates])
+        $zipName = collect([$playerName ? $this->safe($playerName->name) : null, 's' . $season->id, $format, $dates, $picked ? 'selected' : null])
             ->filter()->implode('_') . '.zip';
 
         return response()->streamDownload(function () use ($files) {

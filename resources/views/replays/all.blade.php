@@ -44,6 +44,7 @@
                             <div class="flex flex-wrap gap-2">
                                 <x-zip-download-button :season="$selectedSeason->id" :format="$format" :count="$games->total()" />
                                 <x-zip-date-download :season="$selectedSeason->id" :format="$format" />
+                                <x-zip-selected-download :season="$selectedSeason->id" :format="$format" />
                             </div>
                             @endif
                         </div>
@@ -146,9 +147,7 @@
                                 </div>
                             </div>
                             <!-- Download link below the tables -->
-                            <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
-                            </div>
+                            <x-replay-download :id="$replayId" />
                             @endforeach
                             <div class="mt-6">{{ $games->links() }}</div>
                             @endif

@@ -185,6 +185,30 @@ class ReplayZipDownloadTest extends TestCase
         $this->download(['season' => 1, 'from' => '2026-10-01'])->assertSessionHas('error');
     }
 
+    public function test_only_the_selected_games(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('g1', [$a, $b], [$c, $d], '2v2', '2026-10-01 10:00:00');
+        $this->game('g2', [$a, $b], [$c, $d], '2v2', '2026-10-02 10:00:00');
+        $this->game('g3', [$a, $b], [$c, $d], '2v2', '2026-10-03 10:00:00');
+        $this->game('voided', [$a, $b], [$c, $d], '2v2', '2026-10-04 10:00:00');
+        Replay::where('replay_id', 'voided')->update(['is_invalid' => true]);
+        $other = Season::create(['is_active' => 0]);
+        Replay::create(Replay::where('replay_id', 'g1')->first()->only(['player_name', 'winning_team', 'replay_file', 'team', 'race', 'hash', 'apm', 'eapm', 'format', 'points', 'user_id', 'player_name_id'])
+            + ['replay_id' => 'other-season', 'season_id' => $other->id, 'start_time' => '2026-10-01 11:00:00']);
+
+        $response = $this->download(['season' => 1, 'format' => '2v2', 'games' => ['g3', 'g1', 'voided', 'other-season', 'nope']]);
+        // Invalid games, other seasons and unknown ids are left out; order is still by play time
+        $this->assertSame(['replay g1', 'replay g3'], array_values($this->entries($response->streamedContent())));
+        $this->assertStringContainsString('filename=s1_2v2_selected.zip', $response->headers->get('Content-Disposition'));
+
+        $this->assertStringContainsString('filename=A_s1_2v2_selected.zip',
+            $this->download(['season' => 1, 'format' => '2v2', 'player' => 'A', 'games' => ['g2']])->headers->get('Content-Disposition'));
+
+        $this->download(['season' => 1, 'games' => ['voided']])->assertRedirect()->assertSessionHas('error');
+        $this->download(['season' => 1, 'games' => array_map(fn($i) => "id{$i}", range(1, 101))])->assertSessionHasErrors('games');
+    }
+
     public function test_games_whose_file_is_missing_are_skipped_and_an_empty_result_goes_back(): void
     {
         [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
@@ -229,5 +253,12 @@ class ReplayZipDownloadTest extends TestCase
             ->assertSee('name="from"', false)->assertSee('name="player" value="A"', false);
         $this->actingAs(User::factory()->create())->get('/replays?season=1&format=2v2')
             ->assertSee('name="from"', false)->assertSee('name="format" value="2v2"', false);
+        // Each game gets a Select box, and the page a "Download selected" zip of the picks
+        $this->get('/replays?season=1&format=2v2')
+            ->assertSee('class="js-zip-pick rounded border-gray-400 dark:bg-gray-900 text-blue-600" value="g1"', false)
+            ->assertSee('data-base="' . e(route('replays.download-zip', ['season' => 1, 'format' => '2v2'])) . '"', false);
+        $this->get('/player/A?season=1&format=2v2')
+            ->assertSee('value="g1"', false)
+            ->assertSee('data-scope="1:2v2:A"', false);
     }
 }
