@@ -56,6 +56,7 @@
                                 @endif
                                 @if($seasonGameCount > 0)
                                 <x-zip-download-button :season="$selectedSeason->id" :player="$playerName->name" :count="$seasonGameCount" label="Download all formats" />
+                                <x-zip-date-download :season="$selectedSeason->id" :player="$playerName->name" />
                                 @endif
                             </div>
                         </div>

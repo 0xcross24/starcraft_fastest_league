@@ -25,7 +25,10 @@
                     <p class="text-sm text-gray-400">{{ $games->total() }} {{ Str::plural('game', $games->total()) }}</p>
                     {{-- Whole-season backup: valid games of every format, unless a format is picked --}}
                     @if($seasonId)
-                    <x-zip-download-button :season="$seasonId" :format="$format" :label="$format ? 'Download ' . $format : 'Download whole season'" />
+                    <div class="flex flex-wrap gap-2">
+                        <x-zip-download-button :season="$seasonId" :format="$format" :label="$format ? 'Download ' . $format : 'Download whole season'" />
+                        <x-zip-date-download :season="$seasonId" :format="$format" />
+                    </div>
                     @else
                     <span class="text-xs text-gray-400">Pick a season to download it as a zip.</span>
                     @endif

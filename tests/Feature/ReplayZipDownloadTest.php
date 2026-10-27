@@ -140,6 +140,51 @@ class ReplayZipDownloadTest extends TestCase
         $this->assertStringContainsString('filename=A_s1_2v2.zip', $aIn2v2Response->headers->get('Content-Disposition'));
     }
 
+    public function test_date_range_filter_is_inclusive_and_named(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('sep30', [$a, $b], [$c, $d], '2v2', '2026-09-30 23:59:59');
+        $this->game('oct01', [$a, $b], [$c, $d], '2v2', '2026-10-01 00:00:00');
+        $this->game('oct05', [$a, $b], [$c, $d], '2v2', '2026-10-05 23:59:59');
+        $this->game('oct06', [$a, $b], [$c, $d], '2v2', '2026-10-06 00:00:00');
+        $this->game('oct03-3v3', [$a, $b, $c], [$d, $this->makeName('E'), $this->makeName('F')], '3v3', '2026-10-03 12:00:00');
+
+        $range = $this->download(['season' => 1, 'format' => '2v2', 'from' => '2026-10-01', 'to' => '2026-10-05']);
+        $this->assertSame(['replay oct01', 'replay oct05'], array_values($this->entries($range->streamedContent())));
+        $this->assertStringContainsString('filename=s1_2v2_2026-10-01_to_2026-10-05.zip', $range->headers->get('Content-Disposition'));
+
+        // Reversed dates are swapped rather than giving nothing
+        $reversed = $this->download(['season' => 1, 'format' => '2v2', 'from' => '2026-10-05', 'to' => '2026-10-01']);
+        $this->assertSame(['replay oct01', 'replay oct05'], array_values($this->entries($reversed->streamedContent())));
+
+        $from = $this->download(['season' => 1, 'player' => 'A', 'from' => '2026-10-03']);
+        $this->assertSame(['replay oct03-3v3', 'replay oct05', 'replay oct06'], array_values($this->entries($from->streamedContent())));
+        $this->assertStringContainsString('filename=A_s1_from_2026-10-03.zip', $from->headers->get('Content-Disposition'));
+
+        $to = $this->download(['season' => 1, 'to' => '2026-09-30']);
+        $this->assertSame(['replay sep30'], array_values($this->entries($to->streamedContent())));
+        $this->assertStringContainsString('filename=s1_to_2026-09-30.zip', $to->headers->get('Content-Disposition'));
+
+        $oneDay = $this->download(['season' => 1, 'from' => '2026-10-06', 'to' => '2026-10-06']);
+        $this->assertSame(['replay oct06'], array_values($this->entries($oneDay->streamedContent())));
+        $this->assertStringContainsString('filename=s1_2026-10-06.zip', $oneDay->headers->get('Content-Disposition'));
+
+        $this->download(['season' => 1, 'from' => '2026-11-01'])->assertRedirect()->assertSessionHas('error');
+        $this->download(['season' => 1, 'from' => 'yesterday'])->assertSessionHasErrors('from');
+    }
+
+    public function test_date_range_falls_back_to_upload_time_without_a_start_time(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('old', [$a, $b], [$c, $d]);
+        Replay::where('replay_id', 'old')->update(['start_time' => null, 'created_at' => '2026-09-15 10:00:00']);
+
+        $this->assertSame(['replay old'], array_values($this->entries(
+            $this->download(['season' => 1, 'from' => '2026-09-15', 'to' => '2026-09-15'])->streamedContent()
+        )));
+        $this->download(['season' => 1, 'from' => '2026-10-01'])->assertSessionHas('error');
+    }
+
     public function test_games_whose_file_is_missing_are_skipped_and_an_empty_result_goes_back(): void
     {
         [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
@@ -170,7 +215,7 @@ class ReplayZipDownloadTest extends TestCase
         $a->ensureStats($this->season);
         $zipUrl = route('replays.download-zip', ['season' => 1, 'format' => '2v2']);
 
-        $this->get('/replays?season=1&format=2v2')->assertOk()->assertDontSee('Download all');
+        $this->get('/replays?season=1&format=2v2')->assertOk()->assertDontSee('Download all')->assertDontSee('name="from"', false);
         $this->actingAs(User::factory()->create())->get('/replays?season=1&format=2v2')
             ->assertSee('Download all (1) .zip')->assertSee($zipUrl);
         // The profile button covers the whole season, both formats
@@ -179,6 +224,9 @@ class ReplayZipDownloadTest extends TestCase
             ->assertSee(route('replays.download-zip', ['season' => 1, 'format' => '2v2', 'player' => 'A']))
             ->assertSee('Download 2v2 (1) .zip')
             ->assertSee(route('replays.download-zip', ['season' => 1, 'player' => 'A']))
-            ->assertSee('Download all formats (2) .zip');
+            ->assertSee('Download all formats (2) .zip')
+            ->assertSee('name="from"', false)->assertSee('name="player" value="A"', false);
+        $this->actingAs(User::factory()->create())->get('/replays?season=1&format=2v2')
+            ->assertSee('name="from"', false)->assertSee('name="format" value="2v2"', false);
     }
 }
