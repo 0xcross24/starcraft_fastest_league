@@ -1,7 +1,6 @@
 @props(['season', 'format' => null, 'player' => null, 'count' => null, 'label' => 'Download all'])
 
-{{-- Download every listed game as one zip. Logged-in only, like single downloads. --}}
-@auth
+{{-- Download every listed game as one zip. Guests are sent to log in first, then back here (see App\Http\Middleware\Authenticate). --}}
 <a href="{{ route('replays.download-zip', array_filter(['season' => $season, 'format' => $format, 'player' => $player])) }}"
     class="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
@@ -9,4 +8,3 @@
     </svg>
     {{ $label }}{{ $count ? " ({$count})" : '' }} .zip
 </a>
-@endauth
