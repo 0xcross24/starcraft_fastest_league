@@ -6,6 +6,7 @@ use App\Models\PlayerName;
 use App\Models\Replay;
 use App\Models\User;
 use App\Models\Stats;
+use App\Support\GameFilter;
 use App\Models\Season;
 use App\Services\EloService;
 use App\Services\ReplayParser;
@@ -371,9 +372,11 @@ class ReplayController extends Controller
 
         // Optional filter: only the games this name won, or only the ones it lost
         $result = in_array(request('result'), ['win', 'lost'], true) ? request('result') : null;
-        $ownGames = fn() => Replay::valid()->where('player_name_id', $playerName->id)
+        // Date / race filters (race = the race this name played); the page is already one player
+        $filter = GameFilter::fromRequest(request(), withPlayer: false);
+        $ownGames = fn() => $filter->apply(Replay::valid()->where('player_name_id', $playerName->id)
             ->where('season_id', $seasonId)
-            ->where('format', $format);
+            ->where('format', $format));
 
         $games = Replay::gamesPage(
             $ownGames()->when($result, fn($q) => $q->where('winning_team', $result === 'win' ? 1 : 0))
@@ -388,9 +391,9 @@ class ReplayController extends Controller
             ->get();
 
         // The profile's zip download covers the whole season, both formats
-        $seasonGameCount = Replay::valid()
+        $seasonGameCount = $filter->apply(Replay::valid()
             ->where('player_name_id', $playerName->id)
-            ->where('season_id', $seasonId)
+            ->where('season_id', $seasonId))
             ->distinct()
             ->count('replay_id');
 
@@ -422,7 +425,7 @@ class ReplayController extends Controller
                 ->count() + 1
             : null;
 
-        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'seasonGameCount', 'result', 'resultCounts', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank'));
+        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'seasonGameCount', 'result', 'resultCounts', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank', 'filter'));
     }
 
     public function download($uuid)

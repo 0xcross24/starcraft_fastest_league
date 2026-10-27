@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Replay;
 use App\Models\Season;
+use App\Support\GameFilter;
 use Illuminate\Http\Request;
 
 class AllReplaysController extends Controller
@@ -14,13 +15,15 @@ class AllReplaysController extends Controller
         $seasonId = $request->input('season') ?: ($seasons->count() ? $seasons->max('id') : null);
         $format = $request->input('format', '2v2');
 
+        $filter = GameFilter::fromRequest($request);
+
         $games = Replay::gamesPage(
-            Replay::valid()->where('season_id', $seasonId)->where('format', $format)
+            $filter->apply(Replay::valid()->where('season_id', $seasonId)->where('format', $format))
         );
         $replays = Replay::whereIn('replay_id', $games->pluck('replay_id'))
             ->orderByDesc('created_at')
             ->get();
 
-        return view('replays.all', compact('seasons', 'seasonId', 'format', 'replays', 'games'));
+        return view('replays.all', compact('seasons', 'seasonId', 'format', 'replays', 'games', 'filter'));
     }
 }

@@ -209,6 +209,23 @@ class ReplayZipDownloadTest extends TestCase
         $this->download(['season' => 1, 'games' => array_map(fn($i) => "id{$i}", range(1, 101))])->assertSessionHasErrors('games');
     }
 
+    public function test_race_filter_matches_the_replay_list(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('zerg-game', [$a, $b], [$c, $d]);
+        $this->game('toss-game', [$a, $b], [$c, $d], '2v2', '2026-10-02 10:00:00');
+        Replay::where('replay_id', 'toss-game')->update(['race' => 'Protoss']);
+        Replay::where('replay_id', 'zerg-game')->where('player_name', 'C')->update(['race' => 'Terran']);
+
+        $toss = $this->download(['season' => 1, 'race' => 'Protoss']);
+        $this->assertSame(['replay toss-game'], array_values($this->entries($toss->streamedContent())));
+        $this->assertStringContainsString('filename=s1_Protoss.zip', $toss->headers->get('Content-Disposition'));
+        // With a player: the race that player played
+        $this->assertSame(['replay zerg-game'], array_values($this->entries($this->download(['season' => 1, 'player' => 'C', 'race' => 'Terran'])->streamedContent())));
+        $this->download(['season' => 1, 'player' => 'A', 'race' => 'Terran'])->assertSessionHas('error');
+        $this->download(['season' => 1, 'race' => 'Robot'])->assertSessionHasErrors('race');
+    }
+
     public function test_games_whose_file_is_missing_are_skipped_and_an_empty_result_goes_back(): void
     {
         [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
@@ -250,9 +267,9 @@ class ReplayZipDownloadTest extends TestCase
             ->assertSee('Download 2v2 (1) .zip')
             ->assertSee(route('replays.download-zip', ['season' => 1, 'player' => 'A']))
             ->assertSee('Download all formats (2) .zip')
-            ->assertSee('name="from"', false)->assertSee('name="player" value="A"', false);
+            ->assertSee('name="from"', false)->assertDontSee('name="player"', false);
         $this->actingAs(User::factory()->create())->get('/replays?season=1&format=2v2')
-            ->assertSee('name="from"', false)->assertSee('name="format" value="2v2"', false);
+            ->assertSee('name="from"', false)->assertSee('name="player"', false)->assertSee('name="format" value="2v2"', false);
         // Each game gets a Select box, and the page a "Download selected" zip of the picks
         $this->get('/replays?season=1&format=2v2')
             ->assertSee('class="js-zip-pick rounded border-gray-400 dark:bg-gray-900 text-blue-600" value="g1"', false)

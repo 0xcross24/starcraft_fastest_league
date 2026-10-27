@@ -16,13 +16,13 @@
                         </ul>
                         <ul class="flex mb-6">
                             <li class="mr-4">
-                                <a href="?season={{ $seasonId }}&format=2v2"
+                                <a href="?{{ http_build_query(['season' => $seasonId, 'format' => '2v2'] + $filter->query()) }}"
                                     class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format', '2v2') == '2v2' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
                                     2v2
                                 </a>
                             </li>
                             <li>
-                                <a href="?season={{ $seasonId }}&format=3v3"
+                                <a href="?{{ http_build_query(['season' => $seasonId, 'format' => '3v3'] + $filter->query()) }}"
                                     class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format') == '3v3' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-normal' }}">
                                     3v3
                                 </a>
@@ -42,15 +42,17 @@
                             </h1>
                             @if($selectedSeason && $games->total() > 0)
                             <div class="flex flex-wrap gap-2">
-                                <x-zip-download-button :season="$selectedSeason->id" :format="$format" :count="$games->total()" />
-                                <x-zip-date-download :season="$selectedSeason->id" :format="$format" />
+                                <x-zip-download-button :season="$selectedSeason->id" :format="$format" :filters="$filter->query()" :count="$games->total()" :label="$filter->isActive() ? 'Download filtered' : 'Download all'" />
                                 <x-zip-selected-download :season="$selectedSeason->id" :format="$format" />
                             </div>
                             @endif
                         </div>
+                        @if($selectedSeason)
+                        <x-game-filters :filter="$filter" :count="$games->total()" :season="$selectedSeason->id" :format="$format" :keep="['season' => $seasonId, 'format' => $format]" />
+                        @endif
                         <div class="mt-4">
                             @if($replays->isEmpty())
-                            <p>No replays found for this season and format.</p>
+                            <p>No replays found for this season and format{{ $filter->isActive() ? ' with these filters' : '' }}.</p>
                             @else
                             @php
                             $replayGroupsDesc = $replays->groupBy('replay_id')->sortByDesc(function($groupedReplays) { return $groupedReplays->first()->created_at; });
