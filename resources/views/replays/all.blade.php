@@ -41,7 +41,10 @@
                                 @endif
                             </h1>
                             @if($selectedSeason && $games->total() > 0)
-                            <x-zip-download-button :season="$selectedSeason->id" :format="$format" :count="$games->total()" />
+                            <div class="flex flex-wrap gap-2">
+                                <x-zip-download-button :season="$selectedSeason->id" :format="$format" :count="$games->total()" />
+                                <x-zip-date-download :season="$selectedSeason->id" :format="$format" />
+                            </div>
                             @endif
                         </div>
                         <div class="mt-4">

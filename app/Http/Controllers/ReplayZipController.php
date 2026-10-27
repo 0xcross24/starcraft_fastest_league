@@ -14,8 +14,8 @@ use ZipStream\CompressionMethod;
 use ZipStream\ZipStream;
 
 /**
- * Downloads every valid game of a season (optionally one format, optionally
- * one player's games) as a single zip, streamed so nothing is written to disk.
+ * Downloads every valid game of a season (optionally one format, one player's
+ * games, and/or a date range) as a single zip, streamed so nothing is written to disk.
  */
 class ReplayZipController extends Controller
 {
@@ -25,21 +25,33 @@ class ReplayZipController extends Controller
             'season' => ['required', 'integer', 'exists:seasons,id'],
             'format' => ['nullable', 'in:2v2,3v3'],
             'player' => ['nullable', 'string', 'max:255'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
         ]);
         $season = Season::findOrFail($validated['season']);
         $format = $validated['format'] ?? null;
         $playerName = isset($validated['player'])
             ? PlayerName::where('name', $validated['player'])->firstOrFail()
             : null;
+        [$from, $to] = [$validated['from'] ?? null, $validated['to'] ?? null];
+        if ($from && $to && $from > $to) {
+            [$from, $to] = [$to, $from];
+        }
 
+        // Dates are the day the game was played (same as in the file names),
+        // or the upload time for old rows without a start time. Both ends inclusive.
+        $playedAt = 'COALESCE(start_time, created_at)';
         $gameIds = Replay::valid()
             ->where('season_id', $season->id)
             ->when($format, fn($q) => $q->where('format', $format))
             ->when($playerName, fn($q) => $q->where('player_name_id', $playerName->id))
+            ->when($from, fn($q) => $q->whereRaw("{$playedAt} >= ?", [$from . ' 00:00:00']))
+            ->when($to, fn($q) => $q->whereRaw("{$playedAt} < ?", [Carbon::parse($to)->addDay()->format('Y-m-d') . ' 00:00:00']))
             ->distinct()
             ->pluck('replay_id');
 
         $games = Replay::whereIn('replay_id', $gameIds)
+            ->orderByRaw($playedAt)
             ->orderBy('created_at')
             ->orderBy('team')
             ->get()
@@ -51,8 +63,15 @@ class ReplayZipController extends Controller
         }
 
         // Named after what's in it: s2_2v2.zip, Wk`Cross-_s2_3v3.zip,
-        // Wk`Cross-_s2.zip (all formats), s2.zip (whole season).
-        $zipName = collect([$playerName ? $this->safe($playerName->name) : null, 's' . $season->id, $format])
+        // Wk`Cross-_s2.zip (all formats), s2.zip (whole season), plus the
+        // dates if picked: s2_2v2_2026-10-01_to_2026-10-15.zip, s2_from_2026-10-01.zip.
+        $dates = match (true) {
+            $from && $to => $from === $to ? $from : "{$from}_to_{$to}",
+            (bool) $from => "from_{$from}",
+            (bool) $to => "to_{$to}",
+            default => null,
+        };
+        $zipName = collect([$playerName ? $this->safe($playerName->name) : null, 's' . $season->id, $format, $dates])
             ->filter()->implode('_') . '.zip';
 
         return response()->streamDownload(function () use ($files) {
