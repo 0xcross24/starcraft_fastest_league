@@ -30,7 +30,16 @@ class Authenticate extends Middleware
             return redirect()->route('login');
         }
 
-        return parent::handle($request, $next, ...$guards);
+        $response = parent::handle($request, $next, ...$guards);
+
+        // File responses default to "Cache-Control: public" with a Last-Modified
+        // date, which lets the browser hand the file out again from its cache
+        // after logging out, without asking (and checking login) here.
+        if ($request->route()?->named(...self::DOWNLOAD_ROUTES)) {
+            $response->headers->set('Cache-Control', 'no-store, private');
+        }
+
+        return $response;
     }
 
     /**

@@ -80,4 +80,29 @@ class DownloadAfterLoginTest extends TestCase
         $this->logIn($user)->assertRedirect('/profile');
         $this->assertNull(session(Authenticate::PENDING_DOWNLOAD));
     }
+
+    public function test_downloads_are_never_cached_by_the_browser(): void
+    {
+        $season = \App\Models\Season::create(['is_active' => 1]);
+        $dir = storage_path('app/public/uploads/season_' . $season->id);
+        \Illuminate\Support\Facades\File::ensureDirectoryExists($dir);
+        file_put_contents("{$dir}/nocache-test.rep", 'replay');
+        $user = User::factory()->create();
+        $name = $user->primaryPlayerName();
+        \App\Models\Replay::create([
+            'replay_id' => 'nc1', 'player_name' => $name->name, 'winning_team' => 1, 'replay_file' => 'nocache-test.rep',
+            'team' => '1', 'race' => 'Zerg', 'hash' => 'h-nc1', 'apm' => 1, 'eapm' => 1, 'season_id' => $season->id,
+            'format' => '2v2', 'points' => 0, 'user_id' => $user->id, 'player_name_id' => $name->id,
+        ]);
+
+        try {
+            foreach (['/replay/download/nc1', route('replays.download-zip', ['season' => $season->id], false), route('maps.download', ['filename' => 'SFLClan.scm'], false)] as $url) {
+                $response = $this->actingAs($user)->get($url);
+                $this->assertTrue($response->headers->hasCacheControlDirective('no-store'), "{$url}: " . $response->headers->get('Cache-Control'));
+                $this->assertFalse($response->headers->hasCacheControlDirective('public'), $url);
+            }
+        } finally {
+            unlink("{$dir}/nocache-test.rep");
+        }
+    }
 }
