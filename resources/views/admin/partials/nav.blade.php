@@ -2,7 +2,8 @@
 <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Admin</h1>
     <ul class="flex border-b border-gray-200 dark:border-gray-700 mt-4">
-        @foreach(['admin.users.index' => 'Users', 'admin.replays.index' => 'Replays'] as $routeName => $label)
+        @php $openRequests = \App\Models\InvalidationRequest::open()->distinct()->count('replay_id'); @endphp
+        @foreach(['admin.users.index' => 'Users', 'admin.replays.index' => 'Replays', 'admin.invalidation-requests.index' => 'Requests' . ($openRequests ? " ($openRequests)" : '')] as $routeName => $label)
         @php $active = request()->routeIs(str_replace('.index', '.*', $routeName)); @endphp
         <li class="mr-2">
             <a href="{{ route($routeName) }}"

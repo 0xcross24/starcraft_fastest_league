@@ -150,6 +150,7 @@
                             </div>
                             <!-- Download link below the tables -->
                             <x-replay-download :id="$replayId" />
+                            <x-invalidation-request :replay-id="$replayId" :rows="$groupedReplays" />
                             @endforeach
                             <div class="mt-6">{{ $games->links() }}</div>
                             @endif
