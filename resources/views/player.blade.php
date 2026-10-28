@@ -20,13 +20,13 @@
                         </ul>
                         <ul class="flex mb-6">
                             <li class="mr-4">
-                                <a href="?season={{ $seasonId }}&format=2v2{{ $result ? '&result='.$result : '' }}"
+                                <a href="?{{ http_build_query(array_filter(['season' => $seasonId, 'format' => '2v2', 'result' => $result]) + $filter->query()) }}"
                                     class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format', '2v2') == '2v2' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
                                     2v2
                                 </a>
                             </li>
                             <li>
-                                <a href="?season={{ $seasonId }}&format=3v3{{ $result ? '&result='.$result : '' }}"
+                                <a href="?{{ http_build_query(array_filter(['season' => $seasonId, 'format' => '3v3', 'result' => $result]) + $filter->query()) }}"
                                     class="inline-block py-1 px-4 text-sm font-medium focus:outline-none {{ request('format') == '3v3' ? 'border-b-4 border-blue-500 text-blue-600 font-bold' : 'border-b-0 text-gray-700 dark:text-gray-300 font-bold' }}">
                                     3v3
                                 </a>
@@ -51,12 +51,12 @@
                             <div class=" text-lg font-semibold text-gray-700 dark:text-gray-200">Season {{ $selectedSeason->id }} ({{ strtoupper($format) }})</div>
                             <div class="flex flex-wrap gap-2">
                                 {{-- This format (Wk`Cross-_s2_3v3.zip) and the whole season (Wk`Cross-_s2.zip) --}}
-                                @if($games->total() > 0)
-                                <x-zip-download-button :season="$selectedSeason->id" :format="$format" :player="$playerName->name" :count="$games->total()" :label="'Download ' . $format" />
+                                @if($resultCounts->sum() > 0)
+                                <x-zip-download-button :season="$selectedSeason->id" :format="$format" :player="$playerName->name" :filters="$filter->query()" :count="$resultCounts->sum()" :label="'Download ' . $format" />
                                 @endif
                                 @if($seasonGameCount > 0)
-                                <x-zip-download-button :season="$selectedSeason->id" :player="$playerName->name" :count="$seasonGameCount" label="Download all formats" />
-                                <x-zip-date-download :season="$selectedSeason->id" :player="$playerName->name" />
+                                <x-zip-download-button :season="$selectedSeason->id" :player="$playerName->name" :filters="$filter->query()" :count="$seasonGameCount" label="Download all formats" />
+                                <x-zip-selected-download :season="$selectedSeason->id" :format="$format" :player="$playerName->name" />
                                 @endif
                             </div>
                         </div>
@@ -85,6 +85,8 @@
                         @endif
                         @if($selectedSeason)
                         <div id="season-{{ $selectedSeason->id }}" class="season-ranking block mt-10">
+                            <x-game-filters :filter="$filter" :count="$games->total()" :season="$selectedSeason->id" :format="$format" :with-player="false"
+                                :keep="['season' => $seasonId, 'format' => $format, 'result' => $result]" />
                             {{-- All / Wins / Lost: every game this player lost, and to whom, in one click --}}
                             <ul class="flex gap-2 mb-4 text-sm">
                                 @foreach(['all' => 'All', 'win' => 'Wins', 'lost' => 'Lost'] as $key => $label)
@@ -93,7 +95,7 @@
                                 $active = ($result ?? 'all') === $key;
                                 @endphp
                                 <li>
-                                    <a href="?{{ http_build_query(array_filter(['season' => $seasonId, 'format' => $format, 'result' => $key === 'all' ? null : $key])) }}"
+                                    <a href="?{{ http_build_query(array_filter(['season' => $seasonId, 'format' => $format, 'result' => $key === 'all' ? null : $key]) + $filter->query()) }}"
                                         class="inline-block rounded px-3 py-1 font-semibold {{ $active ? ['all' => 'bg-blue-600', 'win' => 'bg-emerald-600', 'lost' => 'bg-red-600'][$key] . ' text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600' }}">
                                         {{ $label }} ({{ $n }})
                                     </a>
@@ -193,9 +195,7 @@
                                 </div>
                             </div>
                             <!-- Download link below the tables -->
-                            <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
-                            </div>
+                            <x-replay-download :id="$replayId" />
                             @endforeach
                             @endif
                             @elseif($format === '3v3')
@@ -290,9 +290,7 @@
                                 </div>
                             </div>
                             <!-- Download link below the tables -->
-                            <div class="w-full text-center py-2 mb-6">
-                                <a href="{{ route('replay.download', ['uuid' => $replayId]) }}" class="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition font-semibold">Download Replay</a>
-                            </div>
+                            <x-replay-download :id="$replayId" />
                             @endforeach
                             @endif
                             @endif
