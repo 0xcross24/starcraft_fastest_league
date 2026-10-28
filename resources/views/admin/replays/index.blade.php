@@ -13,7 +13,7 @@
                         @endforeach
                     </select>
                     <select name="format" class="rounded-md border-gray-700 bg-gray-900 text-gray-200 text-sm">
-                        <option value="">2v2 + 3v3</option>
+                        <option value="">All formats</option>
                         @foreach(['2v2', '3v3'] as $f)
                         <option value="{{ $f }}" @selected($format === $f)>{{ $f }}</option>
                         @endforeach
@@ -23,15 +23,16 @@
 
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <p class="text-sm text-gray-400">{{ $games->total() }} {{ Str::plural('game', $games->total()) }}</p>
-                    {{-- Whole-season backup: valid games of every format, unless a format is picked --}}
-                    @if($seasonId)
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        {{-- Whole-season backup: valid games of every format, unless a format is picked --}}
+                        @if($seasonId)
                         <x-zip-download-button :season="$seasonId" :format="$format" :label="$format ? 'Download ' . $format : 'Download whole season'" />
                         <x-zip-date-download :season="$seasonId" :format="$format" />
+                        @endif
+                        <button type="button" id="select-page" class="text-xs text-blue-400 hover:underline">Select all on page</button>
+                        {{-- Ticked games, any season; invalid games have no box and are never zipped --}}
+                        <x-zip-selected-download :season="$seasonId" :format="$format" />
                     </div>
-                    @else
-                    <span class="text-xs text-gray-400">Pick a season to download it as a zip.</span>
-                    @endif
                 </div>
 
                 <div class="space-y-4">
@@ -50,6 +51,12 @@
                                 @if($invalid)<span class="ml-1 rounded bg-red-900 px-2 py-0.5 text-red-200">invalid</span>@endif
                             </div>
                             <div class="flex items-center gap-3">
+                                @unless($invalid)
+                                <label class="js-zip-pick-label items-center gap-1 cursor-pointer select-none" style="display: none">
+                                    <input type="checkbox" class="js-zip-pick rounded border-gray-400 bg-gray-900 text-blue-600" value="{{ $game->replay_id }}">
+                                    Select
+                                </label>
+                                @endunless
                                 <a href="{{ route('replay.download', ['uuid' => $game->replay_id]) }}" class="text-blue-400 hover:underline">Download</a>
                                 @unless($invalid)
                                 <form method="post" action="{{ route('admin.replays.invalidate', $game->replay_id) }}"
@@ -82,6 +89,16 @@
                 </div>
 
                 <div class="mt-4">{{ $games->links() }}</div>
+                <script>
+                document.getElementById('select-page').addEventListener('click', () => {
+                    // Stops at the pick limit (the change handler unticks and warns once)
+                    for (const c of document.querySelectorAll('.js-zip-pick:not(:checked)')) {
+                        c.checked = true;
+                        c.dispatchEvent(new Event('change'));
+                        if (!c.checked) break;
+                    }
+                });
+                </script>
             </div>
         </div>
     </div>

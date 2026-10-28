@@ -209,6 +209,47 @@ class ReplayZipDownloadTest extends TestCase
         $this->download(['season' => 1, 'games' => array_map(fn($i) => "id{$i}", range(1, 101))])->assertSessionHasErrors('games');
     }
 
+    public function test_selected_games_can_span_seasons_when_no_season_is_given(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('g1', [$a, $b], [$c, $d], '2v2', '2026-10-01 10:00:00');
+        $this->game('g2', [$a, $b], [$c, $d], '2v2', '2026-10-02 10:00:00');
+        $other = Season::create(['is_active' => 0]);
+        $otherDir = storage_path('app/public/uploads/season_' . $other->id);
+        File::ensureDirectoryExists($otherDir);
+        file_put_contents("{$otherDir}/ziptest-old.rep", 'replay old;');
+        Replay::create(Replay::where('replay_id', 'g1')->first()->only(['player_name', 'winning_team', 'team', 'race', 'hash', 'apm', 'eapm', 'format', 'points', 'user_id', 'player_name_id'])
+            + ['replay_id' => 'old', 'season_id' => $other->id, 'start_time' => '2026-09-01 11:00:00', 'replay_file' => 'ziptest-old.rep']);
+
+        try {
+            $response = $this->download(['games' => ['g2', 'old']]);
+            $this->assertSame(['replay old', 'replay g2'], array_values($this->entries($response->streamedContent())));
+            $this->assertStringContainsString('filename=selected.zip', $response->headers->get('Content-Disposition'));
+        } finally {
+            File::deleteDirectory($otherDir);
+        }
+
+        // Without picks a season is still required
+        $this->download([])->assertSessionHasErrors('season');
+    }
+
+    public function test_admin_replays_page_has_select_boxes_for_valid_games(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('g1', [$a, $b], [$c, $d]);
+        $this->game('voided', [$a, $b], [$c, $d]);
+        Replay::where('replay_id', 'voided')->update(['is_invalid' => true]);
+
+        $this->withSession(['auth.password_confirmed_at' => time()])
+            ->actingAs(User::factory()->admin()->create())->get('/admin/replays')
+            ->assertOk()
+            ->assertSee('All formats')->assertDontSee('2v2 + 3v3')
+            ->assertSee('class="js-zip-pick rounded border-gray-400 bg-gray-900 text-blue-600" value="g1"', false)
+            ->assertDontSee('value="voided"', false)
+            ->assertSee('Select all on page')
+            ->assertSee('data-base="' . e(route('replays.download-zip')) . '"', false);
+    }
+
     public function test_race_filter_matches_the_replay_list(): void
     {
         [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);

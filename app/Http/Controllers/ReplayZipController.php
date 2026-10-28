@@ -26,7 +26,8 @@ class ReplayZipController extends Controller
     public function download(Request $request): Response
     {
         $validated = $request->validate([
-            'season' => ['required', 'integer', 'exists:seasons,id'],
+            // Hand-picked games can come from several seasons (admin portal)
+            'season' => ['required_without:games', 'nullable', 'integer', 'exists:seasons,id'],
             'format' => ['nullable', 'in:2v2,3v3'],
             'player' => ['nullable', 'string', 'max:255'],
             'from' => ['nullable', 'date_format:Y-m-d'],
@@ -37,7 +38,7 @@ class ReplayZipController extends Controller
             'games.*' => ['string', 'max:64'],
         ]);
         $picked = $validated['games'] ?? null;
-        $season = Season::findOrFail($validated['season']);
+        $season = isset($validated['season']) ? Season::findOrFail($validated['season']) : null;
         $format = $validated['format'] ?? null;
         $playerName = isset($validated['player'])
             ? PlayerName::where('name', $validated['player'])->firstOrFail()
@@ -48,7 +49,7 @@ class ReplayZipController extends Controller
         [$from, $to, $race] = [$filter->from, $filter->to, $filter->race];
 
         $gameIds = $filter->apply(Replay::valid())
-            ->where('season_id', $season->id)
+            ->when($season, fn($q) => $q->where('season_id', $season->id))
             ->when($format, fn($q) => $q->where('format', $format))
             ->when($playerName, fn($q) => $q->where('player_name_id', $playerName->id))
             ->when($picked, fn($q) => $q->whereIn('replay_id', $picked))
@@ -70,14 +71,14 @@ class ReplayZipController extends Controller
         // Named after what's in it: s2_2v2.zip, Wk`Cross-_s2_3v3.zip,
         // Wk`Cross-_s2.zip (all formats), s2.zip (whole season), plus the
         // dates if picked: s2_2v2_2026-10-01_to_2026-10-15.zip, s2_from_2026-10-01.zip,
-        // and hand-picked games: s2_2v2_selected.zip.
+        // and hand-picked games: s2_2v2_selected.zip (selected.zip across seasons).
         $dates = match (true) {
             $from && $to => $from === $to ? $from : "{$from}_to_{$to}",
             (bool) $from => "from_{$from}",
             (bool) $to => "to_{$to}",
             default => null,
         };
-        $zipName = collect([$playerName ? $this->safe($playerName->name) : null, 's' . $season->id, $format, $race, $dates, $picked ? 'selected' : null])
+        $zipName = collect([$playerName ? $this->safe($playerName->name) : null, $season ? 's' . $season->id : null, $format, $race, $dates, $picked ? 'selected' : null])
             ->filter()->implode('_') . '.zip';
 
         return response()->streamDownload(function () use ($files) {
