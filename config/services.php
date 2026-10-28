@@ -28,6 +28,13 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    // Replay invalidation requests: webhook of a Discord forum channel (each
+    // game becomes a post) and an optional role to ping on new tickets.
+    'discord' => [
+        'tickets_webhook' => env('DISCORD_TICKETS_WEBHOOK_URL'),
+        'tickets_role_id' => env('DISCORD_TICKETS_ROLE_ID'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

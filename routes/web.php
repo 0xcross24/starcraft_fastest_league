@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\ReplayController as AdminReplayController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\InvalidationRequestController as AdminInvalidationRequestController;
 use App\Http\Controllers\AllReplaysController;
+use App\Http\Controllers\InvalidationRequestController;
 use App\Http\Controllers\PlayerNameController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplayController;
@@ -44,6 +46,7 @@ Route::middleware('auth')->group(function () {
   Route::post('/upload', [ReplayController::class, 'upload'])->middleware('throttle:30,10')->name('upload.upload');
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
   Route::get('/replays/download', [ReplayZipController::class, 'download'])->middleware('throttle:5,10')->name('replays.download-zip');
+  Route::post('/replays/{replayId}/invalidation-request', [InvalidationRequestController::class, 'store'])->middleware('throttle:5,10')->name('invalidation-requests.store');
 });
 
 // Admin portal
@@ -60,6 +63,9 @@ Route::middleware(['auth', 'admin', 'password.confirm'])->prefix('admin')->name(
   Route::post('/users/{user}/password-reset', [AdminUserController::class, 'sendPasswordReset'])->name('users.password-reset');
   Route::get('/replays', [AdminReplayController::class, 'index'])->name('replays.index');
   Route::post('/replays/{replayId}/invalidate', [AdminReplayController::class, 'invalidate'])->name('replays.invalidate');
+  Route::get('/requests', [AdminInvalidationRequestController::class, 'index'])->name('invalidation-requests.index');
+  Route::post('/requests/{invalidationRequest}/approve', [AdminInvalidationRequestController::class, 'approve'])->name('invalidation-requests.approve');
+  Route::post('/requests/{invalidationRequest}/reject', [AdminInvalidationRequestController::class, 'reject'])->name('invalidation-requests.reject');
 });
 
 // Build Order routes
