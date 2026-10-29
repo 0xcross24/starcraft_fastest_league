@@ -66,7 +66,8 @@ class DiscordTickets
         $this->send(['embeds' => [array_filter([
             'title' => $approved ? 'Approved: game invalidated' : 'Rejected: game stays valid',
             'color' => $approved ? 0x10B981 : 0xEF4444,
-            'description' => $request->resolution_note ? Str::limit($request->resolution_note, 2000) : null,
+            'url' => route('games.show', $request->replay_id),
+            'description' => $this->withLink($request->replay_id, $request->resolution_note ? Str::limit($request->resolution_note, 2000) : null),
             'footer' => ['text' => 'by ' . $adminName],
             'timestamp' => now()->toIso8601String(),
         ])]], $request->discord_thread_id);
@@ -91,8 +92,8 @@ class DiscordTickets
         $this->send(['embeds' => [array_filter([
             'title' => Str::limit($title, 250),
             'color' => $color,
-            'description' => $comment->body ? Str::limit($comment->body, 3500) : null,
-            'footer' => ['text' => 'Reply on the site: ' . route('games.show', $comment->replay_id)],
+            'url' => route('games.show', $comment->replay_id),
+            'description' => $this->withLink($comment->replay_id, $comment->body ? Str::limit($comment->body, 3500) : null),
             'timestamp' => $comment->created_at?->toIso8601String(),
         ])]], $threadId);
     }
@@ -111,7 +112,7 @@ class DiscordTickets
             'title' => $title,
             'url' => route('games.show', $request->replay_id),
             'color' => 0xF59E0B,
-            'description' => Str::limit($request->justification, 3500),
+            'description' => $this->withLink($request->replay_id, Str::limit($request->justification, 3500)),
             'fields' => array_merge([
                 ['name' => 'Requested by', 'value' => ($request->playerName?->name ?? $request->user->player_name), 'inline' => true],
                 ['name' => 'Reason', 'value' => $request->reasonLabel(), 'inline' => true],
@@ -121,6 +122,17 @@ class DiscordTickets
             ], $teams),
             'timestamp' => $request->created_at?->toIso8601String(),
         ];
+    }
+
+    /**
+     * $text followed by a link to the game page, where the players and admins
+     * read and reply to the whole conversation (they need to be logged in).
+     */
+    private function withLink(string $replayId, ?string $text): string
+    {
+        $link = '[Read the conversation on the site](' . route('games.show', $replayId) . ')';
+
+        return $text ? $text . "\n\n" . $link : $link;
     }
 
     /**

@@ -200,4 +200,20 @@ class InvalidationDiscussionTest extends TestCase
         $this->actingAs($this->p['C'])->get(route('games.show', 'game-1'))->assertOk()
             ->assertSee('rejected')->assertDontSee('no answer yet')->assertSee('disputes');
     }
+
+    public function test_every_discord_message_links_to_the_conversation_on_the_site(): void
+    {
+        $this->ask('C');
+        $this->say('A', 'agree');
+        $this->actingAs($this->admin)->withSession(['auth.password_confirmed_at' => time()])
+            ->post(route('admin.invalidation-requests.reject', InvalidationRequest::sole()));
+
+        $link = '[Read the conversation on the site](' . route('games.show', 'game-1') . ')';
+        $sent = Http::recorded()->map(fn($pair) => $pair[0]->data()['embeds'][0]);
+        $this->assertCount(3, $sent); // request, agree, decision
+        foreach ($sent as $embed) {
+            $this->assertStringEndsWith($link, $embed['description']);
+            $this->assertSame(route('games.show', 'game-1'), $embed['url']);
+        }
+    }
 }
