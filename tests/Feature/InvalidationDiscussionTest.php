@@ -182,4 +182,22 @@ class InvalidationDiscussionTest extends TestCase
         $this->assertSame('SFL: A disputed invalidating game game-1', $mail->subject);
         $this->assertSame(route('games.show', 'game-1'), $mail->actionUrl);
     }
+
+    public function test_players_show_under_the_name_they_played_and_closed_requests_drop_no_answers(): void
+    {
+        // A now goes by another main name than the one in this game
+        $alt = \App\Models\PlayerName::addFor($this->p['A'], 'NewMain');
+        $alt->makeMain();
+        $this->ask('C');
+        $this->say('A', 'dispute', 'It counted.');
+
+        $page = $this->actingAs($this->admin)->get(route('games.show', 'game-1'))->assertOk();
+        $page->assertSeeInOrder(['A:', 'disputes'])->assertDontSee('NewMain:')->assertSee('no answer yet');
+
+        $this->actingAs($this->admin)->withSession(['auth.password_confirmed_at' => time()])
+            ->post(route('admin.invalidation-requests.reject', InvalidationRequest::sole()));
+
+        $this->actingAs($this->p['C'])->get(route('games.show', 'game-1'))->assertOk()
+            ->assertSee('rejected')->assertDontSee('no answer yet')->assertSee('disputes');
+    }
 }
