@@ -22,13 +22,13 @@ class HomeController extends Controller
         }
 
         // Get top 5 for 2v2 and 3v3 for the current season
-        $top2v2 = Stats::with('playerName')
+        $top2v2 = Stats::with('user')
             ->where('season_id', $season->id)
             ->where('format', '2v2')
             ->orderByDesc('elo')
             ->limit(5)
             ->get();
-        $top3v3 = Stats::with('playerName')
+        $top3v3 = Stats::with('user')
             ->where('season_id', $season->id)
             ->where('format', '3v3')
             ->orderByDesc('elo')

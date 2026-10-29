@@ -69,9 +69,29 @@ class User extends Authenticatable
         return $this->role === 'owner';
     }
 
+    /** The names this account plays under now (at most PlayerName::MAX_PER_USER). */
     public function playerNames()
     {
+        return $this->hasMany(PlayerName::class)->whereNull('retired_at')->orderBy('id');
+    }
+
+    /** Including retired names, which keep their games on this account. */
+    public function allPlayerNames()
+    {
         return $this->hasMany(PlayerName::class)->orderBy('id');
+    }
+
+    /**
+     * Make sure the account has a stats row for every format in the season.
+     */
+    public function ensureStats(Season $season): void
+    {
+        foreach (PlayerName::FORMATS as $format) {
+            Stats::firstOrCreate(
+                ['user_id' => $this->id, 'season_id' => $season->id, 'format' => $format],
+                ['wins' => 0, 'losses' => 0, 'elo' => 1000],
+            );
+        }
     }
 
     public function primaryPlayerName(): ?PlayerName

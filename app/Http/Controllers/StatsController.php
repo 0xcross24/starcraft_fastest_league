@@ -43,7 +43,7 @@ class StatsController extends Controller
         }
 
         // Retrieve users with their associated stats, grouped by season
-        $usersWithStats = Stats::with('playerName')
+        $usersWithStats = Stats::with('user')
             ->orderBy('season_id', 'asc')  // Group by season
             ->orderBy('elo', 'desc')       // Order by Elo in descending order
             ->orderBy('id')                // Tie-breaker for same Elo, matches profile/homepage
@@ -62,8 +62,8 @@ class StatsController extends Controller
     }
 
     /**
-     * @param  int[]  $winners  player_name ids
-     * @param  int[]  $losers  player_name ids
+     * @param  int[]  $winners  user ids
+     * @param  int[]  $losers  user ids
      */
     public function calculateElo(array $winners, array $losers, string $format)
     {
@@ -73,19 +73,19 @@ class StatsController extends Controller
             return ['error' => 'No active season found'];
         }
 
-        $statsFor = fn(array $ids) => Stats::whereIn('player_name_id', $ids)
+        $statsFor = fn(array $ids) => Stats::whereIn('user_id', $ids)
             ->where('season_id', $activeSeason->id)
             ->where('format', $format)
             ->get()
-            ->keyBy('player_name_id');
+            ->keyBy('user_id');
         $winnerStats = $statsFor($winners);
         $loserStats = $statsFor($losers);
 
         // Elo before changes, and each player's change from the iCCup table
-        $currentElo = $winnerStats->pluck('elo', 'player_name_id')->all() + $loserStats->pluck('elo', 'player_name_id')->all();
+        $currentElo = $winnerStats->pluck('elo', 'user_id')->all() + $loserStats->pluck('elo', 'user_id')->all();
         $eloChanges = $this->eloService->rateGame(
-            $winnerStats->pluck('elo', 'player_name_id')->all(),
-            $loserStats->pluck('elo', 'player_name_id')->all(),
+            $winnerStats->pluck('elo', 'user_id')->all(),
+            $loserStats->pluck('elo', 'user_id')->all(),
         );
 
         foreach ([[$winnerStats, 'wins'], [$loserStats, 'losses']] as [$team, $counter]) {

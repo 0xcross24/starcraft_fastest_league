@@ -54,16 +54,20 @@
             {{-- Usernames --}}
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100">
                 <h3 class="text-lg font-semibold">Usernames</h3>
-                <p class="text-sm text-gray-400">Up to {{ \App\Models\PlayerName::MAX_PER_USER }}. Each is ranked separately.</p>
+                <p class="text-sm text-gray-400">Up to {{ \App\Models\PlayerName::MAX_PER_USER }}. All share the account's one rank.</p>
+                @php $retired = $user->allPlayerNames->filter->isRetired(); @endphp
+                @if($retired->isNotEmpty())
+                <p class="mt-1 text-xs text-gray-400">Removed (games kept, can't be registered by others): {{ $retired->pluck('name')->implode(', ') }}</p>
+                @endif
                 <ul class="mt-3 divide-y divide-gray-700">
                     @foreach($user->playerNames as $name)
                     <li class="flex items-center justify-between py-2">
                         <a href="{{ route('player', ['user' => $name->name]) }}" class="text-blue-400 hover:underline">{{ $name->name }}</a>
                         @if($blocker = $name->removalBlocker())
-                        <span class="text-xs text-gray-400">{{ $name->name === $user->player_name ? 'Main name' : 'Has replays' }}</span>
+                        <span class="text-xs text-gray-400">Main name</span>
                         @else
                         <form method="post" action="{{ route('admin.users.names.destroy', [$user, $name]) }}"
-                            onsubmit="return confirm(@js('Remove the username '.$name->name.'?'))">
+                            onsubmit="return confirm(@js('Remove the username '.$name->name.'? Points and games stay on the account.'))">
                             @csrf
                             @method('delete')
                             <button class="text-xs text-red-400 hover:underline">Remove</button>

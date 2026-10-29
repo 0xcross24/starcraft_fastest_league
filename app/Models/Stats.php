@@ -10,21 +10,20 @@ class Stats extends Model
 {
 
     public $timestamps = false; // Disable timestamps
-    protected $fillable = ['user_id', 'player_name_id', 'season_id', 'wins', 'losses', 'elo', 'format'];
+    // One row per account, season and format: every name on the account counts toward it.
+    protected $fillable = ['user_id', 'season_id', 'wins', 'losses', 'elo', 'format'];
 
-    protected static function booted(): void
+    /**
+     * 1-based position in its season and format: higher elo first, ties by row
+     * id (the rankings page order).
+     */
+    public function position(): int
     {
-        // Callers that only know the user get the account's registered name.
-        static::creating(function (Stats $stats) {
-            if (! $stats->player_name_id && $stats->user_id) {
-                $stats->player_name_id = User::find($stats->user_id)?->primaryPlayerName()?->id;
-            }
-        });
-    }
-
-    public function playerName()
-    {
-        return $this->belongsTo(PlayerName::class);
+        return static::where('season_id', $this->season_id)
+            ->where('format', $this->format)
+            ->where(fn($q) => $q->where('elo', '>', $this->elo)
+                ->orWhere(fn($tie) => $tie->where('elo', $this->elo)->where('id', '<', $this->id)))
+            ->count() + 1;
     }
 
     public function user()

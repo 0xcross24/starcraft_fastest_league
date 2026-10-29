@@ -56,8 +56,8 @@ class GameFilter
         return $query
             ->when($this->from, fn($q) => $q->whereRaw(self::PLAYED_AT . ' >= ?', [$this->from . ' 00:00:00']))
             ->when($this->to, fn($q) => $q->whereRaw(self::PLAYED_AT . ' < ?', [Carbon::parse($this->to)->addDay()->format('Y-m-d') . ' 00:00:00']))
-            // An unknown name matches nothing rather than being dropped
-            ->when($this->player, fn($q) => $q->where('player_name_id', $this->playerName?->id ?? 0))
+            // Any of the account's names; an unknown name matches nothing rather than being dropped
+            ->when($this->player, fn($q) => $q->where('user_id', $this->playerName?->user_id ?? 0))
             ->when($this->race, fn($q) => $q->where('race', $this->race));
     }
 
