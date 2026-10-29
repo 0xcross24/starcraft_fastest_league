@@ -73,7 +73,7 @@ class StatsApiController extends Controller
                 continue;
             }
 
-            $rank = $stats->position();
+            $rank = $stats->position() ?? 'N/A';
             $grade = $eloService->getEloGrade($stats->elo);
 
             // Append format info in single line

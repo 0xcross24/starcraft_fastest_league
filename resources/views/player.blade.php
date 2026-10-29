@@ -62,7 +62,7 @@
                         <div class="flex flex-wrap items-center justify-start gap-8 bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-10">
                             <div>
                                 <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Rank</div>
-                                <div class="text-lg font-semibold text-emerald-600 dark:text-emerald-400 mt-1">#{{ $numericRank ?? 'N/A' }}</div>
+                                <div class="text-lg font-semibold text-emerald-600 dark:text-emerald-400 mt-1">{{ $numericRank ? '#' . $numericRank : 'Unranked' }}</div>
                             </div>
                             <div>
                                 <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Grade</div>

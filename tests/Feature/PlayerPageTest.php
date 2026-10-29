@@ -44,6 +44,7 @@ class PlayerPageTest extends TestCase
                 'season_id' => $season->id,
                 'format' => '2v2',
                 'elo' => $elo,
+                'wins' => 1, // only players with games are ranked
             ]);
         }
 
@@ -72,6 +73,7 @@ class PlayerPageTest extends TestCase
                 'season_id' => $season->id,
                 'format' => '2v2',
                 'elo' => 5000,
+                'wins' => 1,
             ]);
         }
 

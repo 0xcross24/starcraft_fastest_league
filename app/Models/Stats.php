@@ -13,13 +13,29 @@ class Stats extends Model
     // One row per account, season and format: every name on the account counts toward it.
     protected $fillable = ['user_id', 'season_id', 'wins', 'losses', 'elo', 'format'];
 
-    /**
-     * 1-based position in its season and format: higher elo first, ties by row
-     * id (the rankings page order).
-     */
-    public function position(): int
+    /** Rows that have played at least one game: the only ones ranked. */
+    public function scopeRanked($query)
     {
-        return static::where('season_id', $this->season_id)
+        return $query->whereRaw('wins + losses > 0');
+    }
+
+    public function hasPlayed(): bool
+    {
+        return $this->wins + $this->losses > 0;
+    }
+
+    /**
+     * 1-based position in its season and format among accounts that have
+     * played: higher elo first, ties by row id (the rankings page order).
+     * Null until this account has played a game there.
+     */
+    public function position(): ?int
+    {
+        if (!$this->hasPlayed()) {
+            return null;
+        }
+
+        return static::ranked()->where('season_id', $this->season_id)
             ->where('format', $this->format)
             ->where(fn($q) => $q->where('elo', '>', $this->elo)
                 ->orWhere(fn($tie) => $tie->where('elo', $this->elo)->where('id', '<', $this->id)))

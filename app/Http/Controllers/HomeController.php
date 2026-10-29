@@ -25,13 +25,17 @@ class HomeController extends Controller
         $top2v2 = Stats::with('user')
             ->where('season_id', $season->id)
             ->where('format', '2v2')
+            ->ranked()
             ->orderByDesc('elo')
+            ->orderBy('id')
             ->limit(5)
             ->get();
         $top3v3 = Stats::with('user')
             ->where('season_id', $season->id)
             ->where('format', '3v3')
+            ->ranked()
             ->orderByDesc('elo')
+            ->orderBy('id')
             ->limit(5)
             ->get();
 

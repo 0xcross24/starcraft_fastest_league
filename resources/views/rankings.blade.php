@@ -63,7 +63,7 @@
                     </thead>
                     <tbody>
                       @php $rankNum = 1; @endphp
-                      @foreach(($usersWithStats[$season->id] ?? collect())->where('format', $format) as $stat)
+                      @forelse(($usersWithStats[$season->id] ?? collect())->where('format', $format) as $stat)
                       <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">{{ $rankNum++ }}</td>
                         <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">
@@ -81,7 +81,9 @@
                         <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">{{ $stat->elo ?? 'N/A' }}</td>
                         <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">{{ $stat->wins ?? 'N/A' }} - {{ $stat->losses ?? 'N/A' }}</td>
                       </tr>
-                      @endforeach
+                      @empty
+                      <tr><td colspan="5" class="border border-gray-300 px-4 py-6 text-center text-gray-400">No games played yet.</td></tr>
+                      @endforelse
                     </tbody>
                   </table>
                 </div>
