@@ -37,7 +37,20 @@
                                 </td>
                                 <td class="px-3 py-2 hidden sm:table-cell">{{ $user->email }}</td>
                                 <td class="px-3 py-2">
-                                    @if($user->isOwner())
+                                    @if(auth()->user()->isOwner() && !$user->is(auth()->user()))
+                                    <form method="post" action="{{ route('admin.users.role', $user) }}">
+                                        @csrf
+                                        @method('patch')
+                                        <select name="role" aria-label="Role for {{ $user->player_name }}" data-current="{{ $user->role }}"
+                                            onchange="if (confirm(@js('Make '.$user->player_name.' ').concat(this.value, '?'))) { this.form.submit(); } else { this.value = this.dataset.current; }"
+                                            class="rounded-md border-gray-700 bg-gray-900 py-1 pl-2 pr-8 text-xs text-gray-200">
+                                            @foreach(\App\Models\User::ROLES as $role)
+                                            <option value="{{ $role }}" @selected($user->role === $role)>{{ $role }}</option>
+                                            @endforeach
+                                        </select>
+                                        <noscript><button class="ml-1 text-xs text-blue-400 hover:underline">Save</button></noscript>
+                                    </form>
+                                    @elseif($user->isOwner())
                                     <span class="rounded bg-yellow-900 px-2 py-0.5 text-xs text-yellow-200">owner</span>
                                     @elseif($user->isAdmin())
                                     <span class="rounded bg-blue-900 px-2 py-0.5 text-xs text-blue-200">admin</span>

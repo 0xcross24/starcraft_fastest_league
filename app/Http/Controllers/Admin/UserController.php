@@ -75,6 +75,30 @@ class UserController extends Controller
         return back()->with('status', 'Account updated.');
     }
 
+    /** Role picker on the users list. Owners only; nobody changes their own role. */
+    public function updateRole(Request $request, User $user): RedirectResponse
+    {
+        $actor = $request->user();
+        abort_unless($actor->isOwner(), 403, 'Only an owner can change roles.');
+
+        $validated = $request->validate(['role' => ['required', Rule::in(User::ROLES)]]);
+
+        if ($user->is($actor)) {
+            return back()->with('error', 'You cannot change your own role.');
+        }
+        if ($validated['role'] === $user->role) {
+            return back();
+        }
+
+        $from = $user->role;
+        $user->role = $validated['role'];
+        $user->save();
+
+        $this->audit($request, 'user.role', $user, ['from' => $from, 'to' => $user->role]);
+
+        return back()->with('status', "{$user->player_name} is now {$user->role}.");
+    }
+
     public function addName(Request $request, User $user): RedirectResponse
     {
         $this->authorizeManage($request, $user);

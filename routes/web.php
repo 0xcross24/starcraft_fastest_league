@@ -57,6 +57,7 @@ Route::middleware(['auth', 'admin', 'password.confirm'])->prefix('admin')->name(
   Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
   Route::get('/users/{user}', [AdminUserController::class, 'edit'])->name('users.edit');
   Route::patch('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+  Route::patch('/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('users.role');
   Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
   Route::post('/users/{user}/names', [AdminUserController::class, 'addName'])->name('users.names.store');
   Route::delete('/users/{user}/names/{playerName}', [AdminUserController::class, 'removeName'])->scopeBindings()->name('users.names.destroy');
