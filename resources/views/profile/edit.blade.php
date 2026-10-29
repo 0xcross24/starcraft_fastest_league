@@ -69,7 +69,7 @@
                 <div class="max-w-xl">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Your Usernames</h3>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        Add the in-game names you play under (up to {{ \App\Models\PlayerName::MAX_PER_USER }}). Games under any of them count toward your one rank. Removing a name keeps your points and games; a name that has played games stays linked to your account and can't be registered by anyone else.
+                        Add the in-game names you play under (up to {{ \App\Models\PlayerName::MAX_PER_USER }}). Games under any of them count toward your one rank. Your main name is the one shown on the rankings. To rename your account, add the new name and click Make main. Removing a name keeps your points and games; a name that has played games stays linked to your account and can't be registered by anyone else.
                     </p>
                     @if (session('error'))
                     <p class="mt-3 text-sm text-red-500">{{ session('error') }}</p>
@@ -81,12 +81,19 @@
                             @if($name->name === $user->player_name)
                             <span class="text-xs text-gray-500 dark:text-gray-400">Main name</span>
                             @else
+                            <div class="flex items-center gap-4">
+                            <form method="post" action="{{ route('player-names.main', $name) }}">
+                                @csrf
+                                @method('patch')
+                                <button type="submit" class="text-xs text-blue-500 hover:underline">Make main</button>
+                            </form>
                             <form method="post" action="{{ route('player-names.destroy', $name) }}"
                                 onsubmit="return confirm(@js('Remove '.$name->name.'? Your points and games stay on your account.'))">
                                 @csrf
                                 @method('delete')
                                 <button type="submit" class="text-xs text-red-500 hover:underline">Remove</button>
                             </form>
+                            </div>
                             @endif
                         </li>
                         @endforeach
@@ -103,6 +110,8 @@
                     @endif
                     @if (session('status') === 'username-added')
                     <p class="mt-2 text-sm text-green-600 dark:text-green-400">{{ __('Username added.') }}</p>
+                    @elseif (session('status') === 'main-name-changed')
+                    <p class="mt-2 text-sm text-green-600 dark:text-green-400">{{ __('Main name changed.') }}</p>
                     @elseif (session('status') === 'username-removed')
                     <p class="mt-2 text-sm text-green-600 dark:text-green-400">{{ __('Username removed.') }}</p>
                     @endif

@@ -120,6 +120,16 @@ class PlayerName extends Model
     }
 
     /**
+     * Make this the account's main name: the one shown on rankings and used
+     * in its page URL. Points and games are unchanged.
+     */
+    public function makeMain(): void
+    {
+        $this->user->player_name = $this->name;
+        $this->user->save();
+    }
+
+    /**
      * Take the name off its account. Points, wins and losses stay with the
      * account either way; a name with games is kept (retired) so they stay
      * linked to it, a name without games is deleted and free to register.

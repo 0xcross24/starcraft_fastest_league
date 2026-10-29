@@ -54,7 +54,7 @@
             {{-- Usernames --}}
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100">
                 <h3 class="text-lg font-semibold">Usernames</h3>
-                <p class="text-sm text-gray-400">Up to {{ \App\Models\PlayerName::MAX_PER_USER }}. All share the account's one rank.</p>
+                <p class="text-sm text-gray-400">Up to {{ \App\Models\PlayerName::MAX_PER_USER }}. All share the account's one rank. The main name is shown on the rankings; to rename, add the new name and make it main.</p>
                 @php $retired = $user->allPlayerNames->filter->isRetired(); @endphp
                 @if($retired->isNotEmpty())
                 <p class="mt-1 text-xs text-gray-400">Removed (games kept, can't be registered by others): {{ $retired->pluck('name')->implode(', ') }}</p>
@@ -66,12 +66,19 @@
                         @if($blocker = $name->removalBlocker())
                         <span class="text-xs text-gray-400">Main name</span>
                         @else
-                        <form method="post" action="{{ route('admin.users.names.destroy', [$user, $name]) }}"
-                            onsubmit="return confirm(@js('Remove the username '.$name->name.'? Points and games stay on the account.'))">
-                            @csrf
-                            @method('delete')
-                            <button class="text-xs text-red-400 hover:underline">Remove</button>
-                        </form>
+                        <div class="flex items-center gap-4">
+                            <form method="post" action="{{ route('admin.users.names.main', [$user, $name]) }}">
+                                @csrf
+                                @method('patch')
+                                <button class="text-xs text-blue-400 hover:underline">Make main</button>
+                            </form>
+                            <form method="post" action="{{ route('admin.users.names.destroy', [$user, $name]) }}"
+                                onsubmit="return confirm(@js('Remove the username '.$name->name.'? Points and games stay on the account.'))">
+                                @csrf
+                                @method('delete')
+                                <button class="text-xs text-red-400 hover:underline">Remove</button>
+                            </form>
+                        </div>
                         @endif
                     </li>
                     @endforeach
