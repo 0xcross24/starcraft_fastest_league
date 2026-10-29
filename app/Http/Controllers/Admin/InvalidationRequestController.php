@@ -32,7 +32,7 @@ class InvalidationRequestController extends Controller
         $discussions = $requests->pluck('replay_id')->unique()->mapWithKeys(fn($id) => [$id => [
             'stances' => $case->stances($id),
             'comments' => $case->comments($id),
-            'players' => $case->participants($id)->keyBy('id'),
+            'players' => $case->playedNames($id),
         ]]);
 
         return view('admin.requests.index', compact('requests', 'rows', 'status', 'discussions'));

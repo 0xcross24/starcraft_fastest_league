@@ -23,7 +23,7 @@ class GameController extends Controller
         $isPlayer = $user && $rows->contains('user_id', $user->id);
         $canSee = $isPlayer || $user?->isAdmin();
 
-        $requests = $canSee ? InvalidationRequest::with('user')->where('replay_id', $replayId)->orderBy('id')->get() : collect();
+        $requests = $canSee ? InvalidationRequest::with(['user', 'playerName', 'resolver'])->where('replay_id', $replayId)->orderBy('id')->get() : collect();
 
         return view('games.show', [
             'replayId' => $replayId,
@@ -32,7 +32,7 @@ class GameController extends Controller
             'requests' => $requests,
             'open' => $requests->contains('status', InvalidationRequest::OPEN),
             'stances' => $requests->isNotEmpty() ? $case->stances($replayId) : collect(),
-            'players' => $case->participants($replayId)->keyBy('id'),
+            'players' => $case->playedNames($replayId),
             'comments' => $requests->isNotEmpty() ? $case->comments($replayId) : collect(),
         ]);
     }

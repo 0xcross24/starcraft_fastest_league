@@ -46,6 +46,12 @@ class InvalidationCase
         ]);
     }
 
+    /** The name each account played under in this game, keyed by user id. */
+    public function playedNames(string $replayId): Collection
+    {
+        return Replay::where('replay_id', $replayId)->whereNotNull('user_id')->pluck('player_name', 'user_id');
+    }
+
     public function comments(string $replayId): Collection
     {
         return InvalidationComment::with('user')->where('replay_id', $replayId)->orderBy('id')->get();

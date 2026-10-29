@@ -1,7 +1,8 @@
 @props(['replayId', 'requests', 'stances', 'players', 'comments', 'open' => false, 'canPost' => false, 'adminReply' => false, 'replyAction' => null])
 
 {{-- One game's invalidation requests, where each player stands, and the
-     conversation between the players and the admins. --}}
+     conversation between the players and the admins. Players go by the name
+     they played under in this game ($players: user id => name). --}}
 @php
 $decided = $requests->firstWhere('status', '!=', 'open');
 $stanceLabel = ['agree' => ['agrees', 'text-emerald-400'], 'dispute' => ['disputes', 'text-red-400']];
@@ -19,18 +20,21 @@ $stanceLabel = ['agree' => ['agrees', 'text-emerald-400'], 'dispute' => ['disput
 
     @foreach($requests as $req)
     <div class="rounded border border-gray-700 p-3">
-        <div class="text-xs text-gray-400">{{ $req->user?->player_name }} asked · {{ $req->created_at->format('Y-m-d H:i') }}</div>
+        <div class="text-xs text-gray-400">{{ $players[$req->user_id] ?? $req->user?->player_name }} asked · {{ $req->created_at->format('Y-m-d H:i') }}</div>
         <div class="font-semibold text-gray-200">{{ $req->reasonLabel() }}</div>
         <p class="mt-1 whitespace-pre-line text-gray-300">{{ $req->justification }}</p>
     </div>
     @endforeach
     @endif
 
+    {{-- Once decided, only the players who answered are worth listing --}}
+    @php $shown = $open ? $stances : $stances->filter(); @endphp
+    @if($shown->isNotEmpty())
     <div>
         <div class="font-semibold text-gray-300">Players</div>
         <ul class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
-            @foreach($stances as $userId => $stance)
-            <li>{{ $players[$userId]?->player_name ?? '?' }}:
+            @foreach($shown as $userId => $stance)
+            <li>{{ $players[$userId] ?? '?' }}:
                 @if($stance)<span class="{{ $stanceLabel[$stance][1] }}">{{ $stanceLabel[$stance][0] }}</span>@else<span class="text-gray-400">no answer yet</span>@endif
             </li>
             @endforeach
@@ -39,13 +43,14 @@ $stanceLabel = ['agree' => ['agrees', 'text-emerald-400'], 'dispute' => ['disput
         <p class="mt-1 text-xs text-gray-400">If every player agrees, the game is invalidated automatically. If anyone disputes, an admin decides.</p>
         @endif
     </div>
+    @endif
 
     @if($comments->isNotEmpty())
     <ul class="space-y-2">
         @foreach($comments as $c)
         <li class="rounded p-2 {{ $c->from_admin ? 'bg-blue-900/30 border border-blue-800' : 'bg-gray-900/40' }}">
             <div class="text-xs text-gray-400">
-                <span class="text-gray-200">{{ $c->user?->player_name }}</span>
+                <span class="text-gray-200">{{ $c->from_admin ? $c->user?->player_name : ($players[$c->user_id] ?? $c->user?->player_name) }}</span>
                 @if($c->from_admin)<span class="ml-1 text-blue-300">admin</span>@endif
                 @if($c->stance)<span class="ml-1 {{ $stanceLabel[$c->stance][1] }}">{{ $stanceLabel[$c->stance][0] }}</span>@endif
                 · {{ $c->created_at->format('Y-m-d H:i') }}
