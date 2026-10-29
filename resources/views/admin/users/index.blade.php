@@ -37,7 +37,9 @@
                                 </td>
                                 <td class="px-3 py-2 hidden sm:table-cell">{{ $user->email }}</td>
                                 <td class="px-3 py-2">
-                                    @if($user->role === 'admin')
+                                    @if($user->isOwner())
+                                    <span class="rounded bg-yellow-900 px-2 py-0.5 text-xs text-yellow-200">owner</span>
+                                    @elseif($user->isAdmin())
                                     <span class="rounded bg-blue-900 px-2 py-0.5 text-xs text-blue-200">admin</span>
                                     @else
                                     <span class="text-gray-400">user</span>

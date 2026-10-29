@@ -38,7 +38,7 @@ class BuildOrderController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        if (Auth::user()->role !== 'admin') {
+        if (!Auth::user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
         $parents = BuildOrder::possibleParentsFor(null);
@@ -54,7 +54,7 @@ class BuildOrderController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        if (Auth::user()->role !== 'admin') {
+        if (!Auth::user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
         $validated = $request->validate($this->rules());
@@ -81,7 +81,7 @@ class BuildOrderController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        if (Auth::user()->role !== 'admin') {
+        if (!Auth::user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
         $buildOrder = BuildOrder::findOrFail($id);
@@ -98,7 +98,7 @@ class BuildOrderController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        if (Auth::user()->role !== 'admin') {
+        if (!Auth::user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
         $buildOrder = BuildOrder::findOrFail($id);
@@ -116,7 +116,7 @@ class BuildOrderController extends Controller
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        if (Auth::user()->role !== 'admin') {
+        if (!Auth::user()->isAdmin()) {
             abort(403, 'Unauthorized action.');
         }
         $buildOrder = BuildOrder::findOrFail($id);

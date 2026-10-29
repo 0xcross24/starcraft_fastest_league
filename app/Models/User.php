@@ -22,8 +22,11 @@ class User extends Authenticatable
         'player_name',
         'email',
         'password',
-        // 'role' is deliberately not mass assignable; only the admin portal sets it.
+        // 'role' is deliberately not mass assignable; only the owner sets it in the admin portal.
     ];
+
+    /** Roles, lowest to highest. An owner can do everything an admin can, plus change roles. */
+    public const ROLES = ['user', 'admin', 'owner'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -54,6 +57,16 @@ class User extends Authenticatable
         static::created(function (User $user) {
             $user->playerNames()->create(['name' => $user->player_name]);
         });
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'owner'], true);
+    }
+
+    public function isOwner(): bool
+    {
+        return $this->role === 'owner';
     }
 
     public function playerNames()

@@ -6,7 +6,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-2xl font-bold font-logo">Build Orders</h1>
                         @auth
-                        @if(auth()->user() && auth()->user()->role === 'admin')
+                        @if(auth()->user() && auth()->user()->isAdmin())
                         <a href="{{ route('builds.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">New</a>
                         @endif
                         @endauth

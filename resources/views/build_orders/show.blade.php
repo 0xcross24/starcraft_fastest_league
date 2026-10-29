@@ -20,7 +20,7 @@
                     <div class="flex items-center justify-between mb-6">
                         <h1 class="text-3xl font-bold font-logo m-0">{{ $buildOrder->title }}</h1>
                         @auth
-                        @if(auth()->user() && auth()->user()->role === 'admin')
+                        @if(auth()->user() && auth()->user()->isAdmin())
                         <div class="flex gap-2">
                             <a href="{{ route('builds.edit', ['id' => $buildOrder->id]) }}" class="px-2 py-1 text-sm bg-yellow-500 text-white hover:bg-yellow-600">Edit</a>
                             <form action="{{ route('builds.destroy', ['id' => $buildOrder->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this build order?');">
