@@ -121,6 +121,37 @@ class AdminPortalTest extends TestCase
         $this->actingAs($this->admin)->get(route('admin.users.edit', $user))->assertOk()->assertDontSee('<select id="role"', false);
     }
 
+    public function test_an_owner_can_change_roles_from_the_users_list(): void
+    {
+        $owner = User::factory()->owner()->create(['player_name' => 'TheOwner']);
+        $user = User::factory()->create(['player_name' => 'Pleb']);
+
+        $this->actingAs($owner)->get('/admin/users')->assertOk()
+            ->assertSee(route('admin.users.role', $user))
+            ->assertSee(route('admin.users.role', $this->admin))
+            ->assertDontSee(route('admin.users.role', $owner)); // no picker for yourself
+
+        $this->actingAs($owner)->from('/admin/users')
+            ->patch(route('admin.users.role', $user), ['role' => 'admin'])
+            ->assertRedirect('/admin/users')->assertSessionHas('status', 'Pleb is now admin.');
+        $this->assertSame('admin', $user->fresh()->role);
+
+        $this->actingAs($owner)->patch(route('admin.users.role', $user), ['role' => 'king'])->assertSessionHasErrors('role');
+        $this->actingAs($owner)->patch(route('admin.users.role', $owner), ['role' => 'user'])->assertSessionHas('error');
+        $this->assertSame('owner', $owner->fresh()->role);
+    }
+
+    public function test_only_owners_get_the_role_picker_on_the_users_list(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($this->admin)->get('/admin/users')->assertOk()->assertDontSee(route('admin.users.role', $user));
+        $this->actingAs($this->admin)->patch(route('admin.users.role', $user), ['role' => 'admin'])->assertForbidden();
+        $this->actingAs($user)->patch(route('admin.users.role', $user), ['role' => 'owner'])->assertForbidden();
+
+        $this->assertSame('user', $user->fresh()->role);
+    }
+
     public function test_an_owner_cannot_change_their_own_role(): void
     {
         $owner = User::factory()->owner()->create();
