@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ReplayController as AdminReplayController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\InvalidationRequestController as AdminInvalidationRequestController;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\AllReplaysController;
 use App\Http\Controllers\InvalidationRequestController;
 use App\Http\Controllers\PlayerNameController;
@@ -24,6 +25,7 @@ Route::get('/rules', function () {
 Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
 
 Route::get('/replays', [AllReplaysController::class, 'index'])->name('replays.all');
+Route::get('/games/{replayId}', [GameController::class, 'show'])->name('games.show');
 
 Route::get('/players/search', [PlayerSearchController::class, 'index'])
   ->middleware('throttle:60,1')
@@ -48,6 +50,7 @@ Route::middleware('auth')->group(function () {
   Route::get('/replay/download/{uuid}', [ReplayController::class, 'download'])->name('replay.download');
   Route::get('/replays/download', [ReplayZipController::class, 'download'])->middleware('throttle:5,10')->name('replays.download-zip');
   Route::post('/replays/{replayId}/invalidation-request', [InvalidationRequestController::class, 'store'])->middleware('throttle:5,10')->name('invalidation-requests.store');
+  Route::post('/games/{replayId}/discussion', [InvalidationRequestController::class, 'comment'])->middleware('throttle:20,10')->name('invalidation-requests.comment');
 });
 
 // Admin portal
@@ -69,6 +72,7 @@ Route::middleware(['auth', 'admin', 'password.confirm'])->prefix('admin')->name(
   Route::get('/requests', [AdminInvalidationRequestController::class, 'index'])->name('invalidation-requests.index');
   Route::post('/requests/{invalidationRequest}/approve', [AdminInvalidationRequestController::class, 'approve'])->name('invalidation-requests.approve');
   Route::post('/requests/{invalidationRequest}/reject', [AdminInvalidationRequestController::class, 'reject'])->name('invalidation-requests.reject');
+  Route::post('/requests/game/{replayId}/reply', [AdminInvalidationRequestController::class, 'reply'])->name('invalidation-requests.reply');
 });
 
 // Build Order routes

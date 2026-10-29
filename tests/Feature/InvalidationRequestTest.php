@@ -103,11 +103,13 @@ class InvalidationRequestTest extends TestCase
         $this->ask($this->loser)->assertSessionHas('invalidation_request.message', 'You already asked for this game to be invalidated.');
         $this->assertSame(1, InvalidationRequest::count());
 
+        // Both players asking means everyone agrees: approved on its own
         $this->ask($this->winner);
         $this->assertSame(2, InvalidationRequest::count());
         $this->assertSame('777', InvalidationRequest::where('user_id', $this->winner->id)->value('discord_thread_id'));
-        Http::assertSentCount(2);
+        Http::assertSentCount(3); // new post, reply, decision
         Http::assertSent(fn(Request $r) => str_contains($r->url(), 'thread_id=777') && !isset($r->data()['thread_name']));
+        $this->assertSame(2, InvalidationRequest::where('status', 'approved')->count());
     }
 
     public function test_the_request_is_kept_when_discord_is_not_configured(): void
@@ -136,13 +138,13 @@ class InvalidationRequestTest extends TestCase
 
         $this->ask($this->loser);
         $this->actingAs($this->loser)->get('/replays?season=1&format=2v2')
-            ->assertDontSee('Request invalidation')->assertSee('waiting for an admin');
+            ->assertDontSee('Request invalidation')->assertSee('Invalidation requested')->assertSee(route('games.show', 'game-1'));
     }
 
     public function test_approving_invalidates_the_game_closes_all_its_requests_and_posts_in_the_ticket(): void
     {
         $this->ask($this->loser);
-        $this->ask($this->winner);
+        $this->actingAs($this->winner)->post(route('invalidation-requests.comment', 'game-1'), ['stance' => 'dispute', 'body' => 'We agreed it was rated.']);
         $ticket = InvalidationRequest::first();
 
         $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($this->admin)

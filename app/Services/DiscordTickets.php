@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\InvalidationComment;
 use App\Models\InvalidationRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -71,6 +72,31 @@ class DiscordTickets
         ])]], $request->discord_thread_id);
     }
 
+    /**
+     * Mirror a message from the site's discussion into the game's ticket.
+     */
+    public function comment(?string $threadId, string $authorName, InvalidationComment $comment): void
+    {
+        if (!$threadId) {
+            return;
+        }
+
+        [$title, $color] = match (true) {
+            $comment->from_admin => ["Admin $authorName replied", 0x3B82F6],
+            $comment->stance === InvalidationComment::AGREE => ["$authorName agrees", 0x10B981],
+            $comment->stance === InvalidationComment::DISPUTE => ["$authorName disputes", 0xEF4444],
+            default => ["$authorName commented", 0x9CA3AF],
+        };
+
+        $this->send(['embeds' => [array_filter([
+            'title' => Str::limit($title, 250),
+            'color' => $color,
+            'description' => $comment->body ? Str::limit($comment->body, 3500) : null,
+            'footer' => ['text' => 'Reply on the site: ' . route('games.show', $comment->replay_id)],
+            'timestamp' => $comment->created_at?->toIso8601String(),
+        ])]], $threadId);
+    }
+
     private function embed(InvalidationRequest $request, string $title): array
     {
         $rows = $request->rows();
@@ -83,7 +109,7 @@ class DiscordTickets
 
         return [
             'title' => $title,
-            'url' => route('admin.invalidation-requests.index'),
+            'url' => route('games.show', $request->replay_id),
             'color' => 0xF59E0B,
             'description' => Str::limit($request->justification, 3500),
             'fields' => array_merge([
