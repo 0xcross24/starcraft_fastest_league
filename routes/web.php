@@ -72,6 +72,7 @@ Route::middleware(['auth', 'admin', 'password.confirm'])->prefix('admin')->name(
   Route::get('/requests', [AdminInvalidationRequestController::class, 'index'])->name('invalidation-requests.index');
   Route::post('/requests/{invalidationRequest}/approve', [AdminInvalidationRequestController::class, 'approve'])->name('invalidation-requests.approve');
   Route::post('/requests/{invalidationRequest}/reject', [AdminInvalidationRequestController::class, 'reject'])->name('invalidation-requests.reject');
+  Route::post('/requests/{invalidationRequest}/reopen', [AdminInvalidationRequestController::class, 'reopen'])->name('invalidation-requests.reopen');
   Route::post('/requests/game/{replayId}/reply', [AdminInvalidationRequestController::class, 'reply'])->name('invalidation-requests.reply');
 });
 

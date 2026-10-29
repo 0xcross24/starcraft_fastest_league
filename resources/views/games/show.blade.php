@@ -44,7 +44,7 @@
             @if($requests->isNotEmpty())
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100">
                 <x-invalidation-discussion :replay-id="$replayId" :requests="$requests" :stances="$stances" :players="$players" :comments="$comments"
-                    :open="$open" :can-post="$isPlayer && $open" :admin-reply="!$isPlayer && $open && auth()->user()?->isAdmin()" />
+                    :open="$open" :can-post="$canPost" :admin-reply="!$isPlayer && $open && auth()->user()?->isAdmin()" />
             </div>
             @endif
         </div>

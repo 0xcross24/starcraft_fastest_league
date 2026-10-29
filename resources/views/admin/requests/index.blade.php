@@ -77,8 +77,25 @@
                         </form>
                         @else
                         <p class="mt-2 text-xs text-gray-400">
-                            {{ ucfirst($ticket->status) }} by {{ $ticket->resolver?->player_name ?? '?' }} {{ $ticket->resolved_at?->format('Y-m-d H:i') }}@if($ticket->resolution_note): {{ $ticket->resolution_note }}@endif
+                            {{ ucfirst($ticket->status) }} by {{ $ticket->resolver?->player_name ?? 'all players agreeing' }} {{ $ticket->resolved_at?->format('Y-m-d H:i') }}@if($ticket->resolution_note): {{ $ticket->resolution_note }}@endif
                         </p>
+                        {{-- Change the decision, or put it back to open --}}
+                        <form method="post" class="mt-2 flex flex-wrap items-center gap-2">
+                            @csrf
+                            <x-text-input name="note" placeholder="Why (optional, emailed and posted on Discord)" class="flex-1 min-w-0 text-sm" maxlength="1000" />
+                            @if($ticket->status === 'rejected')
+                            <button formaction="{{ route('admin.invalidation-requests.approve', $ticket) }}"
+                                onclick="return confirm(@js('Change to approved and invalidate game '.substr($ticket->replay_id, 0, 8).'? This reverses the ELO and wins/losses it gave every player.'))"
+                                class="rounded bg-red-700 px-3 py-1.5 text-sm text-white hover:bg-red-600">Change to approved</button>
+                            @else
+                            <button formaction="{{ route('admin.invalidation-requests.reject', $ticket) }}"
+                                onclick="return confirm(@js('Change to rejected? Game '.substr($ticket->replay_id, 0, 8).' counts again and its season is re-rated.'))"
+                                class="rounded bg-gray-700 px-3 py-1.5 text-sm text-gray-200 hover:bg-gray-600">Change to rejected</button>
+                            @endif
+                            <button formaction="{{ route('admin.invalidation-requests.reopen', $ticket) }}"
+                                onclick="return confirm(@js($ticket->status === 'approved' ? 'Reopen? Game '.substr($ticket->replay_id, 0, 8).' counts again (season re-rated) until it is decided again.' : 'Reopen this request?'))"
+                                class="rounded bg-amber-700 px-3 py-1.5 text-sm text-white hover:bg-amber-600">Reopen</button>
+                        </form>
                         @endif
                     </div>
                     @empty

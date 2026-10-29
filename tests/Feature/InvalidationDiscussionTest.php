@@ -143,7 +143,7 @@ class InvalidationDiscussionTest extends TestCase
         $this->assertTrue($this->invalid());
     }
 
-    public function test_admins_reply_on_the_site_and_players_cannot_post_after_a_decision(): void
+    public function test_admins_reply_on_the_site_and_players_hear_the_decision(): void
     {
         $this->ask('C');
 
@@ -161,8 +161,9 @@ class InvalidationDiscussionTest extends TestCase
         $this->actingAs($this->admin)->post(route('admin.invalidation-requests.reject', InvalidationRequest::sole()), ['note' => 'Rated.']);
         Notification::assertSentTo($this->p['C'], InvalidationUpdate::class, fn($n) => $n->event === 'rejected' && $n->body === 'Rated.');
 
-        $this->say('C', null, 'But...')->assertSessionHas('error');
-        $this->assertSame(1, InvalidationComment::count());
+        // Rejected requests take further posts (and go back to the admins)
+        $this->say('C', null, 'But...')->assertSessionHas('status');
+        $this->assertSame('open', InvalidationRequest::sole()->status);
     }
 
     public function test_people_outside_the_game_cannot_post(): void
@@ -215,5 +216,90 @@ class InvalidationDiscussionTest extends TestCase
             $this->assertStringEndsWith($link, $embed['description']);
             $this->assertSame(route('games.show', 'game-1'), $embed['url']);
         }
+    }
+
+    private function asAdmin()
+    {
+        return $this->actingAs($this->admin)->withSession(['auth.password_confirmed_at' => time()]);
+    }
+
+    public function test_a_player_can_dispute_a_rejection_which_reopens_it(): void
+    {
+        $this->ask('C');
+        $this->asAdmin()->post(route('admin.invalidation-requests.reject', InvalidationRequest::sole()), ['note' => 'Rated.']);
+
+        $this->actingAs($this->p['D'])->get(route('games.show', 'game-1'))->assertSee('Disagree with the rejection?')->assertSee('I dispute this');
+        $this->say('D', 'agree', 'It really was practice, here is the chat log.')->assertSessionHas('status');
+
+        $this->assertSame('open', InvalidationRequest::sole()->status);
+        $this->assertSame(['rejected', 'reopened'], InvalidationComment::whereNotNull('event')->orderBy('id')->pluck('event')->all());
+        Http::assertSent(fn(Request $r) => ($r->data()['embeds'][0]['title'] ?? '') === 'D reopened it after the rejection');
+        $this->asAdmin()->get(route('admin.invalidation-requests.index'))->assertSee('Requests (1)');
+        $this->actingAs($this->p['C'])->get(route('games.show', 'game-1'))
+            ->assertSeeInOrder(['Rejected: game still counts', 'Rated.', 'Reopened for the admins', 'chat log']);
+    }
+
+    public function test_players_cannot_post_once_the_game_is_invalidated(): void
+    {
+        $this->ask('C');
+        $this->asAdmin()->post(route('admin.invalidation-requests.approve', InvalidationRequest::sole()));
+
+        $this->actingAs($this->p['A'])->get(route('games.show', 'game-1'))->assertDontSee('I dispute this');
+        $this->say('A', 'dispute', 'Bring it back!')->assertSessionHas('error');
+        $this->assertSame('approved', InvalidationRequest::sole()->status);
+    }
+
+    public function test_an_admin_can_reopen_or_change_a_rejection(): void
+    {
+        $this->ask('C');
+        $ticket = InvalidationRequest::sole();
+        $this->asAdmin()->post(route('admin.invalidation-requests.reject', $ticket));
+
+        $this->asAdmin()->post(route('admin.invalidation-requests.reopen', $ticket))->assertSessionHas('status');
+        $this->assertSame('open', $ticket->fresh()->status);
+        Notification::assertSentTo($this->p['A'], InvalidationUpdate::class, fn($n) => $n->event === 'reopened');
+
+        $this->asAdmin()->post(route('admin.invalidation-requests.reject', $ticket));
+        $this->asAdmin()->post(route('admin.invalidation-requests.approve', $ticket), ['note' => 'Changed my mind.'])->assertSessionHas('status');
+        $this->assertSame('approved', $ticket->fresh()->status);
+        $this->assertTrue($this->invalid());
+    }
+
+    public function test_changing_an_approval_to_rejected_brings_the_game_back_and_re_rates(): void
+    {
+        $this->ask('C');
+        $ticket = InvalidationRequest::sole();
+        $this->asAdmin()->post(route('admin.invalidation-requests.approve', $ticket));
+        $this->assertSame(1000, Stats::where('user_id', $this->p['A']->id)->where('format', '2v2')->value('elo'));
+
+        $this->asAdmin()->get(route('admin.invalidation-requests.index', ['status' => 'approved']))->assertSee('Change to rejected')->assertSee('Reopen');
+        $this->asAdmin()->post(route('admin.invalidation-requests.reject', $ticket), ['note' => 'Wrong call.'])->assertSessionHas('status');
+
+        $this->assertSame('rejected', $ticket->fresh()->status);
+        $this->assertFalse(Replay::where('replay_id', 'game-1')->get()->contains->is_invalid);
+        foreach (['A' => [1, 0], 'C' => [0, 1]] as $name => [$wins, $losses]) {
+            $stats = Stats::where('user_id', $this->p[$name]->id)->where('format', '2v2')->first();
+            $row = Replay::where('replay_id', 'game-1')->where('user_id', $this->p[$name]->id)->first();
+            $this->assertSame([$wins, $losses], [$stats->wins, $stats->losses]);
+            $this->assertSame(1000 + $row->points, $stats->elo);
+            $this->assertNotSame(0, $row->points);
+            $this->assertSame($stats->elo, $row->elo_after);
+        }
+    }
+
+    public function test_an_approved_game_that_was_uploaded_again_cannot_be_brought_back(): void
+    {
+        $this->ask('C');
+        $ticket = InvalidationRequest::sole();
+        $this->asAdmin()->post(route('admin.invalidation-requests.approve', $ticket));
+        // The same game, uploaded again after it was invalidated
+        Replay::create(Replay::where('replay_id', 'game-1')->first()->only(['player_name', 'winning_team', 'replay_file', 'team', 'race', 'hash', 'apm', 'eapm', 'season_id', 'format', 'user_id', 'player_name_id'])
+            + ['replay_id' => 'game-1-again', 'points' => 50]);
+
+        $this->asAdmin()->post(route('admin.invalidation-requests.reopen', $ticket))->assertSessionHas('error');
+        $this->asAdmin()->post(route('admin.invalidation-requests.reject', $ticket))->assertSessionHas('error');
+
+        $this->assertSame('approved', $ticket->fresh()->status);
+        $this->assertTrue($this->invalid());
     }
 }
