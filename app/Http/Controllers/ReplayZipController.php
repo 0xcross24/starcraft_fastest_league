@@ -51,7 +51,7 @@ class ReplayZipController extends Controller
         $gameIds = $filter->apply(Replay::valid())
             ->when($season, fn($q) => $q->where('season_id', $season->id))
             ->when($format, fn($q) => $q->where('format', $format))
-            ->when($playerName, fn($q) => $q->where('player_name_id', $playerName->id))
+            ->when($playerName, fn($q) => $q->where('user_id', $playerName->user_id))
             ->when($picked, fn($q) => $q->whereIn('replay_id', $picked))
             ->distinct()
             ->pluck('replay_id');

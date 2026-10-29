@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Season;
 use App\Models\PlayerName;
+use App\Models\User;
 use App\Models\Stats;
 use App\Services\EloService;
 use Illuminate\Support\Facades\Storage;
@@ -51,9 +52,9 @@ class StartNextSeason extends Command
             Storage::disk('public')->makeDirectory($seasonDir);
         }
 
-        // Every player name starts the new season on fresh 2v2 and 3v3 stats
-        foreach (PlayerName::all() as $playerName) {
-            $playerName->ensureStats($season);
+        // Every account starts the new season on fresh 2v2 and 3v3 stats
+        foreach (User::all() as $user) {
+            $user->ensureStats($season);
         }
 
         $this->info("Season {$nextSeasonId} started. Previous season ended. Stats reset for all users and formats.");
@@ -144,7 +145,7 @@ class StartNextSeason extends Command
         $fields = [];
 
         foreach (PlayerName::FORMATS as $format) {
-            $top = Stats::with('playerName')
+            $top = Stats::with('user')
                 ->where('season_id', $season->id)
                 ->where('format', $format)
                 ->whereRaw('wins + losses > 0')
@@ -160,7 +161,7 @@ class StartNextSeason extends Command
             $lines = $top->values()->map(fn(Stats $stat, int $i) => sprintf(
                 '%s **%s** — %d ELO (%s) · %d-%d',
                 $medals[$i] ?? '`#' . ($i + 1) . '`',
-                $this->escapeMarkdown($stat->playerName?->name ?? 'Unknown'),
+                $this->escapeMarkdown($stat->user?->player_name ?? 'Unknown'),
                 $stat->elo,
                 $grades->getEloGrade($stat->elo),
                 $stat->wins,

@@ -39,7 +39,8 @@ class StatsApiController extends Controller
             'user_agent' => substr($request->header('User-Agent'), 0, 200), // Limit UA length
         ]);
 
-        $playerName = PlayerName::where('name', $username)->first();
+        // Any of an account's names finds the account's stats
+        $playerName = PlayerName::where('name', $username)->with('user')->first();
         if (!$playerName) {
             return response("User not found", 404)
                 ->header('Content-Type', 'text/plain');
@@ -55,14 +56,14 @@ class StatsApiController extends Controller
         if ($formatQuery) {
             $formats = [$formatQuery];
         } else {
-            $formats = Stats::where('player_name_id', $playerName->id)
+            $formats = Stats::where('user_id', $playerName->user_id)
                 ->where('season_id', $seasonId)
                 ->pluck('format')
                 ->toArray();
         }
 
         foreach ($formats as $fmt) {
-            $stats = Stats::where('player_name_id', $playerName->id)
+            $stats = Stats::where('user_id', $playerName->user_id)
                 ->where('season_id', $seasonId)
                 ->where('format', $fmt)
                 ->first();
@@ -72,14 +73,7 @@ class StatsApiController extends Controller
                 continue;
             }
 
-            $allStats = Stats::where('season_id', $seasonId)
-                ->where('format', $fmt)
-                ->orderByDesc('elo')
-                ->orderBy('id')
-                ->get();
-
-            $rank = $allStats->search(fn($s) => $s->player_name_id == $playerName->id);
-            $rank = $rank !== false ? $rank + 1 : "N/A";
+            $rank = $stats->position();
             $grade = $eloService->getEloGrade($stats->elo);
 
             // Append format info in single line

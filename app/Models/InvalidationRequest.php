@@ -70,7 +70,7 @@ class InvalidationRequest extends Model
     public static function participantRow(User $user, string $replayId): ?Replay
     {
         return Replay::where('replay_id', $replayId)
-            ->whereIn('player_name_id', $user->playerNames()->select('id'))
+            ->where('user_id', $user->id)
             ->first();
     }
 }

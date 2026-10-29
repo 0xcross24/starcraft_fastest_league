@@ -21,26 +21,10 @@ class ProfileController extends Controller
         $seasonId = $request->input('season') ?? ($seasons->count() ? $seasons->max('id') : null);
         $format = $request->input('format', '2v2');
 
-        // Each player name has its own stats; the dropdown picks which one.
+        // One set of stats per account, whichever of its names played
         $playerNames = $user->playerNames;
-        $playerName = $playerNames->firstWhere('id', (int) $request->input('name'))
-            ?? $user->primaryPlayerName();
-
-        $stats = $playerName
-            ? $playerName->stats()->where('season_id', $seasonId)->where('format', $format)->first()
-            : null;
-
-        // Calculate rank for this name in this season/format (match rankings page order for ties)
-        $rank = null;
-        if ($stats) {
-            $allStats = \App\Models\Stats::where('season_id', $seasonId)
-                ->where('format', $format)
-                ->orderByDesc('elo')
-                ->orderBy('id') // secondary sort for tie-breaker, matches rankings page
-                ->pluck('id');
-            $rank = $allStats->search($stats->id);
-            $rank = $rank !== false ? $rank + 1 : null;
-        }
+        $stats = $user->stats()->where('season_id', $seasonId)->where('format', $format)->first();
+        $rank = $stats?->position();
 
         return view('profile.edit', [
             'user' => $user,
@@ -50,7 +34,6 @@ class ProfileController extends Controller
             'stats' => $stats,
             'rank' => $rank,
             'playerNames' => $playerNames,
-            'playerName' => $playerName,
         ]);
     }
 

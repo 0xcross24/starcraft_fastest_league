@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 /**
  * Lets a logged-in user add the other in-game names they play under, so
- * replays recorded under any of them count, each ranked separately.
+ * replays recorded under any of them count toward the account's one rating.
  */
 class PlayerNameController extends Controller
 {
@@ -22,21 +22,19 @@ class PlayerNameController extends Controller
 
         $playerName = PlayerName::addFor($user, $validated['name']);
 
-        return redirect()->route('profile.edit', ['name' => $playerName->id])
-            ->with('status', 'username-added');
+        return redirect()->route('profile.edit')->with('status', 'username-added');
     }
 
     public function destroy(Request $request, PlayerName $playerName): RedirectResponse
     {
         abort_unless($playerName->user_id === $request->user()->id, 403);
 
-        // The main name identifies the account, and a name with games behind
-        // it carries rated history, so neither can be removed.
+        // The main name identifies the account and cannot be removed.
         if ($blocker = $playerName->removalBlocker()) {
             return back()->with('error', $blocker);
         }
 
-        $playerName->delete();
+        $playerName->remove();
 
         return redirect()->route('profile.edit')->with('status', 'username-removed');
     }

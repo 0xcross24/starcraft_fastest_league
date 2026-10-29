@@ -37,8 +37,7 @@
                                 Profile: {{ $playerName->name }}
                             </h2>
                             @if($accountNames->count() > 1)
-                            <x-username-select :names="$accountNames" :selected="$playerName"
-                                :url-for="fn($n) => route('player', ['user' => $n->name, 'season' => $seasonId, 'format' => $format])" />
+                            <span class="text-sm text-gray-400">Also plays as {{ $accountNames->where('name', '!=', $user->player_name)->pluck('name')->implode(', ') }}</span>
                             @endif
                         </div>
                         <!-- Player Stats/Ranking for Selected Season/Format -->
@@ -115,14 +114,14 @@
                             @foreach($replayGroupsDesc as $replayId => $groupedReplays)
                             @php
                             // From this profile's side: its team on the left, opponents on the right
-                            $ownTeam = optional($groupedReplays->firstWhere('player_name_id', $playerName->id))->team ?? '1';
+                            $ownTeam = optional($groupedReplays->firstWhere('user_id', $user->id))->team ?? '1';
                             $team1 = $groupedReplays->where('team', $ownTeam);
                             $team2 = $groupedReplays->where('team', '!=', $ownTeam);
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
                             <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
-                                :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
+                                :own="$groupedReplays->firstWhere('user_id', $user->id)" />
                             <div class="flex flex-col xl:flex-row gap-3 xl:gap-0 mb-6">
                                 <!-- This profile's team -->
                                 <div class="w-full xl:w-1/2 overflow-x-auto">
@@ -144,7 +143,7 @@
                                             @foreach($team1 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
+                                                    @if($player->user_id === $user->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -178,7 +177,7 @@
                                             @foreach($team2 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
+                                                    @if($player->user_id === $user->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -212,14 +211,14 @@
                             @foreach($replayGroupsDesc3v3 as $replayId => $groupedReplays)
                             @php
                             // From this profile's side: its team on the left, opponents on the right
-                            $ownTeam = optional($groupedReplays->firstWhere('player_name_id', $playerName->id))->team ?? '1';
+                            $ownTeam = optional($groupedReplays->firstWhere('user_id', $user->id))->team ?? '1';
                             $team1 = $groupedReplays->where('team', $ownTeam);
                             $team2 = $groupedReplays->where('team', '!=', $ownTeam);
                             $team1Win = $team1->first() && $team1->first()->winning_team == 1;
                             $team2Win = $team2->first() && $team2->first()->winning_team == 1;
                             @endphp
                             <x-profile-game-result :replay-id="$replayId" :won="$team1Win"
-                                :own="$groupedReplays->firstWhere('player_name_id', $playerName->id)" />
+                                :own="$groupedReplays->firstWhere('user_id', $user->id)" />
                             <div class="flex flex-col xl:flex-row gap-3 xl:gap-0 mb-6">
                                 <!-- This profile's team -->
                                 <div class="w-full xl:w-1/2 overflow-x-auto">
@@ -240,7 +239,7 @@
                                             @foreach($team1 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
+                                                    @if($player->user_id === $user->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
@@ -274,7 +273,7 @@
                                             @foreach($team2 as $player)
                                             <tr>
                                                 <td class="border text-neonBlue font-semibold border-gray-200 text-center px-2 py-1 max-w-xs whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-                                                    @if($player->player_name_id === $playerName->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
+                                                    @if($player->user_id === $user->id)<span class="font-bold text-gray-100" title="{{ $player->player_name }}">{{ $player->player_name }}</span>@else<a href="{{ route('player', ['user' => $player->player_name]) }}" title="{{ $player->player_name }}">{{ $player->player_name }}</a>@endif
                                                 </td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>

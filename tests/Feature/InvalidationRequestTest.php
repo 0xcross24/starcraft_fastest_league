@@ -46,8 +46,8 @@ class InvalidationRequestTest extends TestCase
                 'user_id' => $user->id, 'player_name_id' => $name->id,
             ]);
             Stats::updateOrCreate(
-                ['player_name_id' => $name->id, 'season_id' => 1, 'format' => '2v2'],
-                ['user_id' => $user->id, 'wins' => $won ? 1 : 0, 'losses' => $won ? 0 : 1, 'elo' => 1000 + $points],
+                ['user_id' => $user->id, 'season_id' => 1, 'format' => '2v2'],
+                ['wins' => $won ? 1 : 0, 'losses' => $won ? 0 : 1, 'elo' => 1000 + $points],
             );
         }
     }
@@ -153,7 +153,7 @@ class InvalidationRequestTest extends TestCase
             ->assertSessionHas('status');
 
         $this->assertTrue(Replay::where('replay_id', 'game-1')->get()->every->is_invalid);
-        $this->assertSame(1000, Stats::where('player_name_id', $this->winner->primaryPlayerName()->id)->value('elo'));
+        $this->assertSame(1000, Stats::where('user_id', $this->winner->id)->value('elo'));
         $this->assertSame(0, InvalidationRequest::open()->count());
         $this->assertSame('Confirmed practice.', $ticket->fresh()->resolution_note);
         $this->assertSame($this->admin->id, $ticket->fresh()->resolved_by);

@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\PlayerName;
+use App\Models\User;
 use App\Models\Season;
 
 class InitStatsForNewSeason extends Command
@@ -20,14 +20,14 @@ class InitStatsForNewSeason extends Command
             return 1;
         }
         $count = 0;
-        foreach (PlayerName::all() as $playerName) {
+        foreach (User::all() as $user) {
             // Only create if not already exists
-            if (!$playerName->stats()->where('season_id', $seasonId)->exists()) {
-                $playerName->ensureStats($season);
+            if (!$user->stats()->where('season_id', $seasonId)->exists()) {
+                $user->ensureStats($season);
                 $count++;
             }
         }
-        $this->info("Initialized stats for $count player names for season $seasonId.");
+        $this->info("Initialized stats for $count accounts for season $seasonId.");
         return 0;
     }
 }

@@ -57,7 +57,7 @@ class RegisteredUserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            $user->primaryPlayerName()->ensureStats($currentSeason);
+            $user->ensureStats($currentSeason);
 
             return $user;
         });

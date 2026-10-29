@@ -23,7 +23,7 @@ class ReplayInvalidator
 
         DB::transaction(function () use ($replays) {
             foreach ($replays as $replay) {
-                $stats = Stats::where('player_name_id', $replay->player_name_id)
+                $stats = Stats::where('user_id', $replay->user_id)
                     ->where('season_id', $replay->season_id)
                     ->where('format', $replay->format)
                     ->first();

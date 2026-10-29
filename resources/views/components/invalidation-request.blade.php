@@ -5,7 +5,7 @@
      Players who already asked see their request's status instead. --}}
 @php
 $user = auth()->user();
-$mine = $user ? $rows->whereIn('player_name_id', $user->playerNames->pluck('id'))->first() : null;
+$mine = $user ? $rows->where('user_id', $user->id)->first() : null;
 $gameInvalid = $rows->isNotEmpty() && $rows->every(fn($r) => $r->is_invalid);
 $existing = $mine ? \App\Models\InvalidationRequest::where('replay_id', $replayId)->where('user_id', $user->id)->first() : null;
 $flash = session('invalidation_request');

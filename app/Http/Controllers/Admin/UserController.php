@@ -25,7 +25,7 @@ class UserController extends Controller
                 $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search) . '%';
                 $query->where(fn($q) => $q
                     ->where('email', 'like', $like)
-                    ->orWhereHas('playerNames', fn($n) => $n->where('name', 'like', $like)));
+                    ->orWhereHas('allPlayerNames', fn($n) => $n->where('name', 'like', $like)));
             })
             ->orderBy('id')
             ->paginate(25)
@@ -117,8 +117,8 @@ class UserController extends Controller
             return back()->with('error', $blocker);
         }
 
-        $playerName->delete();
-        $this->audit($request, 'user.name.remove', $user, ['name' => $playerName->name]);
+        $playerName->remove();
+        $this->audit($request, 'user.name.remove', $user, ['name' => $playerName->name, 'retired' => $playerName->exists]);
 
         return back()->with('status', "Removed username {$playerName->name}.");
     }
@@ -146,7 +146,7 @@ class UserController extends Controller
             return back()->with('error', 'This account has uploaded replays and cannot be deleted.');
         }
 
-        $this->audit($request, 'user.delete', $user, ['names' => $user->playerNames->pluck('name')->all()]);
+        $this->audit($request, 'user.delete', $user, ['names' => $user->allPlayerNames->pluck('name')->all()]);
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('status', "Deleted {$user->player_name}.");
