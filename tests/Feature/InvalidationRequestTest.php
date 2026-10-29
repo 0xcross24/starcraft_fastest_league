@@ -18,8 +18,11 @@ class InvalidationRequestTest extends TestCase
 
     private const WEBHOOK = 'https://discord.com/api/webhooks/1/abc';
 
+    // A 2v2: Winner + Partner beat Loser + Teammate
     private User $winner;
+    private User $partner;
     private User $loser;
+    private User $teammate;
     private User $admin;
 
     protected function setUp(): void
@@ -30,14 +33,16 @@ class InvalidationRequestTest extends TestCase
         Http::fake([self::WEBHOOK . '*' => Http::response(['id' => '900', 'channel_id' => '777'])]);
 
         $this->winner = User::factory()->create(['player_name' => 'Winner']);
+        $this->partner = User::factory()->create(['player_name' => 'Partner']);
         $this->loser = User::factory()->create(['player_name' => 'Loser']);
+        $this->teammate = User::factory()->create(['player_name' => 'Teammate']);
         $this->admin = User::factory()->admin()->create(['player_name' => 'TheAdmin']);
         $this->game('game-1');
     }
 
     private function game(string $replayId): void
     {
-        foreach ([[$this->winner, true, 20], [$this->loser, false, -20]] as [$user, $won, $points]) {
+        foreach ([[$this->winner, true, 20], [$this->partner, true, 20], [$this->loser, false, -20], [$this->teammate, false, -20]] as [$user, $won, $points]) {
             $name = $user->primaryPlayerName();
             Replay::create([
                 'replay_id' => $replayId, 'player_name' => $name->name, 'winning_team' => $won ? 1 : 0,
@@ -77,7 +82,7 @@ class InvalidationRequestTest extends TestCase
                 && str_starts_with($data['thread_name'], 'Game game-1 · S1 2v2 · Loser')
                 && $data['allowed_mentions'] === ['parse' => []]
                 && str_contains($data['embeds'][0]['description'], 'practice game')
-                && collect($data['embeds'][0]['fields'])->contains('value', "Winner (Zerg) +20");
+                && collect($data['embeds'][0]['fields'])->contains('value', "Winner (Zerg) +20\nPartner (Zerg) +20");
         });
     }
 
@@ -103,13 +108,12 @@ class InvalidationRequestTest extends TestCase
         $this->ask($this->loser)->assertSessionHas('invalidation_request.message', 'You already asked for this game to be invalidated.');
         $this->assertSame(1, InvalidationRequest::count());
 
-        // Both players asking means everyone agrees: approved on its own
         $this->ask($this->winner);
         $this->assertSame(2, InvalidationRequest::count());
         $this->assertSame('777', InvalidationRequest::where('user_id', $this->winner->id)->value('discord_thread_id'));
-        Http::assertSentCount(3); // new post, reply, decision
+        Http::assertSentCount(2);
         Http::assertSent(fn(Request $r) => str_contains($r->url(), 'thread_id=777') && !isset($r->data()['thread_name']));
-        $this->assertSame(2, InvalidationRequest::where('status', 'approved')->count());
+        $this->assertSame(2, InvalidationRequest::open()->count()); // 2 of the 4 players agree so far
     }
 
     public function test_the_request_is_kept_when_discord_is_not_configured(): void
@@ -144,7 +148,7 @@ class InvalidationRequestTest extends TestCase
     public function test_approving_invalidates_the_game_closes_all_its_requests_and_posts_in_the_ticket(): void
     {
         $this->ask($this->loser);
-        $this->actingAs($this->winner)->post(route('invalidation-requests.comment', 'game-1'), ['stance' => 'dispute', 'body' => 'We agreed it was rated.']);
+        $this->ask($this->winner);
         $ticket = InvalidationRequest::first();
 
         $this->withSession(['auth.password_confirmed_at' => time()])->actingAs($this->admin)
