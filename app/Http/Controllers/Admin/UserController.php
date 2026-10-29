@@ -14,8 +14,6 @@ use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    public const ROLES = ['user', 'admin'];
-
     public function index(Request $request): View
     {
         $search = trim((string) $request->input('q'));
@@ -40,23 +38,32 @@ class UserController extends Controller
     {
         $user->load('playerNames')->loadCount('replay');
 
-        return view('admin.users.edit', ['user' => $user, 'roles' => self::ROLES]);
+        return view('admin.users.edit', ['user' => $user, 'roles' => User::ROLES]);
     }
 
     public function update(Request $request, User $user): RedirectResponse
     {
+        $this->authorizeManage($request, $user);
+        $actor = $request->user();
+
         $validated = $request->validate([
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
-            'role' => ['required', Rule::in(self::ROLES)],
+            'role' => [$actor->isOwner() ? 'required' : 'nullable', Rule::in(User::ROLES)],
         ]);
+        $role = $validated['role'] ?? $user->role;
 
-        // An admin demoting themselves could leave nobody able to undo it.
-        if ($user->is($request->user()) && $validated['role'] !== 'admin') {
-            return back()->with('error', 'You cannot remove your own admin role.');
+        if ($role !== $user->role) {
+            if (!$actor->isOwner()) {
+                return back()->with('error', 'Only an owner can change roles.');
+            }
+            // An owner demoting themselves could leave nobody able to undo it.
+            if ($user->is($actor)) {
+                return back()->with('error', 'You cannot change your own role.');
+            }
         }
 
         $user->email = $validated['email'];
-        $user->role = $validated['role'];
+        $user->role = $role;
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
@@ -70,6 +77,7 @@ class UserController extends Controller
 
     public function addName(Request $request, User $user): RedirectResponse
     {
+        $this->authorizeManage($request, $user);
         $validated = $request->validateWithBag('playerName', ['name' => PlayerName::rulesFor($user)]);
 
         $playerName = PlayerName::addFor($user, $validated['name']);
@@ -80,6 +88,7 @@ class UserController extends Controller
 
     public function removeName(Request $request, User $user, PlayerName $playerName): RedirectResponse
     {
+        $this->authorizeManage($request, $user);
         if ($blocker = $playerName->removalBlocker()) {
             return back()->with('error', $blocker);
         }
@@ -92,6 +101,7 @@ class UserController extends Controller
 
     public function sendPasswordReset(Request $request, User $user): RedirectResponse
     {
+        $this->authorizeManage($request, $user);
         $status = Password::sendResetLink(['email' => $user->email]);
         $this->audit($request, 'user.password_reset', $user, ['status' => $status]);
 
@@ -102,6 +112,7 @@ class UserController extends Controller
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
+        $this->authorizeManage($request, $user);
         if ($user->is($request->user())) {
             return back()->with('error', 'You cannot delete your own account here.');
         }
@@ -115,6 +126,15 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('status', "Deleted {$user->player_name}.");
+    }
+
+    /**
+     * Only an owner may touch an owner's account: an admin could otherwise change
+     * the owner's email, send a reset link to it and take the account over.
+     */
+    private function authorizeManage(Request $request, User $user): void
+    {
+        abort_if($user->isOwner() && !$request->user()->isOwner(), 403, 'Only an owner can change an owner account.');
     }
 
     private function audit(Request $request, string $action, User $user, array $context = []): void

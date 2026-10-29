@@ -80,27 +80,84 @@ class AdminPortalTest extends TestCase
             ->assertOk()->assertSee('Alpha')->assertDontSee('Bravo');
     }
 
-    public function test_an_admin_can_change_email_and_role(): void
+    public function test_an_admin_can_change_email_but_not_roles(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($this->admin)
-            ->patch(route('admin.users.update', $user), ['email' => 'new@example.com', 'role' => 'admin'])
+            ->patch(route('admin.users.update', $user), ['email' => 'new@example.com', 'role' => 'user'])
             ->assertSessionHas('status');
+        $this->actingAs($this->admin)
+            ->patch(route('admin.users.update', $user), ['email' => 'new@example.com', 'role' => 'admin'])
+            ->assertSessionHas('error');
+        $this->actingAs($this->admin)
+            ->patch(route('admin.users.update', $this->admin), ['email' => $this->admin->email, 'role' => 'owner'])
+            ->assertSessionHas('error');
 
         $user->refresh();
         $this->assertSame('new@example.com', $user->email);
-        $this->assertSame('admin', $user->role);
+        $this->assertSame('user', $user->role);
         $this->assertNull($user->email_verified_at);
+        $this->assertSame('admin', $this->admin->fresh()->role);
     }
 
-    public function test_an_admin_cannot_remove_their_own_admin_role(): void
+    public function test_an_owner_can_give_and_take_any_role(): void
     {
-        $this->actingAs($this->admin)
+        $owner = User::factory()->owner()->create();
+        $user = User::factory()->create();
+
+        foreach (['admin', 'owner', 'user'] as $role) {
+            $this->actingAs($owner)
+                ->patch(route('admin.users.update', $user), ['email' => $user->email, 'role' => $role])
+                ->assertSessionHas('status');
+            $this->assertSame($role, $user->fresh()->role);
+        }
+        $this->actingAs($owner)
             ->patch(route('admin.users.update', $this->admin), ['email' => $this->admin->email, 'role' => 'user'])
+            ->assertSessionHas('status');
+        $this->assertSame('user', $this->admin->fresh()->role);
+
+        $this->actingAs($owner)->get(route('admin.users.edit', $user))->assertOk()->assertSee('<select id="role"', false);
+        $this->actingAs($this->admin)->get(route('admin.users.edit', $user))->assertOk()->assertDontSee('<select id="role"', false);
+    }
+
+    public function test_an_owner_cannot_change_their_own_role(): void
+    {
+        $owner = User::factory()->owner()->create();
+
+        $this->actingAs($owner)
+            ->patch(route('admin.users.update', $owner), ['email' => $owner->email, 'role' => 'admin'])
             ->assertSessionHas('error');
 
-        $this->assertSame('admin', $this->admin->fresh()->role);
+        $this->assertSame('owner', $owner->fresh()->role);
+    }
+
+    public function test_owners_have_admin_access(): void
+    {
+        $owner = User::factory()->owner()->create();
+
+        $this->actingAs($owner)->get('/admin/users')->assertOk();
+        $this->actingAs($owner)->get('/admin/replays')->assertOk();
+        $this->actingAs($owner)->get(route('builds.create'))->assertOk();
+        $this->actingAs($owner)->get('/rankings')->assertSee(route('admin.users.index'));
+    }
+
+    public function test_admins_cannot_change_an_owner_account(): void
+    {
+        Notification::fake();
+        $owner = User::factory()->owner()->create(['email' => 'owner@example.com']);
+
+        $this->actingAs($this->admin)->get(route('admin.users.edit', $owner))
+            ->assertOk()->assertSee('Only an owner can change it.');
+        $this->actingAs($this->admin)
+            ->patch(route('admin.users.update', $owner), ['email' => 'evil@example.com', 'role' => 'owner'])
+            ->assertForbidden();
+        $this->actingAs($this->admin)->post(route('admin.users.password-reset', $owner))->assertForbidden();
+        $this->actingAs($this->admin)->post(route('admin.users.names.store', $owner), ['name' => 'Extra'])->assertForbidden();
+        $this->actingAs($this->admin)->delete(route('admin.users.destroy', $owner))->assertForbidden();
+
+        $this->assertSame('owner@example.com', $owner->fresh()->email);
+        Notification::assertNothingSent();
     }
 
     public function test_an_admin_can_add_and_remove_a_users_names_within_the_rules(): void

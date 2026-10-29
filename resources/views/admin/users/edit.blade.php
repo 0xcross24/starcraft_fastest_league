@@ -11,6 +11,9 @@
                 </p>
 
                 {{-- Account --}}
+                @if($user->isOwner() && !auth()->user()->isOwner())
+                <p class="mt-6 text-sm text-gray-400">This is an owner account. Only an owner can change it.</p>
+                @else
                 <form method="post" action="{{ route('admin.users.update', $user) }}" class="mt-6 space-y-4">
                     @csrf
                     @method('patch')
@@ -21,17 +24,32 @@
                     </div>
                     <div>
                         <x-input-label for="role" value="Role" />
+                        @if(auth()->user()->isOwner() && !$user->is(auth()->user()))
                         <select id="role" name="role" class="mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-gray-200">
                             @foreach($roles as $role)
                             <option value="{{ $role }}" @selected(old('role', $user->role) === $role)>{{ $role }}</option>
                             @endforeach
                         </select>
-                        <p class="mt-1 text-xs text-gray-400">Admins can manage builds and use this portal.</p>
+                        @else
+                        <input type="hidden" name="role" value="{{ $user->role }}">
+                        <p id="role" class="mt-1 text-gray-200">{{ $user->role }}</p>
+                        @endif
+                        <p class="mt-1 text-xs text-gray-400">
+                            Admins can manage builds and use this portal. Owners can also change roles and owner accounts.
+                            @if($user->is(auth()->user()))
+                            You cannot change your own role.
+                            @elseif(!auth()->user()->isOwner())
+                            Only an owner can change roles.
+                            @endif
+                        </p>
                         <x-input-error class="mt-2" :messages="$errors->get('role')" />
                     </div>
                     <x-primary-button>Save</x-primary-button>
                 </form>
+                @endif
             </div>
+
+            @if(!$user->isOwner() || auth()->user()->isOwner())
 
             {{-- Usernames --}}
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100">
@@ -88,6 +106,7 @@
                 </form>
                 @endif
             </div>
+            @endif
         </div>
     </div>
 </x-app-layout>
