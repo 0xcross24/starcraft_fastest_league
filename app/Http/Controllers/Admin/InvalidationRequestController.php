@@ -62,7 +62,12 @@ class InvalidationRequestController extends Controller
      */
     public function reject(Request $request, InvalidationRequest $invalidationRequest, InvalidationCase $case): RedirectResponse
     {
-        $case->resolve($invalidationRequest->replay_id, InvalidationRequest::REJECTED, $request->user(), $this->note($request));
+        $note = $this->note($request);
+        try {
+            $case->resolve($invalidationRequest->replay_id, InvalidationRequest::REJECTED, $request->user(), $note);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         Log::info('admin: invalidation-request.reject', [
             'admin_id' => $request->user()->id,
@@ -72,6 +77,27 @@ class InvalidationRequestController extends Controller
         ]);
 
         return back()->with('status', 'Request for game ' . substr($invalidationRequest->replay_id, 0, 8) . ' rejected; the game stays valid.');
+    }
+
+    /**
+     * Put a decided request back to open. Reopening an approval brings the
+     * game back until it is decided again.
+     */
+    public function reopen(Request $request, InvalidationRequest $invalidationRequest, InvalidationCase $case): RedirectResponse
+    {
+        try {
+            $case->reopen($invalidationRequest->replay_id, $request->user(), byAdmin: true);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        Log::info('admin: invalidation-request.reopen', [
+            'admin_id' => $request->user()->id,
+            'admin' => $request->user()->player_name,
+            'replay_id' => $invalidationRequest->replay_id,
+        ]);
+
+        return back()->with('status', 'Request for game ' . substr($invalidationRequest->replay_id, 0, 8) . ' reopened.');
     }
 
     /**

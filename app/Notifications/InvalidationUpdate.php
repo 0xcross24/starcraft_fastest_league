@@ -34,6 +34,7 @@ class InvalidationUpdate extends Notification
             'agree' => ["$who agreed to invalidate game $game", "$who agreed that game $game should be invalidated."],
             'dispute' => ["$who disputed invalidating game $game", "$who disputed the request to invalidate game $game. An admin will decide."],
             'admin_reply' => ["Admin reply on game $game", "$who (admin) replied about game $game."],
+            'reopened' => ["Invalidation request for game $game reopened", "$who reopened the request to invalidate game $game. It is waiting for a decision again."],
             'approved' => ["Game $game was invalidated", "Game $game was invalidated. The ELO and wins/losses it gave every player were reversed."],
             'rejected' => ["Invalidation of game $game was rejected", "The request to invalidate game $game was rejected. The game still counts."],
             default => ["New comment on game $game", "$who commented on the request to invalidate game $game."],

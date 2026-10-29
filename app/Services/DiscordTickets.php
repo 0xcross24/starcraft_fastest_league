@@ -83,6 +83,7 @@ class DiscordTickets
         }
 
         [$title, $color] = match (true) {
+            $comment->event === InvalidationComment::REOPENED => ["$authorName reopened it after the rejection", 0xF59E0B],
             $comment->from_admin => ["Admin $authorName replied", 0x3B82F6],
             $comment->stance === InvalidationComment::AGREE => ["$authorName agrees", 0x10B981],
             $comment->stance === InvalidationComment::DISPUTE => ["$authorName disputes", 0xEF4444],

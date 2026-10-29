@@ -21,6 +21,7 @@ class InvalidationCase
     public function __construct(
         private DiscordTickets $tickets,
         private ReplayInvalidator $invalidator,
+        private EloRecalculator $recalculator,
     ) {}
 
     /** Accounts that played in the game. */
@@ -63,6 +64,18 @@ class InvalidationCase
     }
 
     /**
+     * Players can post while a request is open, and after a rejection (which
+     * reopens it). An approved game is invalidated and stays closed.
+     */
+    public function acceptsPosts(string $replayId): bool
+    {
+        $statuses = InvalidationRequest::where('replay_id', $replayId)->pluck('status');
+
+        return $statuses->contains(InvalidationRequest::OPEN)
+            || ($statuses->isNotEmpty() && $statuses->every(fn($s) => $s === InvalidationRequest::REJECTED));
+    }
+
+    /**
      * A new request was saved: post it to Discord and tell the other players.
      */
     public function opened(InvalidationRequest $request): void
@@ -77,6 +90,11 @@ class InvalidationCase
      */
     public function comment(User $author, string $replayId, ?string $stance, ?string $body, bool $fromAdmin = false): InvalidationComment
     {
+        // A player posting on a rejected request sends it back to the admins
+        if (!$fromAdmin && !$this->isOpen($replayId)) {
+            $this->reopen($replayId, $author);
+        }
+
         $comment = InvalidationComment::create([
             'replay_id' => $replayId,
             'user_id' => $author->id,
@@ -98,9 +116,14 @@ class InvalidationCase
     /**
      * Approve (invalidate the game) or reject, closing every open request for
      * it. $admin is null when the players agreed and it closed on its own.
+     * An admin changing an earlier decision reopens it first.
      */
     public function resolve(string $replayId, string $status, ?User $admin, ?string $note): int
     {
+        if ($admin && !$this->isOpen($replayId)) {
+            $this->reopen($replayId, $admin, byAdmin: true);
+        }
+
         $count = 0;
         if ($status === InvalidationRequest::APPROVED) {
             $count = $this->invalidator->invalidate(Replay::where('replay_id', $replayId)->get());
@@ -116,6 +139,10 @@ class InvalidationCase
             ])->save();
         }
 
+        if ($open->isNotEmpty()) {
+            InvalidationComment::create(['replay_id' => $replayId, 'user_id' => $admin?->id, 'from_admin' => (bool) $admin, 'event' => $status, 'body' => $note]);
+        }
+
         // All requests for a game share one Discord post; announce once.
         if ($posted = $open->firstWhere('discord_thread_id')) {
             $this->tickets->resolved($posted, $admin?->player_name ?? 'all players agreed');
@@ -125,6 +152,57 @@ class InvalidationCase
         }
 
         return $count;
+    }
+
+    /**
+     * Put a decided request back in front of the admins. A player can reopen
+     * a rejection; an admin can reopen either decision, and reopening an
+     * approval brings the game back (it counts again and its season is
+     * re-rated) until it is decided again.
+     *
+     * @throws \RuntimeException if the game can't be brought back
+     */
+    public function reopen(string $replayId, User $by, bool $byAdmin = false): void
+    {
+        $decided = InvalidationRequest::where('replay_id', $replayId)->where('status', '!=', InvalidationRequest::OPEN)->get();
+        if ($decided->isEmpty()) {
+            return;
+        }
+
+        if ($decided->contains('status', InvalidationRequest::APPROVED)) {
+            $this->restoreGame($replayId);
+        }
+
+        foreach ($decided as $ticket) {
+            $ticket->forceFill(['status' => InvalidationRequest::OPEN, 'resolved_by' => null, 'resolved_at' => null, 'resolution_note' => null])->save();
+        }
+
+        $event = InvalidationComment::create(['replay_id' => $replayId, 'user_id' => $by->id, 'from_admin' => $byAdmin, 'event' => InvalidationComment::REOPENED]);
+        $this->tickets->comment($this->threadId($replayId), $by->player_name, $event);
+        if ($byAdmin) {
+            $this->notify($replayId, $by, 'reopened', null);
+        }
+        Log::info('invalidation: reopened', ['replay_id' => $replayId, 'user_id' => $by->id, 'admin' => $byAdmin]);
+    }
+
+    /**
+     * Undo an invalidation: the rows count again and the season is re-rated
+     * from its games, so every later game's points stay right.
+     */
+    private function restoreGame(string $replayId): void
+    {
+        $rows = Replay::where('replay_id', $replayId)->get();
+        $hash = $rows->first()?->hash;
+        // Invalidated games can be uploaded again (Replay::alreadyUploaded); bringing
+        // this copy back as well would count the game twice.
+        if ($hash && Replay::where('hash', $hash)->where('replay_id', '!=', $replayId)->where('is_invalid', false)->exists()) {
+            throw new \RuntimeException('This game was uploaded again after it was invalidated, so it cannot be brought back.');
+        }
+
+        Replay::where('replay_id', $replayId)->update(['is_invalid' => false]);
+        foreach ($rows->pluck('season_id')->unique() as $seasonId) {
+            $this->recalculator->recalculate($seasonId);
+        }
     }
 
     private function autoApproveIfEveryoneAgrees(string $replayId): void

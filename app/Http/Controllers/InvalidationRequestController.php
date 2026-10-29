@@ -62,8 +62,8 @@ class InvalidationRequestController extends Controller
             'body' => ['nullable', 'string', 'max:2000', Rule::requiredIf(fn() => $request->input('stance') !== InvalidationComment::AGREE)],
         ]);
 
-        if (!$case->isOpen($replayId)) {
-            return redirect()->route('games.show', $replayId)->with('error', 'This request has already been decided.');
+        if (!$case->acceptsPosts($replayId)) {
+            return redirect()->route('games.show', $replayId)->with('error', 'This game was already invalidated.');
         }
 
         $case->comment($user, $replayId, $data['stance'] ?? null, trim((string) ($data['body'] ?? '')) ?: null);

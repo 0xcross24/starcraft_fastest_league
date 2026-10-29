@@ -31,6 +31,7 @@ class GameController extends Controller
             'isPlayer' => $isPlayer,
             'requests' => $requests,
             'open' => $requests->contains('status', InvalidationRequest::OPEN),
+            'canPost' => $isPlayer && $requests->isNotEmpty() && $case->acceptsPosts($replayId),
             'stances' => $requests->isNotEmpty() ? $case->stances($replayId) : collect(),
             'players' => $case->playedNames($replayId),
             'comments' => $requests->isNotEmpty() ? $case->comments($replayId) : collect(),

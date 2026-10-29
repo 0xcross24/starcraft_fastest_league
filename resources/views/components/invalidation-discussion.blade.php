@@ -48,6 +48,15 @@ $stanceLabel = ['agree' => ['agrees', 'text-emerald-400'], 'dispute' => ['disput
     @if($comments->isNotEmpty())
     <ul class="space-y-2">
         @foreach($comments as $c)
+        @if($c->event)
+        <li class="px-2 text-xs {{ ['approved' => 'text-emerald-400', 'rejected' => 'text-red-400', 'reopened' => 'text-amber-300'][$c->event] ?? 'text-gray-400' }}">
+            {{ ['approved' => 'Approved: game invalidated', 'rejected' => 'Rejected: game still counts', 'reopened' => 'Reopened for the admins'][$c->event] ?? $c->event }}
+            · {{ $c->user ? ($c->from_admin ? $c->user->player_name : ($players[$c->user_id] ?? $c->user->player_name)) : 'all players agreed' }}
+            · {{ $c->created_at->format('Y-m-d H:i') }}
+            @if($c->body)<span class="text-gray-300">· {{ $c->body }}</span>@endif
+        </li>
+        @continue
+        @endif
         <li class="rounded p-2 {{ $c->from_admin ? 'bg-blue-900/30 border border-blue-800' : 'bg-gray-900/40' }}">
             <div class="text-xs text-gray-400">
                 <span class="text-gray-200">{{ $c->from_admin ? $c->user?->player_name : ($players[$c->user_id] ?? $c->user?->player_name) }}</span>
@@ -70,6 +79,9 @@ $stanceLabel = ['agree' => ['agrees', 'text-emerald-400'], 'dispute' => ['disput
     @endif
 
     @if($canPost)
+    @unless($open)
+    <p class="text-xs text-amber-300">Disagree with the rejection? Post below and the request goes back to the admins.</p>
+    @endunless
     <form method="post" action="{{ route('invalidation-requests.comment', $replayId) }}" class="space-y-2 rounded border border-gray-700 p-3">
         @csrf
         <div class="flex flex-wrap gap-4">
