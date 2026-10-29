@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\InvalidationRequest;
 use App\Models\Replay;
-use App\Services\DiscordTickets;
-use App\Services\ReplayInvalidator;
+use App\Services\InvalidationCase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -29,18 +28,23 @@ class InvalidationRequestController extends Controller
             ->get()
             ->groupBy('replay_id');
 
-        return view('admin.requests.index', compact('requests', 'rows', 'status'));
+        $case = app(InvalidationCase::class);
+        $discussions = $requests->pluck('replay_id')->unique()->mapWithKeys(fn($id) => [$id => [
+            'stances' => $case->stances($id),
+            'comments' => $case->comments($id),
+            'players' => $case->participants($id)->keyBy('id'),
+        ]]);
+
+        return view('admin.requests.index', compact('requests', 'rows', 'status', 'discussions'));
     }
 
     /**
      * Invalidate the game and close every open request for it.
      */
-    public function approve(Request $request, InvalidationRequest $invalidationRequest, ReplayInvalidator $invalidator, DiscordTickets $tickets): RedirectResponse
+    public function approve(Request $request, InvalidationRequest $invalidationRequest, InvalidationCase $case): RedirectResponse
     {
-        $note = $this->note($request);
         $replayId = $invalidationRequest->replay_id;
-        $count = $invalidator->invalidate(Replay::where('replay_id', $replayId)->get());
-        $this->resolve($request, $invalidationRequest, InvalidationRequest::APPROVED, $note, $tickets);
+        $count = $case->resolve($replayId, InvalidationRequest::APPROVED, $request->user(), $this->note($request));
 
         Log::info('admin: replay.invalidate', [
             'admin_id' => $request->user()->id,
@@ -56,9 +60,9 @@ class InvalidationRequestController extends Controller
     /**
      * Keep the game and close every open request for it.
      */
-    public function reject(Request $request, InvalidationRequest $invalidationRequest, DiscordTickets $tickets): RedirectResponse
+    public function reject(Request $request, InvalidationRequest $invalidationRequest, InvalidationCase $case): RedirectResponse
     {
-        $this->resolve($request, $invalidationRequest, InvalidationRequest::REJECTED, $this->note($request), $tickets);
+        $case->resolve($invalidationRequest->replay_id, InvalidationRequest::REJECTED, $request->user(), $this->note($request));
 
         Log::info('admin: invalidation-request.reject', [
             'admin_id' => $request->user()->id,
@@ -70,26 +74,22 @@ class InvalidationRequestController extends Controller
         return back()->with('status', 'Request for game ' . substr($invalidationRequest->replay_id, 0, 8) . ' rejected; the game stays valid.');
     }
 
+    /**
+     * An admin replies in the game's discussion (shown to the players, emailed, and posted on Discord).
+     */
+    public function reply(Request $request, string $replayId, InvalidationCase $case): RedirectResponse
+    {
+        abort_unless(InvalidationRequest::where('replay_id', $replayId)->exists(), 404);
+        $body = trim($request->validate(['body' => ['required', 'string', 'max:2000']])['body']);
+
+        $case->comment($request->user(), $replayId, null, $body, fromAdmin: true);
+        Log::info('admin: invalidation-request.reply', ['admin_id' => $request->user()->id, 'replay_id' => $replayId]);
+
+        return back()->with('status', 'Reply posted.');
+    }
+
     private function note(Request $request): ?string
     {
         return trim((string) ($request->validate(['note' => ['nullable', 'string', 'max:1000']])['note'] ?? '')) ?: null;
-    }
-
-    private function resolve(Request $request, InvalidationRequest $invalidationRequest, string $status, ?string $note, DiscordTickets $tickets): void
-    {
-        $open = InvalidationRequest::open()->where('replay_id', $invalidationRequest->replay_id)->get();
-        foreach ($open as $ticket) {
-            $ticket->forceFill([
-                'status' => $status,
-                'resolved_by' => $request->user()->id,
-                'resolved_at' => now(),
-                'resolution_note' => $note,
-            ])->save();
-        }
-
-        // All requests for a game share one Discord post; announce once.
-        if ($posted = $open->firstWhere('discord_thread_id')) {
-            $tickets->resolved($posted, $request->user()->player_name);
-        }
     }
 }

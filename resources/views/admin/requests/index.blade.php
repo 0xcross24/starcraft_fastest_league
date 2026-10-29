@@ -53,10 +53,22 @@
                             @endforeach
                         </div>
 
+                        @php $d = $discussions[$ticket->replay_id]; @endphp
+                        <details class="mt-3 rounded bg-gray-900/40 p-2" @if($ticket->status === 'open') open @endif>
+                            <summary class="cursor-pointer text-sm text-gray-300">
+                                Players: {{ $d['stances']->filter(fn($s) => $s === 'agree')->count() }} agree · {{ $d['stances']->filter(fn($s) => $s === 'dispute')->count() }} dispute · {{ $d['stances']->filter(fn($s) => $s === null)->count() }} no answer · {{ $d['comments']->count() }} {{ Str::plural('message', $d['comments']->count()) }}
+                                · <a href="{{ route('games.show', $ticket->replay_id) }}" class="text-blue-400 hover:underline">game page</a>
+                            </summary>
+                            <div class="mt-2">
+                                <x-invalidation-discussion :replay-id="$ticket->replay_id" :requests="collect()" :stances="$d['stances']" :players="$d['players']" :comments="$d['comments']"
+                                    :open="false" :admin-reply="$ticket->status === 'open'" />
+                            </div>
+                        </details>
+
                         @if($ticket->status === 'open')
                         <form method="post" class="mt-3 flex flex-wrap items-center gap-2">
                             @csrf
-                            <x-text-input name="note" placeholder="Note for the players (optional, posted on Discord)" class="flex-1 min-w-0 text-sm" maxlength="1000" />
+                            <x-text-input name="note" placeholder="Note for the players (optional, emailed and posted on Discord)" class="flex-1 min-w-0 text-sm" maxlength="1000" />
                             <button formaction="{{ route('admin.invalidation-requests.approve', $ticket) }}"
                                 onclick="return confirm(@js('Invalidate game '.substr($ticket->replay_id, 0, 8).'? This reverses the ELO and wins/losses it gave every player.'))"
                                 class="rounded bg-red-700 px-3 py-1.5 text-sm text-white hover:bg-red-600">Approve &amp; invalidate</button>
