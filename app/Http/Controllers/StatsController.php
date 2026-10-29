@@ -43,7 +43,9 @@ class StatsController extends Controller
         }
 
         // Retrieve users with their associated stats, grouped by season
+        // Accounts show up once they have played a game in that season and format
         $usersWithStats = Stats::with('user')
+            ->ranked()
             ->orderBy('season_id', 'asc')  // Group by season
             ->orderBy('elo', 'desc')       // Order by Elo in descending order
             ->orderBy('id')                // Tie-breaker for same Elo, matches profile/homepage
