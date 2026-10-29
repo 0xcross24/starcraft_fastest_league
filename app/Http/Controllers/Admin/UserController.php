@@ -123,6 +123,20 @@ class UserController extends Controller
         return back()->with('status', "Removed username {$playerName->name}.");
     }
 
+    public function makeMainName(Request $request, User $user, PlayerName $playerName): RedirectResponse
+    {
+        $this->authorizeManage($request, $user);
+        if ($playerName->isRetired()) {
+            return back()->with('error', 'That username was removed; add it back first.');
+        }
+
+        $from = $user->player_name;
+        $playerName->makeMain();
+        $this->audit($request, 'user.name.main', $user, ['from' => $from, 'to' => $playerName->name]);
+
+        return back()->with('status', "Main username is now {$playerName->name}.");
+    }
+
     public function sendPasswordReset(Request $request, User $user): RedirectResponse
     {
         $this->authorizeManage($request, $user);

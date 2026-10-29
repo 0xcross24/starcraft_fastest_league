@@ -263,4 +263,49 @@ class MultipleUsernamesTest extends TestCase
             ->assertViewHas('stats', fn($s) => $s->elo === 1100 && $s->wins === 1)
             ->assertViewHas('rank', 1);
     }
+
+    public function test_a_user_can_make_another_of_their_names_main(): void
+    {
+        $user = $this->players();
+        $this->storeReplay(['Main', 'A'], ['B', 'C']);
+        $smurf = PlayerName::where('name', 'Smurf')->first();
+
+        $this->actingAs($user)->patch(route('player-names.main', $smurf))->assertRedirect(route('profile.edit'));
+
+        $this->assertSame('Smurf', $user->fresh()->player_name);
+        $this->assertSame(1100, $this->elo('Smurf')); // points unchanged
+        $this->get('/player/Main')->assertRedirect(route('player', ['user' => 'Smurf']));
+        $this->get('/rankings?format=2v2')->assertSee('Smurf');
+
+        // The old main name can now be removed; it has games, so it stays on the account
+        $old = PlayerName::where('name', 'Main')->first();
+        $this->actingAs($user)->delete(route('player-names.destroy', $old))->assertRedirect();
+        $this->assertTrue($old->fresh()->isRetired());
+        $this->assertSame(1100, $this->elo('Smurf'));
+    }
+
+    public function test_only_the_owner_can_make_a_name_main_and_not_a_removed_one(): void
+    {
+        $user = $this->players();
+        $smurf = PlayerName::where('name', 'Smurf')->first();
+
+        $this->actingAs(User::factory()->create())->patch(route('player-names.main', $smurf))->assertForbidden();
+
+        $smurf->forceFill(['retired_at' => now()])->save();
+        $this->actingAs($user)->patch(route('player-names.main', $smurf))->assertSessionHas('error');
+        $this->assertSame('Main', $user->fresh()->player_name);
+    }
+
+    public function test_an_admin_can_change_a_users_main_name(): void
+    {
+        $user = $this->players();
+        $smurf = PlayerName::where('name', 'Smurf')->first();
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])
+            ->patch(route('admin.users.names.main', [$user, $smurf]))->assertSessionHas('status');
+
+        $this->assertSame('Smurf', $user->fresh()->player_name);
+        $this->actingAs($admin)->patch(route('admin.users.names.main', [$admin, $smurf]))->assertNotFound(); // not that user's name
+    }
 }

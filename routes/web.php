@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
   Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
   Route::post('/profile/names', [PlayerNameController::class, 'store'])->name('player-names.store');
   Route::delete('/profile/names/{playerName}', [PlayerNameController::class, 'destroy'])->name('player-names.destroy');
+  Route::patch('/profile/names/{playerName}/main', [PlayerNameController::class, 'makeMain'])->name('player-names.main');
   Route::get('/profile/maps/download/{filename}', [ProfileController::class, 'downloadMap'])->where('filename', 'OP SFL-\\.scm|SFLClan\\.scm|WkClan  Styler 빠른무한\(Ob\)\\.scm')->name('maps.download');
 });
 
@@ -61,6 +62,7 @@ Route::middleware(['auth', 'admin', 'password.confirm'])->prefix('admin')->name(
   Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
   Route::post('/users/{user}/names', [AdminUserController::class, 'addName'])->name('users.names.store');
   Route::delete('/users/{user}/names/{playerName}', [AdminUserController::class, 'removeName'])->scopeBindings()->name('users.names.destroy');
+  Route::patch('/users/{user}/names/{playerName}/main', [AdminUserController::class, 'makeMainName'])->scopeBindings()->name('users.names.main');
   Route::post('/users/{user}/password-reset', [AdminUserController::class, 'sendPasswordReset'])->name('users.password-reset');
   Route::get('/replays', [AdminReplayController::class, 'index'])->name('replays.index');
   Route::post('/replays/{replayId}/invalidate', [AdminReplayController::class, 'invalidate'])->name('replays.invalidate');

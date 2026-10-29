@@ -25,6 +25,18 @@ class PlayerNameController extends Controller
         return redirect()->route('profile.edit')->with('status', 'username-added');
     }
 
+    public function makeMain(Request $request, PlayerName $playerName): RedirectResponse
+    {
+        abort_unless($playerName->user_id === $request->user()->id, 403);
+        if ($playerName->isRetired()) {
+            return back()->with('error', 'Add that username back before making it your main name.');
+        }
+
+        $playerName->makeMain();
+
+        return redirect()->route('profile.edit')->with('status', 'main-name-changed');
+    }
+
     public function destroy(Request $request, PlayerName $playerName): RedirectResponse
     {
         abort_unless($playerName->user_id === $request->user()->id, 403);
