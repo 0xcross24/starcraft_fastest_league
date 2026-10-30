@@ -23,8 +23,9 @@ $chip = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 tex
         @endif
     </div>
 
-    <details class="mt-2" @if($open) open @endif>
-        <summary class="cursor-pointer select-none text-xs font-semibold text-blue-600 dark:text-blue-400">Filters</summary>
+    {{-- Always open on desktop (no toggle); a collapsible "Filters" on phones --}}
+    <details class="mt-2 game-filters" @if($open) open @endif>
+        <summary class="md:hidden cursor-pointer select-none text-xs font-semibold text-blue-600 dark:text-blue-400">Filters</summary>
         <form method="GET" class="mt-2 flex flex-wrap items-end gap-3 p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50">
             @foreach(array_filter($keep) as $name => $value)
             <input type="hidden" name="{{ $name }}" value="{{ $value }}">
@@ -58,4 +59,12 @@ $chip = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 tex
             @endif
         </form>
     </details>
+    <script>
+        (function (details) {
+            var desktop = window.matchMedia('(min-width: 768px)');
+            var sync = function () { if (desktop.matches) details.open = true; };
+            sync();
+            desktop.addEventListener('change', sync);
+        })(document.currentScript.previousElementSibling);
+    </script>
 </div>
