@@ -100,7 +100,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->signedPoints() }}</td>
                                                 @php
                                                 $eloAfter = $player->elo_after;
                                                 @endphp
@@ -137,7 +137,7 @@
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->race }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->apm ?? 'N/A' }}</td>
                                                 <td class="border border-gray-200 text-center px-2 py-1 text-sm hidden sm:table-cell">{{ $player->eapm ?? 'N/A' }}</td>
-                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->points ?? 'N/A' }}</td>
+                                                <td class="border border-gray-200 text-center px-2 py-1 text-sm">{{ $player->signedPoints() }}</td>
                                                 @php
                                                 $eloAfter = $player->elo_after;
                                                 @endphp

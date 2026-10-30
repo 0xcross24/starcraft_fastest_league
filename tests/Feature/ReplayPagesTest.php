@@ -184,4 +184,20 @@ class ReplayPagesTest extends TestCase
         // The Replays page keeps neutral Team 1 / Team 2
         $this->get('/replays?season=1&format=2v2')->assertSee('Team 1')->assertSee('Team 2');
     }
+
+    public function test_points_show_a_plus_sign_for_gains(): void
+    {
+        [$a, $b, $c, $d] = array_map(fn($n) => $this->makeName($n), ['A', 'B', 'C', 'D']);
+        $this->game('g1', [$a, $b], [$c, $d], 100);
+        $cell = fn($v) => '<td class="border border-gray-200 text-center px-2 py-1 text-sm">' . $v . '</td>';
+
+        $this->get('/replays?season=' . $this->season->id . '&format=2v2')->assertOk()
+            ->assertSee($cell('+100'), false)->assertSee($cell('-100'), false);
+        $this->get('/player/A?season=' . $this->season->id . '&format=2v2')->assertOk()
+            ->assertSee($cell('+100'), false)->assertSee($cell('-100'), false);
+        $this->get('/')->assertOk()->assertSee('+100');
+
+        $this->assertSame('0', (new Replay(['points' => 0]))->signedPoints());
+        $this->assertSame('N/A', (new Replay())->signedPoints());
+    }
 }
