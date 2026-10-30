@@ -72,6 +72,16 @@ class Replay extends Model
       ->withQueryString();
   }
 
+  /** Points as shown in game tables: +100, -50, 0 (N/A if unknown). */
+  public function signedPoints(): string
+  {
+    if ($this->points === null) {
+      return 'N/A';
+    }
+
+    return ($this->points > 0 ? '+' : '') . $this->points;
+  }
+
   public function playerName()
   {
     return $this->belongsTo(PlayerName::class);

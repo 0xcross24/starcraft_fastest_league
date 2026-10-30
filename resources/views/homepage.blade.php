@@ -132,7 +132,7 @@
                   <span class="text-red-500 font-bold">Lost</span>
                   @endif
                 </td>
-                <td class="border border-gray-300 text-center px-2 py-1">{{ $replay->points }}</td>
+                <td class="border border-gray-300 text-center px-2 py-1">{{ $replay->signedPoints() }}</td>
                 <td class="border border-gray-300 text-center px-2 py-1">{{ $replay->apm }}</td>
               </tr>
               @endforeach
