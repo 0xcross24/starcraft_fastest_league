@@ -43,12 +43,6 @@
             <a href="mailto:cr0ss24881@gmail.com">cr0ss24881@gmail.com</a>.
         </p>
 
-        <h2>Children</h2>
-        <p>
-            SFL is not directed at children under 13, and we do not knowingly collect
-            their personal information.
-        </p>
-
         <h2>Changes</h2>
         <p>
             We may update this policy from time to time; the date at the top shows the
