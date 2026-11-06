@@ -61,6 +61,7 @@ class EloRecalculator
                     DB::table('replays')->where('id', $id)->update($values);
                 }
             });
+            DiscordRankings::refreshSoon();
         }
 
         return ['games' => $rows->pluck('replay_id')->unique()->count(), 'stats' => $stats];

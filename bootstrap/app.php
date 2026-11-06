@@ -28,6 +28,13 @@ return Application::configure(basePath: dirname(__DIR__))
             ->onFailure(function () {
                 Log::error('Failed to start new season automatically');
             });
+
+        // Live rankings message in Discord. Uploads and invalidations update it
+        // right away; this catches anything else (renames, manual fixes). Only
+        // sends an edit when the standings changed.
+        $schedule->command('rankings:discord')
+            ->everyFiveMinutes()
+            ->withoutOverlapping();
     })
     ->withMiddleware(function (Middleware $middleware) {
         //
