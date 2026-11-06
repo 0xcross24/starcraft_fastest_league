@@ -41,6 +41,8 @@ return [
         'rankings_channel_id' => env('DISCORD_RANKINGS_CHANNEL_ID'),
         'rankings_bot_token' => env('DISCORD_RANKINGS_BOT_TOKEN'),
         'rankings_public_key' => env('DISCORD_RANKINGS_PUBLIC_KEY'),
+        // Ladder badge emojis as Discord writes them: "<:sfl_S:123> <:sfl_A_plus:456> ..."
+        'rankings_emojis' => env('DISCORD_RANKINGS_EMOJIS'),
     ],
 
     // GA4 measurement ID (G-XXXXXXXXXX); the tag is left out when unset.

@@ -93,7 +93,8 @@ class DiscordRankings
     {
         $post = DiscordMessage::firstOrNew(['key' => self::KEY]);
         $standings = $this->standings();
-        $hash = hash('sha256', json_encode($standings));
+        // The badge emojis are part of what is shown: setting them re-sends it
+        $hash = hash('sha256', json_encode([$standings, config('services.discord.rankings_emojis')]));
 
         $current = $post->message_id && $post->via === $mode;
         if ($current && $post->hash === $hash && !$force) {
@@ -155,7 +156,9 @@ class DiscordRankings
         }
 
         $formats = [];
+        $counts = [];
         foreach (self::FORMATS as $format) {
+            $counts[$format] = Stats::where('season_id', $season->id)->where('format', $format)->ranked()->count();
             $formats[$format] = Stats::with('user')
                 ->where('season_id', $season->id)
                 ->where('format', $format)
@@ -172,7 +175,7 @@ class DiscordRankings
                 ])->all();
         }
 
-        return ['season' => $season->id, 'formats' => $formats];
+        return ['season' => $season->id, 'formats' => $formats, 'counts' => $counts];
     }
 
     public function payload(array $standings, string $mode, string $format, int $changedAt): array
@@ -212,9 +215,8 @@ class DiscordRankings
         } else {
             $lines = [];
             foreach ($standings['formats'][$format] ?? [] as $i => $row) {
-                $place = ['🥇', '🥈', '🥉'][$i] ?? '**#' . ($i + 1) . '**';
-                $lines[] = sprintf('%s **%s** — %d (%s) · %dW %dL', $place, $this->escape($row['name']),
-                    $row['elo'], $this->elo->getEloGrade($row['elo']), $row['wins'], $row['losses']);
+                $lines[] = sprintf('`#%d` %s **%s** — %d · %dW %dL', $i + 1, $this->badge($this->elo->getEloGrade($row['elo'])),
+                    $this->escape($row['name']), $row['elo'], $row['wins'], $row['losses']);
             }
             $lines = $lines ?: ['No ranked games yet this season.'];
         }
@@ -223,12 +225,32 @@ class DiscordRankings
         $lines[] = "-# updated <t:{$changedAt}:R>";
 
         return [
-            'title' => $season ? "🏆 Season {$season} · {$format} Top " . self::TOP : "🏆 {$format} Rankings",
+            'title' => $season ? "🏆 Ladder · Season {$season} · {$format} (" . ($standings['counts'][$format] ?? 0) . ')' : "🏆 {$format} Ladder",
             'url' => $url,
             'color' => $format === '2v2' ? 0xF59E0B : 0x3B82F6,
             'description' => implode("\n", $lines),
             'footer' => ['text' => 'StarCraft Fastest League · starcraftfastest.us'],
         ];
+    }
+
+    /**
+     * The grade as the ladder badge emoji (sfl_D_plus for D+ ...), taken from
+     * DISCORD_RANKINGS_EMOJIS: the emojis as Discord writes them, e.g.
+     * "<:sfl_S:123> <:sfl_D_plus:456>" (type \:sfl_S: in Discord to get one).
+     * A grade without an emoji is shown as plain text.
+     */
+    private function badge(string $grade): string
+    {
+        static $parsed = [];
+        $config = (string) config('services.discord.rankings_emojis');
+        if (!isset($parsed[$config])) {
+            preg_match_all('/<a?:(\w+):(\d+)>/', $config, $m, PREG_SET_ORDER);
+            $parsed[$config] = collect($m)->mapWithKeys(fn($e) => [$e[1] => $e[0]])->all();
+        }
+
+        $name = 'sfl_' . str_replace(['+', '-'], ['_plus', '_minus'], $grade);
+
+        return $parsed[$config][$name] ?? "`{$grade}`";
     }
 
     /** Player names are shown as typed, not as Discord markdown. */
