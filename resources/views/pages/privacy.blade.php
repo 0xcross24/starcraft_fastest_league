@@ -4,14 +4,14 @@
         <p><em>Last updated: November 5, 2026</em></p>
         <p>
             This policy explains what information the StarCraft Fastest League
-            ("SFL", "we") at {{ config('app.url') }} collects, why, and the choices you
+            ("SFL", "we") at starcraftfastest.us collects, why, and the choices you
             have. SFL is a community project run by Wk`Cross-. Questions
             about this policy go to <a href="mailto:cr0ss24881@gmail.com">cr0ss24881@gmail.com</a>.
         </p>
 
         <h2>Information you give us</h2>
         <ul>
-            <li><strong>Account:</strong> your email address, a password (stored only as a one-way hash) and up to three in-game player names.</li>
+            <li><strong>Account:</strong> your email address, a password and up to three in-game player names.</li>
             <li><strong>Replays:</strong> the replay files you upload. A replay contains the in-game names, races, actions and result of everyone in the game, and we show the names, races, APM, result and rating change for each game publicly.</li>
             <li><strong>Invalidation requests and comments:</strong> what you write when requesting or discussing an invalidation. It is shown to the players in that game and to admins, posted to a private channel on our Discord server, and emailed to the players involved.</li>
         </ul>
