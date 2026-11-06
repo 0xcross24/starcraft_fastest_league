@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="'Game '.$replayId">
     @php
     $first = $rows->first();
     $invalid = $rows->every(fn($r) => $r->is_invalid);

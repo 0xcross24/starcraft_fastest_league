@@ -1,4 +1,4 @@
-<x-auth-layout>
+<x-auth-layout title="Reset password">
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 

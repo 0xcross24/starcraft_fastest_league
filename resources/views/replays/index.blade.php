@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Upload replays">
 
     <div class="flex items-center justify-center w-full">
         <div class="dark:bg-gray-900 sm:max-w-lg mt-6 px-6 py-2 shadow-md sm:rounded-lg">

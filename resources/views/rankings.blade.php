@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Rankings - 2v2 and 3v3 Fastest Ladder" description="Season rankings for the SFL StarCraft: Brood War Fastest ladder: ELO, grade, wins and losses for every 2v2 and 3v3 player.">
   <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
       <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

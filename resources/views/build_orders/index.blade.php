@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Build Orders for Team Fastest" description="Protoss, Terran and Zerg build orders for 2v2 and 3v3 StarCraft: Brood War Fastest, sorted by race and team matchup.">
     <div class="py-12">
         <div class="max-w-screen-xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

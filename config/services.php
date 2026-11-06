@@ -35,6 +35,11 @@ return [
         'tickets_role_id' => env('DISCORD_TICKETS_ROLE_ID'),
     ],
 
+    // GA4 measurement ID (G-XXXXXXXXXX); the tag is left out when unset.
+    'google_analytics' => [
+        'id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

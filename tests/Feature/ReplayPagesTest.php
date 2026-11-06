@@ -170,9 +170,10 @@ class ReplayPagesTest extends TestCase
         }
         $page->assertDontSee('Opponents');
         // The profile's own name is never a link to the page you're on; others are
-        $page->assertDontSee(route('player', ['user' => 'Me']), false)
-            ->assertSee(route('player', ['user' => 'Mate']), false)
-            ->assertSee(route('player', ['user' => 'Opp1']), false);
+        // (as an href: the page's own URL is still in its og:url meta tag)
+        $page->assertDontSee('href="'.route('player', ['user' => 'Me']).'"', false)
+            ->assertSee('href="'.route('player', ['user' => 'Mate']).'"', false)
+            ->assertSee('href="'.route('player', ['user' => 'Opp1']).'"', false);
         $page->assertSee('All (2)')->assertSee('Wins (1)')->assertSee('Lost (1)');
 
         // Filters: only the losses (and to whom), only the wins

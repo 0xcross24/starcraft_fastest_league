@@ -1,4 +1,4 @@
-<x-auth-layout>
+<x-auth-layout title="Register">
     <form method="POST" action="{{ route('register') }}" class="group">
         @csrf
 

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="$user->player_name.' - Player Profile'" :description="'Fastest ladder profile of '.$user->player_name.' on SFL: rating, grade, record and recent 2v2 and 3v3 games.'" :noindex="$noindex">
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

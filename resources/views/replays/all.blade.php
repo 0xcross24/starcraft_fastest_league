@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Replays - Recent Fastest Games" description="Recent 2v2 and 3v3 StarCraft: Brood War Fastest games played on the SFL ladder, with results, points and downloadable replays.">
     <div class="py-12">
         <div class="max-w-screen-xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

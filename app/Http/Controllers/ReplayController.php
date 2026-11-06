@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\Storage;
 
 class ReplayController extends Controller
 {
+    // Valid games an account needs before its profile is offered to search engines
+    public const INDEXABLE_PLAYER_GAMES = 10;
+
     protected $eloService;
     protected $statsController;
 
@@ -409,7 +412,12 @@ class ReplayController extends Controller
         $rank = $stats ? $this->eloService->getEloGrade($stats->elo) : null;
         $numericRank = $stats?->position();
 
-        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'seasonGameCount', 'result', 'resultCounts', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank', 'filter'));
+        // A profile with only a handful of games is a near-empty template;
+        // keep it out of search results until the account has a history.
+        $noindex = Replay::valid()->where('user_id', $user->id)->distinct()->count('replay_id')
+            < self::INDEXABLE_PLAYER_GAMES;
+
+        return view('player', compact('user', 'playerName', 'accountNames', 'replays', 'games', 'seasonGameCount', 'result', 'resultCounts', 'stats', 'rank', 'seasons', 'format', 'seasonId', 'numericRank', 'filter', 'noindex'));
     }
 
     public function download($uuid)

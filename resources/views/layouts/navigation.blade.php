@@ -15,6 +15,7 @@
                     <x-nav-link href="/replays" :active="request()->is('replays')">Replays</x-nav-link>
                     <x-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-nav-link>
                     <x-nav-link href="/rules" :active="request()->is('rules')">Rules</x-nav-link>
+                    <x-nav-link href="/about" :active="request()->is('about')">About</x-nav-link>
                     <x-nav-link href="/builds" :active="request()->is('builds')">Build Orders</x-nav-link>
                 </div>
             </div>
@@ -88,6 +89,7 @@
             <x-responsive-nav-link href="/replays" :active="request()->is('replays')">Replays</x-responsive-nav-link>
             <x-responsive-nav-link href="/rankings" :active="request()->is('rankings')">Rankings</x-responsive-nav-link>
             <x-responsive-nav-link href="/rules" :active="request()->is('rules')">Rules</x-responsive-nav-link>
+            <x-responsive-nav-link href="/about" :active="request()->is('about')">About</x-responsive-nav-link>
             <x-responsive-nav-link href="/builds" :active="request()->is('builds')">Build Orders</x-responsive-nav-link>
         </div>
 
