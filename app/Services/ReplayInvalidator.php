@@ -45,6 +45,10 @@ class ReplayInvalidator
             }
         });
 
+        if ($replays->isNotEmpty()) {
+            DiscordRankings::refreshSoon();
+        }
+
         return $replays->count();
     }
 }

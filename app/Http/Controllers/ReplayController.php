@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Stats;
 use App\Support\GameFilter;
 use App\Models\Season;
+use App\Services\DiscordRankings;
 use App\Services\EloService;
 use App\Services\ReplayParser;
 use Illuminate\Http\Request;
@@ -342,6 +343,8 @@ class ReplayController extends Controller
                 'format' => $format,
             ]);
         }
+
+        DiscordRankings::refreshSoon();
 
         return [
             'ok' => true,

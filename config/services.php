@@ -33,6 +33,14 @@ return [
     'discord' => [
         'tickets_webhook' => env('DISCORD_TICKETS_WEBHOOK_URL'),
         'tickets_role_id' => env('DISCORD_TICKETS_ROLE_ID'),
+
+        // Live rankings message (App\Services\DiscordRankings). The webhook alone
+        // shows both formats; the SFL Rankings app (bot token + channel + public
+        // key) adds the 2v2 / 3v3 buttons.
+        'rankings_webhook' => env('DISCORD_RANKINGS_WEBHOOK_URL'),
+        'rankings_channel_id' => env('DISCORD_RANKINGS_CHANNEL_ID'),
+        'rankings_bot_token' => env('DISCORD_RANKINGS_BOT_TOKEN'),
+        'rankings_public_key' => env('DISCORD_RANKINGS_PUBLIC_KEY'),
     ],
 
     // GA4 measurement ID (G-XXXXXXXXXX); the tag is left out when unset.

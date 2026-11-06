@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\DiscordRankings;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -127,6 +128,7 @@ class PlayerName extends Model
     {
         $this->user->player_name = $this->name;
         $this->user->save();
+        DiscordRankings::refreshSoon();
     }
 
     /**
