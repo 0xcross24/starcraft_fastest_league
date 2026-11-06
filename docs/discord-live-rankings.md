@@ -49,3 +49,18 @@ bot token, and Discord sends button clicks to the site. No bot process runs.
 At the next update, the site deletes the webhook's message and the app posts
 the one with buttons. A click flips the message for everyone, and later
 updates keep the format that's showing.
+
+## Ladder badges
+
+Each player is shown as `#1 [badge] Name — points · W L`, with the grade as an
+iCCup-style badge emoji. The images are in `docs/discord-badges/`
+(`sfl_S.png` … `sfl_D_minus.png`, `sfl_E.png`).
+
+1. Server Settings → Emoji → upload all 14 images. Keep the file names as the
+   emoji names.
+2. In any channel, send
+   `\:sfl_S: \:sfl_A_plus: \:sfl_A: \:sfl_A_minus: \:sfl_B_plus: \:sfl_B: \:sfl_B_minus: \:sfl_C_plus: \:sfl_C: \:sfl_C_minus: \:sfl_D_plus: \:sfl_D: \:sfl_D_minus: \:sfl_E:`.
+   Discord shows the emojis' codes (`<:sfl_S:123…>`) instead of the images.
+3. Prod `.env`: `DISCORD_RANKINGS_EMOJIS="<paste that message>"`. The next
+   update (within 5 minutes) switches to the badges. Until then, grades are
+   shown as text.

@@ -88,10 +88,10 @@ class DiscordRankingsTest extends TestCase
 
             return $request->method() === 'POST'
                 && $request->url() === self::WEBHOOK . '?wait=true&with_components=true'
-                && $two['title'] === '🏆 Season 1 · 2v2 Top 5'
-                && str_starts_with($lines[0], '🥇 **A** — 1400 (')
-                && str_starts_with($lines[3], '**#4** **D**')
-                && str_starts_with($lines[4], '**#5** **E**')
+                && $two['title'] === '🏆 Ladder · Season 1 · 2v2 (6)'
+                && $lines[0] === '`#1` `D` **A** — 1400 · 9W 1L'
+                && str_starts_with($lines[3], '`#4` `D` **D**')
+                && str_starts_with($lines[4], '`#5` `D` **E**')
                 && !str_contains($two['description'], '**F**')
                 && !str_contains($two['description'], 'NoGames')
                 && str_contains($two['description'], 'updated <t:')
@@ -171,6 +171,21 @@ class DiscordRankingsTest extends TestCase
         });
         $post = DiscordMessage::first();
         $this->assertSame(['777', 'bot'], [$post->message_id, $post->via]);
+    }
+
+    public function test_grades_show_as_the_ladder_badge_emojis_once_set(): void
+    {
+        $this->webhookMode();
+        Http::fake(['discord.test/*' => Http::response(['id' => '900'])]);
+        $this->player('A', 1600, 3, 0);
+        $this->player('B', 950, 1, 2);
+        $this->sync();
+
+        config(['services.discord.rankings_emojis' => '<:sfl_D_plus:111> <:sfl_D:222>']);
+        $this->assertSame('edited', $this->sync());
+
+        Http::assertSent(fn(Request $r) => $r->method() === 'PATCH'
+            && str_starts_with($r->data()['embeds'][0]['description'], "`#1` <:sfl_D_plus:111> **A** — 1600 · 3W 0L\n`#2` <:sfl_D:222> **B**"));
     }
 
     public function test_refresh_soon_syncs_once_after_the_request(): void
@@ -265,7 +280,7 @@ class DiscordRankingsTest extends TestCase
             ->assertOk()->assertJsonPath('type', 7);
 
         $data = $response->json('data');
-        $this->assertSame('🏆 Season 1 · 3v3 Top 5', $data['embeds'][0]['title']);
+        $this->assertSame('🏆 Ladder · Season 1 · 3v3 (1)', $data['embeds'][0]['title']);
         $this->assertStringContainsString('**B**', $data['embeds'][0]['description']);
         $this->assertTrue($data['components'][0]['components'][1]['disabled']);
         $this->assertSame('3v3', DiscordMessage::first()->format);
