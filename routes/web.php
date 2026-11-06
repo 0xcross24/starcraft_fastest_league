@@ -13,6 +13,7 @@ use App\Http\Controllers\PlayerSearchController;
 use App\Http\Controllers\ReplayZipController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\BuildOrderController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +21,12 @@ Route::get('/', [HomeController::class, 'index'])->name('homepage');
 
 Route::get('/rules', function () {
   return view('rules');
-});
+})->name('rules');
+
+Route::view('/about', 'pages.about')->name('about');
+Route::view('/contact', 'pages.contact')->name('contact');
+Route::view('/privacy', 'pages.privacy')->name('privacy');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/rankings', [StatsController::class, 'displayAllRanking'])->name('rankings');
 

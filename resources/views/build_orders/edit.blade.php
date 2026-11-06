@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Edit build order">
     <div class="py-12">
         <div class="max-w-screen-md mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

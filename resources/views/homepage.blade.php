@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout description="StarCraft: Brood War Fastest team ladder. Top 2v2 and 3v3 players this season, recent games, replays and build orders.">
   <div class="pb-12">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
       <!-- 2v2 Leaderboard -->

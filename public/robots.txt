@@ -1,2 +1,7 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /replay/download/
+Disallow: /replays/download
+Disallow: /players/search
+
+Sitemap: https://starcraftfastest.us/sitemap.xml

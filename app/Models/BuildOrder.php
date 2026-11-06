@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class BuildOrder extends Model
 {
@@ -42,6 +43,30 @@ class BuildOrder extends Model
         'matchup' => 'array',
         'position' => 'integer',
     ];
+
+    /**
+     * Page title naming the race, without repeating it ("Protoss Storm Drop
+     * Build - Protoss Build Order").
+     */
+    public function pageTitle(): string
+    {
+        return str_contains(strtolower($this->title), strtolower($this->race))
+            ? $this->title
+            : $this->title.' - '.$this->race.' Build Order';
+    }
+
+    /**
+     * One-line summary for the page's meta description: what the build is
+     * and where it fits, then as much of the written description as fits.
+     */
+    public function metaDescription(): string
+    {
+        $matchups = is_array($this->matchup) ? implode(', ', $this->matchup) : $this->matchup;
+        $summary = $this->race.' build order'.($matchups ? ' for '.$matchups : '')
+            .' in StarCraft: Brood War team Fastest.';
+
+        return Str::limit(trim($summary.' '.Str::squish(strip_tags((string) $this->description))), 160);
+    }
 
     public function parent(): BelongsTo
     {
