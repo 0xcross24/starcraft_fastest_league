@@ -123,9 +123,10 @@ class ReplayController extends Controller
 
         // Enforce exact map name match
         $mapName = $data['Header']['Map'] ?? '';
-        $mapName = preg_replace('/[[:^print:]]/', '', $mapName); // Remove non-printable chars
-        if (!in_array($mapName, ['OP SFL-', 'SFLClan', 'Clan Wk` Styler(Ob)'], true)) {
-            return ['error' => 'Replay must be played on OP SFL-, SFLClan, or Clan Wk` Styler(Ob) exactly. You can find the map in your Profile page'];
+        // Remove non-printable chars (this also drops Korean text, e.g. "SCW 47 Korea 빠른무한" -> "SCW 47 Korea")
+        $mapName = trim(preg_replace('/[[:^print:]]/', '', $mapName));
+        if (!in_array($mapName, ['OP SFL-', 'SFLClan', 'Clan Wk` Styler(Ob)', 'SCW 47 Korea'], true)) {
+            return ['error' => 'Replay must be played on OP SFL-, SFLClan, Clan Wk` Styler(Ob), or SCW 47 Korea exactly. You can find the map in your Profile page'];
         }
 
         return ['data' => $data, 'fingerprint' => $this->generateReplayFingerprint($data), 'startedAt' => $startedAt];
