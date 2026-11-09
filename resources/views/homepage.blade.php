@@ -1,11 +1,5 @@
 <x-guest-layout description="StarCraft: Brood War Fastest team ladder. Top 2v2 and 3v3 players this season, recent games, replays and build orders.">
   <div class="pb-12">
-    @if($season)
-    <div class="mt-6 text-center">
-      <div class="font-semibold text-gray-700 dark:text-gray-200">Season {{ $season->id }}</div>
-      <x-season-dates :season="$season" />
-    </div>
-    @endif
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
       <!-- 2v2 Leaderboard -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-3 w-full">

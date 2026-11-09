@@ -88,7 +88,9 @@ class SeasonDatesTest extends TestCase
         Season::create(['is_active' => 0, 'starts_at' => '2025-08-27 00:56:51', 'ends_at' => '2025-09-16 03:51:04']);
         Season::create(['is_active' => 1, 'starts_at' => '2026-10-22 01:42:17']);
 
-        foreach (['/', '/rankings', '/replays'] as $url) {
+        $this->get('/')->assertOk()->assertDontSee('ends in');
+
+        foreach (['/rankings', '/replays'] as $url) {
             $this->get($url)->assertOk()
                 ->assertSeeInOrder(['Oct 22, 2026', '–', 'Dec 31, 2026', 'ends in 52 days']);
         }
