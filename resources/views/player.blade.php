@@ -47,7 +47,10 @@
                         @endphp
                         @if($selectedSeason && $stats)
                         <div class="pb-3 flex flex-wrap items-center justify-between gap-3">
-                            <div class=" text-lg font-semibold text-gray-700 dark:text-gray-200">Season {{ $selectedSeason->id }} ({{ strtoupper($format) }})</div>
+                            <div>
+                                <div class=" text-lg font-semibold text-gray-700 dark:text-gray-200">Season {{ $selectedSeason->id }} ({{ strtoupper($format) }})</div>
+                                <x-season-dates :season="$selectedSeason" />
+                            </div>
                             <div class="flex flex-wrap gap-2">
                                 {{-- This format (Wk`Cross-_s2_3v3.zip) and the whole season (Wk`Cross-_s2.zip) --}}
                                 @if($resultCounts->sum() > 0)
