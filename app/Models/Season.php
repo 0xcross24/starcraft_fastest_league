@@ -22,11 +22,12 @@ class Season extends Model
 
   /**
    * When this season ends: its recorded end, or for the running season the
-   * next scheduled season change (1 Jan/Apr/Jul/Oct, see bootstrap/app.php).
+   * last second before the next season starts (1 Jan/Apr/Jul/Oct, see
+   * bootstrap/app.php), so it reads as the last day of the quarter.
    */
   public function endsAt(): ?Carbon
   {
-    return $this->ends_at ?? ($this->is_active ? self::nextScheduledStart() : null);
+    return $this->ends_at ?? ($this->is_active ? self::nextScheduledStart()->subSecond() : null);
   }
 
   public static function nextScheduledStart(?Carbon $from = null): Carbon

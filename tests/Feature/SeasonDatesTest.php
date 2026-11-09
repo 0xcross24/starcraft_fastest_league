@@ -31,8 +31,11 @@ class SeasonDatesTest extends TestCase
         ])->forceFill(['created_at' => $at, 'updated_at' => $at])->save();
     }
 
-    public function test_running_season_ends_at_the_next_quarterly_season_change(): void
+    public function test_running_season_ends_on_the_last_day_before_the_next_quarterly_season(): void
     {
+        Carbon::setTestNow('2026-11-09 15:00:00');
+        $this->assertSame('2026-12-31 23:59:59', (new Season(['is_active' => 1]))->endsAt()->toDateTimeString());
+
         $this->assertSame('2027-01-01 00:00:00', Season::nextScheduledStart(Carbon::parse('2026-11-09 15:00'))->toDateTimeString());
         $this->assertSame('2027-01-01 00:00:00', Season::nextScheduledStart(Carbon::parse('2026-12-31 23:59'))->toDateTimeString());
         $this->assertSame('2026-04-01 00:00:00', Season::nextScheduledStart(Carbon::parse('2026-01-01 00:00'))->toDateTimeString());
@@ -73,10 +76,10 @@ class SeasonDatesTest extends TestCase
 
         $this->artisan('season:start-next')->assertSuccessful();
 
-        $this->assertSame('2027-01-01 00:00:00', $old->refresh()->ends_at->toDateTimeString());
+        $this->assertSame('2026-12-31 23:59:59', $old->refresh()->ends_at->toDateTimeString());
         $new = Season::where('is_active', 1)->sole();
         $this->assertSame('2027-01-01 00:00:00', $new->starts_at->toDateTimeString());
-        $this->assertSame('2027-04-01 00:00:00', $new->endsAt()->toDateTimeString());
+        $this->assertSame('2027-03-31 23:59:59', $new->endsAt()->toDateTimeString());
     }
 
     public function test_pages_show_the_season_dates_and_days_left(): void
@@ -87,7 +90,7 @@ class SeasonDatesTest extends TestCase
 
         foreach (['/', '/rankings', '/replays'] as $url) {
             $this->get($url)->assertOk()
-                ->assertSeeInOrder(['Oct 22, 2026', '–', 'Jan 1, 2027', 'ends in 52 days']);
+                ->assertSeeInOrder(['Oct 22, 2026', '–', 'Dec 31, 2026', 'ends in 52 days']);
         }
 
         $this->get('/rankings?season=1')->assertOk()
@@ -103,6 +106,6 @@ class SeasonDatesTest extends TestCase
         $user->ensureStats($season);
 
         $this->get('/player/A')->assertOk()
-            ->assertSeeInOrder(['Oct 22, 2026', 'Jan 1, 2027', 'ends today']);
+            ->assertSeeInOrder(['Oct 22, 2026', 'Dec 31, 2026', 'ends today']);
     }
 }
