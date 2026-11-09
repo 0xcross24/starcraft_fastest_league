@@ -49,7 +49,8 @@
               @foreach($seasons as $season)
               @if($season->id == $selectedSeasonId)
               <div id="season-{{ $season->id }}" class="season-ranking block">
-                <h3 class="text-lg font-semibold mb-4">Season {{ $season->id }} Ranking ({{ strtoupper($format) }})</h3>
+                <h3 class="text-lg font-semibold">Season {{ $season->id }} Ranking ({{ strtoupper($format) }})</h3>
+                <x-season-dates :season="$season" class="mb-4" />
                 <div class="overflow-x-auto">
                   <table class="w-full border-collapse border border-gray-200 mb-4">
                     <thead class="bg-gray-200 dark:bg-gray-700">

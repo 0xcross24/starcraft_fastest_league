@@ -34,6 +34,8 @@ class StartNextSeason extends Command
         // End the current active season
         if ($current) {
             $current->is_active = 0;
+            // The last day of the old season, not the first day of the new one
+            $current->ends_at = now()->subSecond();
             $current->save();
         }
 
@@ -43,6 +45,7 @@ class StartNextSeason extends Command
         $season = new Season();
         $season->id = $nextSeasonId;
         $season->is_active = 1;
+        $season->starts_at = now();
         $season->save();
 
 

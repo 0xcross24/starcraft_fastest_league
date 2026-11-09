@@ -33,13 +33,18 @@
                         $selectedSeason = $seasons->firstWhere('id', $seasonId);
                         @endphp
                         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                            <h1 class="text-lg font-semibold">
+                            <div>
+                                <h1 class="text-lg font-semibold">
+                                    @if($selectedSeason)
+                                    Season {{ $selectedSeason->id }} Replays ({{ strtoupper($format) }})
+                                    @else
+                                    All Replays
+                                    @endif
+                                </h1>
                                 @if($selectedSeason)
-                                Season {{ $selectedSeason->id }} Replays ({{ strtoupper($format) }})
-                                @else
-                                All Replays
+                                <x-season-dates :season="$selectedSeason" />
                                 @endif
-                            </h1>
+                            </div>
                             @if($selectedSeason && $games->total() > 0)
                             <div class="flex flex-wrap gap-2">
                                 <x-zip-download-button :season="$selectedSeason->id" :format="$format" :filters="$filter->query()" :count="$games->total()" :label="$filter->isActive() ? 'Download filtered' : 'Download all'" />
