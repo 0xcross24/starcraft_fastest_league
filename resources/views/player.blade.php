@@ -69,7 +69,7 @@
                             </div>
                             <div>
                                 <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Grade</div>
-                                <x-elo-grade :elo="$stats->elo ?? 0" class="text-lg font-semibold mt-1 block" />
+                                <x-elo-grade :elo="$stats->elo ?? 0" class="mt-2" />
                             </div>
                             <div>
                                 <div class="text-lg font-semibold text-gray-700 dark:text-gray-200">Won</div>

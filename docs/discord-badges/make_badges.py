@@ -10,7 +10,7 @@ BOX = (1.5, 25.5, 126.5, 102.5)  # same outline as the first set
 BORDER, GAP, SIGN = 7, 3, 26     # px; sign = width of the + / − bars
 CAP = 37                         # cap height in px
 
-def badge(g, out):
+def badge(g, out, crop=False):
     c = COL[g[0]]
     im = Image.new('RGBA', (128 * S, 128 * S), (0, 0, 0, 0))
     ImageDraw.Draw(im).rectangle([v * S for v in BOX], fill='black', outline=c, width=BORDER * S)
@@ -33,9 +33,13 @@ def badge(g, out):
     l, t, r, b = ink.getbbox()
     dx, dy = round(64 * S - (l + r) / 2), round(yc - (t + b) / 2)
     im.paste(Image.new('RGBA', im.size, c), (dx, dy), ink)
-    im.resize((128, 128), Image.LANCZOS).save(out)
+    im = im.resize((128, 128), Image.LANCZOS)
+    if crop:  # the site wants just the box, not the square emoji canvas
+        im = im.crop((1, 25, 127, 103))
+    im.save(out)
 
 if __name__ == '__main__':
-    d = sys.argv[1] if len(sys.argv) > 1 else '.'
+    # make_badges.py [dir] [--crop]; --crop is the set in public/images/badges
+    d = next((a for a in sys.argv[1:] if not a.startswith('--')), '.')
     for g in GRADES:
-        badge(g, f"{d}/sfl_{g[0]}{'_plus' if g.endswith('+') else '_minus' if g.endswith('-') else ''}.png")
+        badge(g, f"{d}/sfl_{g[0]}{'_plus' if g.endswith('+') else '_minus' if g.endswith('-') else ''}.png", '--crop' in sys.argv)
