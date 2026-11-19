@@ -3,7 +3,7 @@ Letter and sign are placed by their measured ink so every badge is centred."""
 from PIL import Image, ImageDraw, ImageFont
 import sys
 S = 4  # supersample
-COL = {'S': '#FFC800', 'A': '#3CE03C', 'B': '#88B4D4', 'C': '#F0D840', 'D': '#FF0000', 'E': '#A0A0A0'}
+COL = {'S': '#FFC800', 'A': '#3CE03C', 'B': '#88B4D4', 'C': '#F0D840', 'D': '#FF0000', 'E': '#FF1493'}
 GRADES = ['S', 'A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E']
 font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 52 * S)
 BOX = (1.5, 25.5, 126.5, 102.5)  # same outline as the first set

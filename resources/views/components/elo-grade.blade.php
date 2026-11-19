@@ -15,7 +15,7 @@
         'B' => '#88B4D4',
         'C' => '#F0D840',
         'D' => '#FF0000',
-        'E' => '#A0A0A0',
+        'E' => '#FF1493',
     ];
 
     $color = $gradeColors[$eloService->getGradeTier($grade)] ?? '#A0A0A0';
