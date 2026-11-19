@@ -1,25 +1,15 @@
 @props(['elo' => 0])
 
 @php
-    $eloService = app(\App\Services\EloService::class);
-    $grade = $eloService->getEloGrade($elo);
+    $grade = app(\App\Services\EloService::class)->getEloGrade($elo);
 
     /*
-     * Same badge as the Discord ladder emojis (docs/discord-badges): a black
-     * box with the border and letter in the tier colour. The colours are
-     * inline styles, so nothing here depends on Tailwind keeping a class.
+     * The badge is an image (public/images/badges, made by
+     * docs/discord-badges/make_badges.py --crop) so it looks the same on
+     * every device: as text it depended on each phone's fonts.
      */
-    $gradeColors = [
-        'S' => '#FFC800',
-        'A' => '#3CE03C',
-        'B' => '#88B4D4',
-        'C' => '#F0D840',
-        'D' => '#FF0000',
-        'E' => '#FF1493',
-    ];
-
-    $color = $gradeColors[$eloService->getGradeTier($grade)] ?? '#A0A0A0';
+    $file = 'sfl_'.$grade[0].(str_ends_with($grade, '+') ? '_plus' : (str_ends_with($grade, '-') ? '_minus' : '')).'.png';
 @endphp
 
-<span {{ $attributes->merge(['class' => 'inline-flex items-center justify-center h-6 min-w-[2.25rem] px-1 pt-[3px] rounded-sm border-2 bg-black font-mono font-bold leading-none']) }}
-      style="color: {{ $color }}; border-color: {{ $color }};">{{ $grade }}</span>
+<img src="{{ asset('images/badges/'.$file) }}" alt="{{ $grade }}" title="{{ $grade }}" width="39" height="24"
+     {{ $attributes->merge(['class' => 'inline-block align-middle h-6 w-auto']) }}>
