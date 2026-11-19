@@ -18,7 +18,7 @@
           <tbody class="text-gray-900 dark:text-gray-100">
             @foreach($top2v2 as $stat)
             <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-              <td class="border border-gray-300 text-center px-2 py-1"><x-rank-position :position="$loop->iteration" /></td>
+              <td class="border border-gray-300 text-center px-2 py-1">{{ $loop->iteration }}</td>
               <td class="border border-gray-300 text-center px-2 py-1">
                 @if(isset($stat->user))
                 <a href="{{ route('player', ['user' => $stat->user->player_name]) }}" class="text-blue-500 font-semibold hover:font-bold">
@@ -62,7 +62,7 @@
           <tbody class="text-gray-900 dark:text-gray-100">
             @foreach($top3v3 as $stat)
             <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-              <td class="border border-gray-300 text-center px-2 py-1"><x-rank-position :position="$loop->iteration" /></td>
+              <td class="border border-gray-300 text-center px-2 py-1">{{ $loop->iteration }}</td>
               <td class="border border-gray-300 text-center font-semibold px-2 py-1">
                 @if(isset($stat->user))
                 <a href="{{ route('player', ['user' => $stat->user->player_name]) }}" class="text-blue-500 hover:font-bold">

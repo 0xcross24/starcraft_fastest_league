@@ -65,7 +65,7 @@
                     <tbody>
                       @forelse(($usersWithStats[$season->id] ?? collect())->where('format', $format) as $stat)
                       <tr class="border-b border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <td class="border border-gray-300 text-center px-2 sm:px-4 py-2"><x-rank-position :position="$loop->iteration" /></td>
+                        <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">{{ $loop->iteration }}</td>
                         <td class="border border-gray-300 text-center px-2 sm:px-4 py-2">
                           @if(isset($stat->user))
                           <a href="{{ route('player', ['user' => $stat->user->player_name]) }}" class="font-semibold text-blue-500 hover:font-bold">
