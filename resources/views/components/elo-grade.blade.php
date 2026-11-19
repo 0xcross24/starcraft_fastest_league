@@ -5,22 +5,21 @@
     $grade = $eloService->getEloGrade($elo);
 
     /*
-     * These class names must appear literally in a Blade file. tailwind.config.js
-     * scans resources/views only, so a class returned from app/ is invisible to
-     * the build and gets purged - which is exactly how the rank letters lost
-     * their colour when assets were last rebuilt.
+     * Same badge as the Discord ladder emojis (docs/discord-badges): a black
+     * box with the border and letter in the tier colour. The colours are
+     * inline styles, so nothing here depends on Tailwind keeping a class.
      */
     $gradeColors = [
-        'S' => 'text-neonGold',
-        'A' => 'text-neonGreen',
-        'B' => 'text-neonBlue',
-        'C' => 'text-neonYellow',
-        'D' => 'text-neonRed',
-        'E' => 'text-neonPink',
+        'S' => '#FFC800',
+        'A' => '#3CE03C',
+        'B' => '#88B4D4',
+        'C' => '#F0D840',
+        'D' => '#FF0000',
+        'E' => '#FF1493',
     ];
 
-    $color = $gradeColors[$eloService->getGradeTier($grade)]
-        ?? 'text-yellow-600 dark:text-yellow-400';
+    $color = $gradeColors[$eloService->getGradeTier($grade)] ?? '#A0A0A0';
 @endphp
 
-<span {{ $attributes->merge(['class' => 'font-bold '.$color]) }}>{{ $grade }}</span>
+<span {{ $attributes->merge(['class' => 'inline-flex items-center justify-center h-6 min-w-[2.25rem] px-1 pt-[3px] rounded-sm border-2 bg-black font-mono font-bold leading-none']) }}
+      style="color: {{ $color }}; border-color: {{ $color }};">{{ $grade }}</span>
